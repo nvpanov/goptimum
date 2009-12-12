@@ -45,11 +45,9 @@ public class Box implements Cloneable {
 		return functionValue;		
 	}	
 	
-
 	public String toString() {
 		return toStringValue() + " (" + toStringArea() + ")";
 	}
-
 	public String toStringArea() {
 		String str = "";
 		for (int i = 0; i < dim; i++) {
@@ -62,7 +60,7 @@ public class Box implements Cloneable {
 	public String toStringValue() {
 		return functionValue.toString();
 	}
-	
+
 	public Box clone() {
 		Box b = new Box(dim);
 		

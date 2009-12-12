@@ -23,7 +23,7 @@ public class BaseAlgorithm implements Algorithm {
 	public BaseAlgorithm(Box area, Function f) {
 		workList = new UnSortedWorkList(area);
 		chooser  = new CurrentBestChooser(workList);
-		splitter = new DummySplitter();
+		splitter = new RndSideEquallySplitter();
 		targetFunction = f;
 	}
 	/*
@@ -34,7 +34,7 @@ public class BaseAlgorithm implements Algorithm {
 	 */
 	public ArrayList<Box> solve() {
 		Box workBox;
-		ArrayList<Box> newBoxes;
+		Box[] newBoxes;
 		
 		do {
 			workBox = chooser.extractNext();
@@ -61,10 +61,9 @@ public class BaseAlgorithm implements Algorithm {
 	/*
 	 * recalculate function value on new sub-boxes
 	 */
-	private void calculateIntervalExtensions(ArrayList<Box> newBoxes) {
-	    Iterator<Box> i = newBoxes.iterator();
-	    while (i.hasNext()) {
-	    	targetFunction.calculateF( i.next() );
+	private void calculateIntervalExtensions(Box[] newBoxes) {
+	    for (int i = 0; i < newBoxes.length; i++) {
+	    	targetFunction.calculateF( newBoxes[i] );
 	    }
 	}
 }

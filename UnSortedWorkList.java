@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 
@@ -9,10 +10,8 @@ public class UnSortedWorkList extends WorkList {
 	}
 
 	@Override
-	public void add(ArrayList<Box> boxes) {
-		Iterator<Box> i = boxes.iterator();
-	    while (i.hasNext())
-	    	add( i.next() );
+	public void add(Box[] boxes) {
+		list.addAll( Arrays.asList(boxes) );
 	}
 	
 	@Override
