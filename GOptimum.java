@@ -1,6 +1,12 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import Algorithm.Algorithm;
+import Algorithm.BaseAlgorithm;
+import Algorithm.Box;
+import TargetFunctions.Function;
+import TargetFunctions.Function_Rastrigin10_2D;
+
 import net.sourceforge.interval.ia_math.RealInterval;
 
 
@@ -11,8 +17,8 @@ public class GOptimum {
 	 */
 	public static void main(String[] args) {
 		
-		Function f = new TestFunction1();
-		Box area = new Box(3, new RealInterval(-1, 1) );
+		Function f = new Function_Rastrigin10_2D();
+		Box area = new Box(2, new RealInterval(-2, 3) );
 		Algorithm algo = new BaseAlgorithm(area, f);
 		ArrayList<Box> optimums = algo.solve(); // could be more than one global optimum 
 	    
@@ -20,7 +26,6 @@ public class GOptimum {
 	    while (i.hasNext()) {
 	    	System.out.println( i.next() );
 	    }
-		
 
 	}
 
