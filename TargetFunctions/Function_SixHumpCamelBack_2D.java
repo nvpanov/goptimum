@@ -105,6 +105,6 @@ public class Function_SixHumpCamelBack_2D implements Function {
     }
 	
 	public static void main(String[] args) {
-		org.junit.runner.JUnitCore.main("Function_SixHumpCamelBack_2D");
+		org.junit.runner.JUnitCore.main("TargetFunctions.Function_SixHumpCamelBack_2D");
 	}
 }

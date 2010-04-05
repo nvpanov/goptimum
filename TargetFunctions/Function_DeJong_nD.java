@@ -81,6 +81,6 @@ public class Function_DeJong_nD implements Function {
     
 
 	public static void main(String[] args) {
-		org.junit.runner.JUnitCore.main("Function_DeJong_nD");
+		org.junit.runner.JUnitCore.main("TargetFunctions.Function_DeJong_nD");
 	}
 }

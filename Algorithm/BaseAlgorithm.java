@@ -12,12 +12,7 @@ public class BaseAlgorithm implements Algorithm {
 	private Splitter splitter;  // will somehow cut the box selected by the Chooser 
 	private Function targetFunction; // the function which optimum we are searching for 
 	private WorkList workList;  // will somehow maintains the list of subboxes  
-	
-	// Stop criterion 
-	// TODO: other criterion has to be added! 
-	private int maxIterations = (int) 1e4; // do not more than 10^3 iterations
-	private int iterations = 0; // iteration counter. required for maxIterations stop criteria 
-	
+	private StopCriterion stopCriterion = new StopCriterion();  
 	
 	/*
 	 * Construct an instance of the algorithm. 
@@ -59,21 +54,9 @@ public class BaseAlgorithm implements Algorithm {
 			newBoxes = splitter.splitIt(workBox);
 			calculateIntervalExtensions(newBoxes);
 			workList.add(newBoxes);
-		} while (isDone(workBox) != true);
+		} while (stopCriterion.isDone(workBox) != true);
 		
 		return workList.getOptimum();
-	}
-
-	/*
-	 * this function decides when it is enough.
-	 * it could be separated in another class but as far as the functionality is quite simple let it be here as a function
-	 */
-	private boolean isDone(Box workBox) {
-		// TODO Add more stop options
-		if (iterations++ > maxIterations)
-			return true;
-		
-		return false;
 	}
 
 	/*

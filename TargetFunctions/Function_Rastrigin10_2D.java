@@ -98,6 +98,6 @@ public class Function_Rastrigin10_2D implements Function {
     }
 	
 	public static void main(String[] args) {
-		org.junit.runner.JUnitCore.main("Function_Rastrigin10_2D");
+		org.junit.runner.JUnitCore.main("TargetFunctions.Function_Rastrigin10_2D");
 	}
 }

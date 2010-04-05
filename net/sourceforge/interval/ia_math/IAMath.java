@@ -895,7 +895,15 @@ public class IAMath
     }
 
     return true;
- }    
+ }
+ 
+  ///////////////////////////////////// nvp ///////////////////////////////
+ public static double wid(RealInterval i) {
+    	return IAMathExtensions.wid(i);
+ }
+ 
+ 
+    
 
 
 
