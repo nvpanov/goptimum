@@ -1,0 +1,9 @@
+*.class
+*.*_
+
+*.htm*
+
+*.zip
+*.tar
+
+Thumbs.db
