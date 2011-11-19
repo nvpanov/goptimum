@@ -174,6 +174,7 @@ public class BaseAlgorithm implements Algorithm {
 
 
 	public String toString() {
-		return this.getClass().getName();
+		String fullName = this.getClass().getName();
+		return fullName.substring(fullName.lastIndexOf('.')+1); // removes packages
 	}
 }

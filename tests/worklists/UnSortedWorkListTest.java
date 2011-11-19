@@ -39,7 +39,7 @@ public class UnSortedWorkListTest extends TestCase {
 		wl1.add(b2);
 		assertTrue(wl1.size() == 1);
 	}
-	@Test(timeout=30*100) // 3 sec
+	@Test(timeout=3*1000) // 3 sec
 	public void testListCleanup() {
 		System.gc();
 		int dim = rnd.nextInt(20) + 100; // more memory

@@ -44,21 +44,21 @@ public class Bisection_SrtL_CBtC_BigEqSTest {
 	@Test(timeout=12*1000) //120 sec
 	public final void test2() {
 		Algorithm a = new Bisection_SrtL_CBtC_BigEqS();
-		RealInterval area = new RealInterval(-rnd.nextInt(10)*90, rnd.nextInt(20)*16);
+		RealInterval area = new RealInterval(-1000, 2000);
 		result = test.f_Price5_Zero(a, area);
 	}
 //	@Ignore
 	@Test//(timeout=12*1000) //120 sec
 	public final void test3() {
 		Algorithm a = new Bisection_SrtL_CBtC_BigEqS();
-		RealInterval area = new RealInterval(-rnd.nextInt(10)*100, rnd.nextInt(10)*200);
+		RealInterval area = new RealInterval(-1000, 2000);
 		result = test.f_Rastrigin10(a, area);
 	}
 //	@Ignore
 	@Test(timeout=12*1000) //120 sec
 	public final void test4() {
 		Algorithm a = new Bisection_SrtL_CBtC_BigEqS();
-		RealInterval area = new RealInterval(-rnd.nextInt(10)*100 - 1, rnd.nextInt(10)*200 + 1);
+		RealInterval area = new RealInterval(-1000, 2000);
 		result = test.f_SixHumpCamelBack(a, area);
 	}
 	
@@ -66,7 +66,7 @@ public class Bisection_SrtL_CBtC_BigEqSTest {
 	public final void test5() {
 		int dim = 7;
 		Algorithm a = new Bisection_SrtL_CBtC_BigEqS();
-		RealInterval area = new RealInterval(-rnd.nextInt(10)*100 - 1, rnd.nextInt(10)*200 + 1);
+		RealInterval area = new RealInterval(-1000, 2000);
 		result = test.f_RosenbrockGn(a, dim, area);
 	}
 	@Test//(timeout=30*1000) //30 sec
@@ -76,5 +76,4 @@ public class Bisection_SrtL_CBtC_BigEqSTest {
 		RealInterval area = new RealInterval(-10, 10);
 		result = test.f_RosenbrockGn(a, dim, area);
 	}
-	
 }

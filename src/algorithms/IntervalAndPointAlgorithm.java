@@ -100,4 +100,9 @@ public class IntervalAndPointAlgorithm extends BaseAlgorithm {
 	public void setPrecision(double pres){
 		intervalAlg.setPrecision(pres);
 	}
+	
+	@Override
+	public String toString() {
+		return intervalAlg.toString() + "+" + pointAlg.toString();
+	}
 }

@@ -1,6 +1,7 @@
 package functions;
 
 import static net.sourceforge.interval.ia_math.IAMath.pow;
+import symboldiff.exceptions.IncorrectExpression;
 import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
 
@@ -10,6 +11,13 @@ public class Function_RavineSurface extends Function {
 
 	public Function_RavineSurface(int dim) {
 		this.dim = dim;
+		try {
+			super.init(toStringFull());
+		} catch (IncorrectExpression e) {
+			// actually everything should be OK,
+			// otherwise we will work w/o derivatives
+			e.printStackTrace();
+		}		
 	}
 	@Override
 	public void calculate(Box b) {

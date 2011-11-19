@@ -49,14 +49,14 @@ public class Function_Rastrigin10_2DTest extends TestCase {
         
         try {
         	f.calculate(box);
-        	fail("exception expected");
-        } catch (IllegalArgumentException e) {
+        	fail("exception expected! Don't you forget to add -ea option to JavaVM arguments? (Window->Preferences->Jnstalled JREs->Edit->Default VM arguments)");
+        } catch (AssertionError e) {
         	//assertTrue(1 == 1);
         }
         try {
         	f.calculatePoint(point);
         	fail("exception expected");
-        } catch (IllegalArgumentException e) {
+        } catch (AssertionError e) {
         	//assertTrue(1 == 1);
         }
     }

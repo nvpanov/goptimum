@@ -46,7 +46,8 @@ class Screener {
 	}
 
 	boolean checkByValue(Box box) {
-		if (box.getFunctionValue().lo() > lowBoundMaxValue)
+		double lo = box.getFunctionValue().lo();
+		if (lo > lowBoundMaxValue)
 			return false;
 	
 		probeNewLimit(box.getFunctionValue().hi());

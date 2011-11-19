@@ -51,14 +51,13 @@ public class Function_Price5_2DTest extends TestCase {
         
         try {
         	f.calculate(box);
-        	fail("exception expected");
-        } catch (IllegalArgumentException e) {
-        	// assertTrue(1 == 1);
+        	fail("exception expected! Don't you forget to add -ea option to JavaVM arguments? (Window->Preferences->Jnstalled JREs->Edit->Default VM arguments)");
+        } catch (AssertionError e) {
         }
         try {
         	f.calculatePoint(point);
         	fail("exception expected");
-        } catch (IllegalArgumentException e) {
+        } catch (AssertionError e) {
         	// OK
         }
     }

@@ -27,7 +27,7 @@ public class Function_SixHumpCamelBack_2D extends Function {
 	
 	@Override
 	public void calculate(Box b) {
-		assert(b.getDimension() != getDimension());
+		assert(b.getDimension() == getDimension());
 			//throw new IllegalArgumentException(this.getClass().getName() + " is 2d function while it called for " + b.getDimension() + "d box.");
 		
 		RealInterval x = b.getInterval(0), y = b.getInterval(1);

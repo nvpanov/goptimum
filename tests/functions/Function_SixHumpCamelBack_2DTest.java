@@ -87,14 +87,14 @@ public class Function_SixHumpCamelBack_2DTest  extends TestCase {
         
         try {
         	f.calculate(box);
-        	fail();
-        } catch (IllegalArgumentException e) {
+        	fail("exception expected! Don't you forget to add -ea option to JavaVM arguments? (Window->Preferences->Jnstalled JREs->Edit->Default VM arguments)");
+        } catch (AssertionError e) {
         	assertTrue(true);
         }
         try {
         	f.calculatePoint(point);
         	fail();
-        } catch (IllegalArgumentException e) {
+        } catch (AssertionError e) {
         	assertTrue(true);
         }
     }
@@ -121,7 +121,7 @@ public class Function_SixHumpCamelBack_2DTest  extends TestCase {
     @Test
     public void testRealInterval() {
     	String s = new RealInterval(1e8, 1e8).toString();
-//    	System.out.println(s);
+    	System.out.println(s);
     	assertEquals("[100,000,000.00, 100,000,000.00]", s);
 
     	s = new RealInterval(123.456789, 123456789.987).toString();

@@ -25,6 +25,7 @@ public class ParallelExecutorTest {
 	
 	@Test(timeout=12*1000) //12 sec
 	public void test0() throws Exception {
+		fail("FIX me");
 		int threads = 2* 3;
 		BaseAlgorithm algorithms[] = new BaseAlgorithm[threads];
 		for (int i = 0; i < threads; i+=2) {

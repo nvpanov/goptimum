@@ -77,9 +77,11 @@ public class SortedWorkListTest {
 	@Test
 	public final void testRemove() {
 		RealInterval it = new RealInterval( -rnd.nextDouble(), rnd.nextDouble() );
-		Box b1 = new Box(dim, it);
+		RealInterval it1 = new RealInterval( it.lo()-rnd.nextDouble(), rnd.nextDouble() );
+		Box b1 = new Box(dim, it); b1.setFunctionValue(it);
+		Box b2 = new Box(dim, it); b2.setFunctionValue(it1);
 		wl = new SortedWorkList(b1);
-		Box b2 = new Box(dim, it);
+		assertTrue(wl.size() == 1);
 		wl.add(b2);
 		assertTrue(wl.size() == 2);
 		wl.remove(b1);

@@ -27,7 +27,7 @@ public class Function_RosenbrockG_nDTest {
 	@Test
     public void testPoints() {
     	rnd.setSeed(System.currentTimeMillis());    	
-    	int dim = rnd.nextInt(10) + 1;
+    	int dim = rnd.nextInt(10) + 2;
     	Function f = new Function_RosenbrockG_nD(dim); 
     	double point[] = new double[dim];
     	Box b = new Box(dim, new RealInterval());

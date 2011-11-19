@@ -64,5 +64,9 @@ public class TestResultAveraging {
 	public static void printHeader() {
 		System.out.println(TestCase.getHeader() + "\tmin\taverage");
 	}
+	public int getNumOfTestCases() {
+		calcAverage();
+		return averageData.keySet().size();
+	}
 
 }

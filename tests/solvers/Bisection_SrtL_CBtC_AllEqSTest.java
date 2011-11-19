@@ -19,14 +19,13 @@ public class Bisection_SrtL_CBtC_AllEqSTest {
 	
 	@BeforeClass 
 	public static void printHeader() {
-		TestData.pritnHeader();
+		TestData.printHeader();
 	}
 	@After
     public void printResult() {
 		System.out.println(result);
     }
 	
-//	@Ignore
 	@Test(timeout=12*1000) //12 sec
 	public final void test1() {
 		Algorithm a = new Bisection_SrtL_CBtC_AllEqS();
@@ -59,5 +58,4 @@ public class Bisection_SrtL_CBtC_AllEqSTest {
 		RealInterval area = new RealInterval(-1000, 1000);
 		result = test.f_SixHumpCamelBack(a, area);
 	}
-	
 }

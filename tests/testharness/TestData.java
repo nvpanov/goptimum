@@ -94,7 +94,7 @@ public class TestData {
 	public String toString() {
 		return problem.toString() + "\t" + result.toString();
 	}
-	public static void pritnHeader() {
+	public static void printHeader() {
 		System.out.println(TestCase.getHeader() + "\t" + TestResult.getHeader());
 	}
 

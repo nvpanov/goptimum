@@ -12,7 +12,7 @@ import worklists.WorkList;
 
 import core.Box;
 import net.sourceforge.interval.ia_math.RealInterval;
-import net.sourceforge.interval.ia_math.exceptions.IAIntersectionException;
+//import net.sourceforge.interval.ia_math.exceptions.IAIntersectionException;
 //import net.sourceforge.interval.ia_math.exceptions.IAIntersectionException;
 import algorithms.Algorithm;
 import algorithms.BaseAlgorithm;
@@ -112,6 +112,8 @@ public class AlgorithmsCommunicator extends Thread {
 	}
 */
 	private void saveFoundOptimumAndArea(ParallelAlgorithm parallelAlgorithm) {
+		throw new RuntimeException("FIX ME");
+/*		
 		RealInterval newOpt = parallelAlgorithm.getOptimumValue();
 		if (newOpt == null)
 			return; // list was cleared before getOptimum call 
@@ -138,6 +140,7 @@ public class AlgorithmsCommunicator extends Thread {
 			}
 		}
 		globalScreeningValue = Math.min(globalScreeningValue, optTmp.hi());
+*/		
 	}
 
 	private double getScreeningValue(int threadNum) {

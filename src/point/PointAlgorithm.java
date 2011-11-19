@@ -20,4 +20,10 @@ public abstract class PointAlgorithm /*implements Runnable*/ {
 		function = f;
 	}
 	public abstract double localMinimum(Box area);
+	
+	@Override
+	public String toString() {
+		String fullName = this.getClass().getName();
+		return fullName.substring(fullName.lastIndexOf('.')+1); // removes packages
+	}	
 }

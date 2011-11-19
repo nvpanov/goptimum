@@ -26,21 +26,21 @@ public class Bisection_UnsL_RndC_BigEqSTest {
 		final int dim = rnd.nextInt(9)+1;
 		test.f_DeJong_NotSim(a, dim);
 	}
-//	@Ignore
+	@Ignore
 	@Test//(timeout=12*1000) //120 sec
 	public final void test2() {
 		Algorithm a = new Bisection_UnsL_RndC_BigEqS();
 		RealInterval area = new RealInterval(-rnd.nextInt(10)*90, rnd.nextInt(20)*16);
 		test.f_Price5_Zero(a, area);
 	}
-//	@Ignore
+	@Ignore
 	@Test//(timeout=12*1000) //120 sec
 	public final void test3() {
 		Algorithm a = new Bisection_UnsL_RndC_BigEqS();
 		RealInterval area = new RealInterval(-rnd.nextInt(10)*100, rnd.nextInt(10)*200);
 		test.f_Rastrigin10(a, area);
 	}
-//	@Ignore
+	@Ignore
 	@Test//(timeout=12*1000) //120 sec
 	public final void test4() {
 		Algorithm a = new Bisection_UnsL_RndC_BigEqS();
