@@ -177,6 +177,9 @@ public abstract class WorkList {
 		if (screener.probeNewLimit(possibleNewMax) )
 			cleaner.cleanList();
 	}
+	public void probeNewLowBoundMaxValueAndDoNotClean(double possibleNewMax) {
+		screener.probeNewLimit(possibleNewMax);
+	}
 
 	public void clean() {
 		clean(Double.MAX_VALUE);
