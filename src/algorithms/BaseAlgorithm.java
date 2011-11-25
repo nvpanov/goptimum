@@ -138,11 +138,14 @@ public class BaseAlgorithm implements Algorithm {
 		return workList.getOptimumArea();
 	}
 
-	public void probeNewLowBoundMaxValue(double localMin) {
-		workList.probeNewLowBoundMaxValue(localMin);
+	public void probeNewLowBoundMaxValueAndDoNotClean(double localMin) {
+		workList.probeNewLowBoundMaxValueAndDoNotClean(localMin);
 	}
 	public void probeNewLowBoundMaxValueAndClean(double localMin) {
 		workList.probeNewLowBoundMaxValueAndClean(localMin);
+	}	
+	public void probeNewLowBoundMaxValue(double localMin) {
+		workList.probeNewLowBoundMaxValue(localMin);
 	}	
 	public double getLowBoundMaxValue() {
 		return workList.getLowBoundMaxValue();
