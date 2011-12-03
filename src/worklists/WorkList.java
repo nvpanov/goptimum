@@ -1,6 +1,7 @@
 package worklists;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -121,6 +122,21 @@ public abstract class WorkList {
 			add_checked(box);
 		}
 	}
+	/*
+	 * receives a new set of boxes and their estimation of the optimum
+	 * used by ParallelAlgorithm
+	 */
+	public void add(Box[] newBoxes, double minLo, double minHi) {
+		if (minLo > screener.getLowBoundMaxValue())
+			return; 					// they hasn't passed screening
+		if (this.size() == 0 || minHi < this.getOptimumValue().lo()) { // getOptimumValue() could be expensive on unsorted lists!
+			// we are an empty list or 		we haven't passed the screening
+			this.clean(minHi);
+			collection.addAll(Arrays.asList(newBoxes));
+		}
+		this.probeNewLowBoundMaxValueAndDoNotClean(minHi);
+		this.add(newBoxes);
+	}
 	public final Box extract(int n) {
 		Box b = extractInternal(n);
 		return b;
@@ -191,7 +207,7 @@ public abstract class WorkList {
 	
 	public final void getWorkFrom(WorkList otherWL) {
 		System.out.println("WorkList::getWorkFrom() {{{");
-		double threshold = otherWL.getLowBoundMaxValue();
+		double threshold = Math.min(this.getLowBoundMaxValue(), otherWL.getLowBoundMaxValue() );
 		assert(threshold <= this.getLowBoundMaxValue());
 		clean(threshold);
 		
