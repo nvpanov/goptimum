@@ -100,6 +100,4 @@ public class SortedWorkList extends WorkList {
 	    }
 	}
 
-
-
 }
