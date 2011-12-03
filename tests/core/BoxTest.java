@@ -18,21 +18,6 @@ public class BoxTest {
 		   return b;
 	}
 	
-	//
-	@Test
-	public final void testInterval() {
-/*		RealInterval x, r;
-		RealInterval y = new RealInterval(1);
-		
-		x = new RealInterval(Double.NEGATIVE_INFINITY, 0.0);
-		
-		x = new RealInterval(-1, 1);
-		y = new RealInterval(3, 3);
-		r = IAMath.power(x, y);
-		assertTrue(r.equals(x));
-*/		
-	}
-	
 	@Test
 	public void intervalWid() {
 	//Infinity : solvers.Bisection_SrtL_RndC_AllEqS@1a1c887 : [-2147483.648, 48.828]
@@ -92,5 +77,4 @@ public class BoxTest {
 		Box c = b.clone();
 		assertTrue( b.toString().equals( c.toString() ) );
 	}
-
 }
