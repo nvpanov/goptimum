@@ -8,6 +8,7 @@ import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
 import functions.Function;
 
+import solvers.Bisection_SrtL_CBtC_BigEqS;
 import splitters.BiggestSideEquallySplitter;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -39,17 +40,18 @@ public class ParallelExecutor implements Algorithm {
 		communicator = new AlgorithmsCommunicator(this);		
 	}
 	private BaseAlgorithm[] replicateAlgorithms(int threadNum, BaseAlgorithm[] algorithms) {
-		throw new NotImplementedException();
-		/*
-		BaseAlgorithm newArr[] = new BaseAlgorithm[threadNum];
-		//Arrays.copyOf can't help here
-		System.arraycopy(algorithms, 0, newArr, 0, algorithms.length);
-		for (int i = algorithms.length; i < newArr.length; i++) {
-			int algNumToClone = (i - algorithms.length) % algorithms.length;
-			newArr[i] = new BaseAlgorithm(algorithms[algNumToClone]);
+		BaseAlgorithm[] pool = new BaseAlgorithm[threadNum];
+		int i = 0;
+		for (; i < algorithms.length; i++) 
+			pool[i] = algorithms[i];
+		for (; i < threadNum; i++) {
+			//pool[i] = algorithms[i-algorithms.length].clone();
+			pool[i] = new Bisection_SrtL_CBtC_BigEqS();
+			System.out.println("Parallelexecutor added " + pool[i].toString() + " algorithm to the pool");
 		}
-		return newArr;  
-		 */		
+		
+
+		return pool;
 	}
 	protected void createThreadForAlgorithm(int i, ParallelAlgorithm pAlg) {
 		threads[i] = new Thread(pAlg);
@@ -92,11 +94,11 @@ public class ParallelExecutor implements Algorithm {
 	}
 	@Override
 	public Box[] getOptimumArea() {
-		return communicator.getArea();
+		return communicator.getOptimumArea();
 	}
 	@Override
 	public RealInterval getOptimumValue() {
-		return communicator.getOptimum();
+		return communicator.getOptimumValue();
 	}
 	@Override
 	public double getPrecision() {
