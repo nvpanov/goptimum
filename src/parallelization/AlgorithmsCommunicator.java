@@ -1,18 +1,19 @@
 package parallelization;
 
 import static algorithms.OptimizationStatus.*;
+import static java.lang.Math.min;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import solvers.Bisection_SrtL_CBtC_AllEqS;
 
+import worklists.SortedWorkList;
 import worklists.UnSortedWorkList;
 import worklists.WorkList;
 
 import core.Box;
 import net.sourceforge.interval.ia_math.RealInterval;
-//import net.sourceforge.interval.ia_math.exceptions.IAIntersectionException;
 //import net.sourceforge.interval.ia_math.exceptions.IAIntersectionException;
 import algorithms.Algorithm;
 import algorithms.BaseAlgorithm;
@@ -29,9 +30,10 @@ public class AlgorithmsCommunicator extends Thread {
 	double globalScreeningValue = Double.MAX_VALUE;
 
 	private RealInterval optTmp = new RealInterval(); // -inf, + inf
-	private ArrayList<Box> areaTmp = new ArrayList<Box>();
 	private volatile Box[] optArea;
 	private volatile RealInterval optVal;
+	
+	private SortedWorkList sortedWorkList;
 
 	public AlgorithmsCommunicator(ParallelExecutor executor) {
 		this.executor = executor;
@@ -40,6 +42,8 @@ public class AlgorithmsCommunicator extends Thread {
 		
 		setPriority(NORM_PRIORITY-2);
 		setName("AlgorithmsCommunicator");
+		
+		sortedWorkList = new SortedWorkList();
 	}
 	
 	public void run() {
@@ -84,14 +88,26 @@ public class AlgorithmsCommunicator extends Thread {
 				}
 			}
 		}
-		composeResult();
+		prepareFinalResult();
 		System.out.println("Communicator: -- DONE --");
+		assert(false); // JUNit parallel execution and asserts
 	}
 	
-	private void composeResult() {
-//		cleanResult();
-		BaseAlgorithm a = new Bisection_SrtL_CBtC_AllEqS();
-		a.setProblem(algorithms[0].getProblem(), areaTmp.toArray(new Box[0]));
+	private void prepareFinalResult() {
+		if (shouldResultBeRefined())
+			refineResult();
+		optArea = sortedWorkList.getOptimumArea();
+		optVal = sortedWorkList.getOptimumValue();
+	}
+	private boolean shouldResultBeRefined() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	private void refineResult() {
+/*		BaseAlgorithm a = new Bisection_SrtL_CBtC_AllEqS();
+		a.setProblem(f, sortedWorkList);
+		
+		a.setProblem(algorithms[0].getProblem());
 		optArea = a.getOptimumArea();
 		optVal  = a.getOptimumValue();
 		System.out.println("composeResult() optValue=" + optVal + ", area size=" + optArea.length);
@@ -101,50 +117,34 @@ public class AlgorithmsCommunicator extends Thread {
 		optArea = a.getOptimumArea();
 		optVal  = a.getOptimumValue();
 		System.out.println("   \\=> optValue=" + optVal + ", area size=" + optArea.length);
-	}
-
-/*	
-   private void cleanResult() {
-		WorkList wl = new UnSortedWorkList();
-		wl.add(areaTmp.toArray(new Box[0]));
-		optArea = wl.getOptimumArea();
-		optVal  = wl.getOptimumValue();		
-	}
-*/
-	private void saveFoundOptimumAndArea(ParallelAlgorithm parallelAlgorithm) {
-		throw new RuntimeException("FIX ME");
-/*		
-		RealInterval newOpt = parallelAlgorithm.getOptimumValue();
-		if (newOpt == null)
-			return; // list was cleared before getOptimum call 
-		Box[] newArea = parallelAlgorithm.getOptimumArea();
-		System.out.println("Communicator: saveFoundOptimumAndArea() : new optimum: " + newOpt);
-		
-		try {
-			optTmp.intersect(newOpt);
-			areaTmp.addAll(Arrays.asList(newArea));
-			System.out.println("Communicator: saveFoundOptimumAndArea() opt ADDED. area size is " + areaTmp.size());
-			
-		} catch (IAIntersectionException e) {
-		//if (optTmp == null || optTmp.isEmpty()) {
-			// intervals doesn't have common values.
-			if (newOpt.lo() < optTmp.lo()) {
-				// new value is better	
-				optTmp = newOpt;
-				areaTmp.clear();
-				areaTmp.addAll(Arrays.asList(newArea));
-				System.out.println("Communicator: saveFoundOptimumAndArea() opt RENEWED. area size is " + areaTmp.size());
-			} else {
-				// throw out new result...
-				System.out.println("Communicator: saveFoundOptimumAndArea() opt DISCARDED");
-			}
-		}
-		globalScreeningValue = Math.min(globalScreeningValue, optTmp.hi());
 */		
 	}
 
+	private void saveFoundOptimumAndArea(ParallelAlgorithm parallelAlgorithm) {
+		//throw new RuntimeException("FIX ME for IAMath2JInterval");
+		
+		RealInterval newOpt = parallelAlgorithm.getOptimumValue();
+		if (newOpt == null)
+			return; // list was cleared before getOptimum call 
+		System.out.println("{{{ Communicator: saveFoundOptimumAndArea() : potential new optimum: " + newOpt);
+
+		if (newOpt.lo() > optTmp.hi()) {
+			// throw out new result...
+			System.out.println("->  Communicator: saveFoundOptimumAndArea() opt DISCARDED");
+			return;
+		}
+		sortedWorkList.add( parallelAlgorithm.getOptimumArea(), newOpt.lo(), newOpt.hi() );
+			
+		if (optTmp.isIntersects(newOpt))
+			System.out.println("->  Communicator: saveFoundOptimumAndArea() opt COMBINED. area size is " + sortedWorkList.size());
+		else
+			System.out.println("->  Communicator: saveFoundOptimumAndArea() opt RENEWED. area size is " + sortedWorkList.size());
+		
+		globalScreeningValue = sortedWorkList.getLowBoundMaxValue();
+	}
+
 	private double getScreeningValue(int threadNum) {
-		return algorithms[threadNum].getCurLowBoundMaxValue();
+		return algorithms[threadNum].getLowBoundMaxValue();
 	}
 	private void updateScreeningValue(int threadNum, double r) {
 		if (r > globalScreeningValue) {
@@ -212,12 +212,12 @@ public class AlgorithmsCommunicator extends Thread {
 		executor.restartThread(threadNum);		
 	}
 	
-	public RealInterval getOptimum() {
-		return optVal;
+	public RealInterval getOptimumValue() {
+		return sortedWorkList.getOptimumValue();
 	}
 
-	public Box[] getArea() {
-		return optArea;
+	public Box[] getOptimumArea() {
+		return sortedWorkList.getOptimumArea();
 	}
 	
 }
