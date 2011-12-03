@@ -1,5 +1,9 @@
 package algorithms;
 
+import net.sourceforge.interval.ia_math.RealInterval;
+import splitters.Splitter;
+import choosers.Chooser;
+import core.Box;
 import worklists.WorkList;
 
 import static algorithms.OptimizationStatus.*;
@@ -172,7 +176,5 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 	public Function getProblem() {
 		return targetFunction;
 	}
-	public double getCurLowBoundMaxValue() {
-		return workList.getLowBoundMaxValue();
-	}
+
 }
