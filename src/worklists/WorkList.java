@@ -3,11 +3,15 @@ package worklists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 import net.sourceforge.interval.ia_math.RealInterval;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import worklists.SortedWorkList.DescendingAreaWidthBoxComparator;
 
 //import net.sourceforge.interval.ia_math.RealInterval;
 
@@ -227,5 +231,30 @@ public abstract class WorkList {
 	}
 	public double getLowBoundMaxValue() {
 		return screener.getLowBoundMaxValue();
+	}
+	/////////////////////////////// for rnd prove only ///////////////////
+	private DescendingAreaWidthBoxComparator widthComparator = new DescendingAreaWidthBoxComparator();
+									
+	// DIRTY CASTS BELLOW!!!!!!!!!!!!!!!!!!!!
+	// OK, OK, This is BAD.... 
+	// But this code is only to check the prove and not supposed to be reused 
+	public void printStats(boolean print) {
+		double sumW = 0;
+		double minW = Double.MAX_VALUE;
+		double maxW = -1;
+		for (Box b : collection) {
+			for (int i = b.getDimension() - 1; i >= 0; i--) {
+				double wid = b.getInterval(i).wid();
+				if (wid > maxW)
+					maxW = wid;
+				if (wid < minW)
+					minW = wid;
+				sumW += wid;					
+			}
+		}
+		sumW = sumW / (collection.size() * collection.iterator().next().getDimension());
+		
+		// MIN, AVERAGE, MAX
+		if (print) System.out.println(minW + "\t" + sumW + "\t" + maxW);
 	}
 }

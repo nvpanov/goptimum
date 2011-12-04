@@ -168,4 +168,11 @@ public class Box implements Cloneable {
 		//updateHistory(result);
 		return result;		
 	}
+
+	public double wid() {
+	    double w = 0;
+	    for (int i = getDimension()-1; i >= 0; i--)
+	    	w += intervals[i].wid();
+	    return w;
+	}
 }

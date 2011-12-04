@@ -100,4 +100,39 @@ public class SortedWorkList extends WorkList {
 	    }
 	}
 
+	static class DescendingAreaWidthBoxComparator implements Comparator<Box> {
+		@Override
+	    public int compare(Box b1, Box b2) {
+			assert(b1.getDimension() == b2.getDimension());
+			if (b1 == b2 || b1.equals(b2))
+				return 0;
+	    	double w1 = 0, w2 = 0;
+	    	for (int i = b1.getDimension()-1; i >= 0; i--) {
+	    		w1 += b1.getInterval(i).wid();
+	    		w2 += b2.getInterval(i).wid();
+	    	}
+	    	if (w1 > w2)
+	    		return -1; // descending order
+	    	if (w1 < w2)
+	    		return 1;
+	    	else { // (w1 == w2)
+	    		for (int i = b1.getDimension()-1; i >= 0; i--) {
+	    			if (b1.getInterval(i).wid() != b2.getInterval(i).wid()) 
+	    				return b1.getInterval(i).wid() > b2.getInterval(i).wid() ? 1 : -1; // descending
+	    		}
+	    		for (int i = b1.getDimension()-1; i >= 0; i--) {
+	    			if (b1.getInterval(i).lo() != b2.getInterval(i).lo()) 
+	    				return b1.getInterval(i).lo() > b2.getInterval(i).lo() ? 1 : -1;
+	    		}
+	    		for (int i = b1.getDimension()-1; i >= 0; i--) {
+	    			if (b1.getInterval(i).hi() != b2.getInterval(i).hi()) 
+	    				return b1.getInterval(i).hi() > b2.getInterval(i).hi() ? 1 : -1;
+	    		}
+	    	}	    	
+	    	assert(false); // should not reach it
+			return 0;
+		}
+	}
+	
+
 }
