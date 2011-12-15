@@ -31,4 +31,5 @@ public interface Algorithm {
 	public void   setPrecision( double pres );
 	public double getPrecision();
 	
+	
 }

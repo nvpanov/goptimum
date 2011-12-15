@@ -257,4 +257,49 @@ public abstract class WorkList {
 		// MIN, AVERAGE, MAX
 		if (print) System.out.println(minW + "\t" + sumW + "\t" + maxW);
 	}
+	
+	private ArrayList<ArrayList<Double>> statMin; 
+	private ArrayList<ArrayList<Double>> statMax; 
+	private ArrayList<ArrayList<Double>> statAvg;
+	
+	public void initStats(int runsInSeria) {
+		int size = runsInSeria;
+		statMin = new ArrayList<ArrayList<Double>>(size);
+		statMax = new ArrayList<ArrayList<Double>>(size);
+		statAvg = new ArrayList<ArrayList<Double>>(size);
+		for (int i= 0; i < size; i++) {
+			statMin.add( new ArrayList<Double>() );
+			statMax.add( new ArrayList<Double>() );
+			statAvg.add( new ArrayList<Double>() );
+		}
+	}
+	// copy-paste!
+	public void collectStats(int runNum) {
+		double sumW = 0;
+		double minW = Double.MAX_VALUE;
+		double maxW = -1;
+		for (Box b : collection) {
+			for (int i = b.getDimension() - 1; i >= 0; i--) {
+				double wid = b.getInterval(i).wid();
+				if (wid > maxW)
+					maxW = wid;
+				if (wid < minW)
+					minW = wid;
+				sumW += wid;					
+			}
+		}
+		sumW = sumW / (collection.size() * collection.iterator().next().getDimension());
+		statMin.get(runNum).add(minW);
+		statMax.get(runNum).add(maxW);
+		statAvg.get(runNum).add(sumW);
+	}
+	public void printCollectedStats() {
+		for (int i = 0; i < statMax.size(); i++) {
+			for (ArrayList<Double> list : statMax) {
+				for (double d : list)
+					System.out.print(d + "\t");
+			}
+			System.out.print("\n");
+		}
+	}
 }

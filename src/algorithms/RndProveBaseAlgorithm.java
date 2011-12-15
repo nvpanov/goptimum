@@ -48,6 +48,7 @@ public class RndProveBaseAlgorithm extends BaseAlgorithm {
 	}
 	@Override
 	public void solve() {
+/*		
 		final int POINTS = 20;
 		int STEP = 2; 
 		int ITERATIONS = (int)Math.pow(STEP, POINTS);
@@ -65,10 +66,30 @@ public class RndProveBaseAlgorithm extends BaseAlgorithm {
 			}
 			iterate();
 		}
+*/		
+		int ITERATIONS = 4000;
+		int RUNS = 100;
+		for (int run = 0; run < RUNS; run++) {
+			
+			reset();
+			workList.initStats(RUNS);
+			
+			for (int i = 0; i < ITERATIONS; i++) {
+				collectStats(run);
+				iterate();
+			}
+		}
 	}
 	private void printStats(int i, boolean print) {
 		if (print) System.out.print((System.nanoTime() - prevTimeRecord) + "\t" + i + "\t");
 		workList.printStats(print);
 		prevTimeRecord = System.nanoTime();		
 	}
+	private void collectStats(int i) {
+		workList.collectStats(i);
+	}
+	public void printCollectedStats() {
+		workList.printCollectedStats();		
+	}
+	
 }
