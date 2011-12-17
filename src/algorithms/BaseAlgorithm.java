@@ -71,7 +71,7 @@ public class BaseAlgorithm implements Algorithm {
 		//	throw new IllegalArgumentException("Algorithm is in inappropriate state " +
 		//			"for this initialization");
 		if (workList.size() != 0) {
-			workList.clean(); // we were solving other problem and got this one.
+			workList.clearAll(); // we were solving other problem and got this one.
 			stopCriterion.reset();
 		}
 		workList.add(area);
@@ -143,10 +143,11 @@ public class BaseAlgorithm implements Algorithm {
 	}
 	public void probeNewLowBoundMaxValueAndClean(double localMin) {
 		workList.probeNewLowBoundMaxValueAndClean(localMin);
-	}	
+	}
 	public void probeNewLowBoundMaxValue(double localMin) {
 		workList.probeNewLowBoundMaxValue(localMin);
-	}	
+	}
+	
 	public double getLowBoundMaxValue() {
 		return workList.getLowBoundMaxValue();
 	}	

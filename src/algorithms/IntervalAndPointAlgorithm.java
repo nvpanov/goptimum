@@ -30,8 +30,8 @@ public class IntervalAndPointAlgorithm extends BaseAlgorithm {
 			status = intervalAlg.iterate();
 			if (worthToRunPoint()) {
 				/*
-				 * point alg. consumes some time but it isn't always gives any benefits 
-				 * (see RosenbrockGn at any symmetric area, like [-100, 100])
+				 * point alg. consumes some time but it doesn't always give benefits 
+				 * (see RosenbrockGn test at any symmetric area, like [-100, 100])
 				 * so we want to use some heuristics    
 				 */
 				Box searchAreaForPointAlg = getAreaForPoint();

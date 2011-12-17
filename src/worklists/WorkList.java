@@ -3,16 +3,12 @@ package worklists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import net.sourceforge.interval.ia_math.RealInterval;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-//import net.sourceforge.interval.ia_math.RealInterval;
-
 import choosers.Chooser;
-
 import core.Box;
 
 
@@ -20,10 +16,14 @@ public abstract class WorkList {
 	protected Collection<Box> collection;
 	protected Screener screener;
 	protected Chooser chooser;
-	protected Cleaner cleaner;
 	private int maxSize = -1;
 	private int avgSize = -1;
 	private int boxAdded = -1;
+	
+	private static final int sizeThreshold = 20;
+	private static final int updatesThreshold = 10;
+	private static final long memoryThreshold = 1 * 1024*1024; // 1 Mb;
+
 
 	/*
 	 * Has a protected constructor only
@@ -42,7 +42,6 @@ public abstract class WorkList {
 			limit = area.getFunctionValue().hi();
 		}
 		screener = new Screener(limit);
-		cleaner = new Cleaner(collection, screener);
 	}
 /*
 	@Override
@@ -131,7 +130,7 @@ public abstract class WorkList {
 			return; 					// they hasn't passed screening
 		if (this.size() == 0 || minHi < this.getOptimumValue().lo()) { // getOptimumValue() could be expensive on unsorted lists!
 			// we are an empty list or 		we haven't passed the screening
-			this.clean(minHi);
+			this.clearAll(minHi);
 			collection.addAll(Arrays.asList(newBoxes));
 		}
 		this.probeNewLowBoundMaxValueAndDoNotClean(minHi);
@@ -174,7 +173,7 @@ public abstract class WorkList {
 		return new RealInterval(loBorder, hiBorder);
 	}
 	public final Box[] getOptimumArea() {
-		cleaner.cleanList();
+		removeRejectedBoxes();
 		
 		//ArrayList<Box> opt = (ArrayList<Box>)list.clone();
 		Box[] opt = collection.toArray(new Box[collection.size()]);
@@ -185,31 +184,109 @@ public abstract class WorkList {
 		return opt;
 	}
 
+	
 	public void probeNewLowBoundMaxValue(double possibleNewMax) {
 		if (screener.probeNewLimit(possibleNewMax) )
-			cleaner.triggerScreeningIfWorth();
+			if(isWorthScreening())
+				removeRejectedBoxes();
 	}
 	public void probeNewLowBoundMaxValueAndClean(double possibleNewMax) {
 		if (screener.probeNewLimit(possibleNewMax) )
-			cleaner.cleanList();
+			removeRejectedBoxes();
 	}
 	public void probeNewLowBoundMaxValueAndDoNotClean(double possibleNewMax) {
 		screener.probeNewLimit(possibleNewMax);
 	}
 
-	public void clean() {
-		clean(Double.MAX_VALUE);
+	/*
+	 * removes ALL boxes and reset screening-by-value threshold
+	 */
+	public void clearAll() {
+		clearAll(Double.MAX_VALUE);
 	}
-	private void clean(double threshold) {
+	private void clearAll(double threshold) {
 		collection.clear();
 		screener = new Screener(threshold);
 	}
+	public int removeRejectedBoxes() {
+		double threshold = screener.getLowBoundMaxValue();
+		int removed = removeRejected2(threshold);
+		screener.resetStatistics();
+		/*		
+		System.out.println("WorkList:  -- Cleaned " + removedCount + 
+				" boxes. Actual size is " + collection.size());
+		*/		
+		return removed;
+	}
+	// first variant of list cleaning.
+	// Do not call this function manually! Use @removeRejectedBoxes()@ instead
+	@SuppressWarnings("unused")
+	private int removeRejected1(double valueLimit) {	
+		int removedCount = 0;
+
+		Iterator<Box> it = collection.iterator(); Box b;
+		while(it.hasNext()) {
+	    	b = it.next();
+			if (b.getFunctionValue().lo() > valueLimit) {
+	    		it.remove();
+	    		removedCount++;
+	    	}
+	    }
+		
+		return removedCount;
+	}
+	// second variant of list cleaning implementation
+	// Do not call this function manually! Use @removeRejectedBoxes()@ instead
+	@SuppressWarnings("unused")
+	private int removeRejected2(double valueLimit) {	
+		int removedCount = 0;
+
+		HashSet<Box> toRemove = new HashSet<Box>();
+		for(Box b : collection) {
+	    	if (b.getFunctionValue().lo() > valueLimit) {
+	    		toRemove.add(b);
+				removedCount++;
+	    	}
+	    }
+		collection.removeAll(toRemove);
+		return removedCount;
+	}
+	// third variant of list cleaning
+	// Do not call this function manually! Use @removeRejectedBoxes()@ instead
+	@SuppressWarnings("unused")
+	private int removeRejected3(double valueLimit) {
+		int removedCount = 0;
+		// WorkList will use the old collection!
+		ArrayList<Box> newCollection = new ArrayList<Box>();
+		for(Box b : collection) {
+	    	if (b.getFunctionValue().lo() < valueLimit) {
+	    		newCollection.add(b);
+	    	}
+	    }
+		removedCount = collection.size() - newCollection.size();
+		collection = newCollection;
+		return removedCount;
+	}
+	private boolean isWorthScreening() {
+		long usedMem = Runtime.getRuntime().totalMemory();
+		if (usedMem > memoryThreshold)
+			return true;
+		if (this.size() < sizeThreshold)
+			return false;
+		if (screener.getValueLimitUpdatesCount() > updatesThreshold)
+			return true;
+//		if (screener.getLowBoundMaxValueLimitDelta() > collection.iterator().next().getFunctionValue().wid()/10) return true;
+		// some other heuristics 
+		//if() return true;
+		return false;			
+	}
+	
 	
 	public final void getWorkFrom(WorkList otherWL) {
 		System.out.println("WorkList::getWorkFrom() {{{");
 		double threshold = Math.min(this.getLowBoundMaxValue(), otherWL.getLowBoundMaxValue() );
 		assert(threshold <= this.getLowBoundMaxValue());
-		clean(threshold);
+		clearAll(threshold);
 		
 		Collection<Box> oCol = otherWL.collection;
 		Box b;

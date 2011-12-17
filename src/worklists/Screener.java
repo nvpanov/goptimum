@@ -1,6 +1,5 @@
 package worklists;
 
-import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
 import functions.Function;
 
@@ -9,15 +8,15 @@ class Screener {
 	private volatile double lowBoundMaxValue = Double.MAX_VALUE;
 	private double lowBoundMaxValueDelta;
 	private int updatesCount;
-	private Function function;
-
+//	private Function function;
+	
 	public Screener(double startLimit) {
 		resetStatistics();
 		lowBoundMaxValue = startLimit;		
 	}
-	public void setFunction(Function f) {
-		function = f;
-	}
+//	public void setFunction(Function f) {
+//		function = f;
+//	}
 
 	public boolean checkPassed(Box box) {
 		return (checkByValue(box) && check1Derivative(box) && check2Derivative());
