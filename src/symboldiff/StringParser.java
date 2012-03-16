@@ -129,21 +129,32 @@ public class StringParser extends Expression {
             op1 = parse_string(expr.substring(1, expr.length() - 1));
         }
         else {
-            boolean isItNegate = false;
             Object[] r = find_first_operation(expr);
             if (r != null) {
                 oper =  (String)r[0];
                 int pos  = (Integer)r[1]; 
             
-                if (isBinaryOperation(oper)) { // pos = 0 is negate case
+                if (isBinaryOperation(oper)) { 
                     op2 = parse_string(expr.substring(pos+oper.length(), expr.length()));
 
+                    // leading minus: negate case
                 	if (pos == 0 && oper.equals("-")) {
-                    	isItNegate = true;
                         oper = "negate";
                     } else
                     	op1 = parse_string(expr.substring(0, pos));
-                    
+                	
+                	// 1e-8, 3.14e+6
+                	if (pos!=0 && (oper.equals("-") || oper.equals("+")) 
+                			   && (expr.charAt(pos-1) == 'e') ) {
+                		try {
+                			Double.parseDouble(op1[op1.length-1].substring(0, op1[op1.length-1].length()-1)); //last element in op1[] w/o last char which is 'e'
+                    		op1[op1.length-1] += oper+op2[0]; 
+                    		op2[0] = "0"; // 1e-8 => 1e - 8 => 1e-8 - 0
+
+                		} catch (NumberFormatException e) {
+							// it is not our case. it just somevarfinisheswith_e+1
+						}
+                	}                    
                 }
                 else if (isUnaryOperation(oper)) {
                     op2 = parse_string(expr.substring(oper.length(), expr.length()));
@@ -196,9 +207,17 @@ public class StringParser extends Expression {
     		pos = expr.indexOf(")", pos)+1;
     		c--;
     	} while (pos != 0);
-    	if (c != 0)
+    	if (c != 0) {
+    		String details;
+    		if (c > 0)
+    			details = " unclosed bracket" + (c==1?"":"s") + " '('";
+    		else {
+    			c = Math.abs(c);
+    			details = " extra closing bracket" + (c==1?"":"s") + " ')'";
+    		}
       		throw new IncorrectExpression("Expression >" + expr + "< is incorrect: " +
-      				"not parent brackets");
+      				"it contains " + c + details);
+    	}
 	}
 
 	private String remove_whitespaces(String expr) {

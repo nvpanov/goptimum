@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.util.Random;
 import org.junit.Test;
 import core.Box;
-import net.sourceforge.interval.ia_math.IAMath;
 import net.sourceforge.interval.ia_math.RealInterval;
 
 
@@ -76,5 +75,45 @@ public class BoxTest {
 		Box b = setupBox();
 		Box c = b.clone();
 		assertTrue( b.toString().equals( c.toString() ) );
+	}
+	
+	@Test
+	public void testHasAtLeastOneCommonSide() {
+		// 1
+		Box a = new Box(1, new RealInterval(0,1) );
+		Box b = new Box(2, new RealInterval(0,1) );
+		try {
+			a.hasAtLeastOneCommonSide(b);
+			fail("Assertion expected");
+		} catch (AssertionError e) {
+			// OK.
+		}
+		
+		// 2
+		a = new Box(1, new RealInterval(0,1) );
+		b = new Box(1, new RealInterval(0,1) );
+		assertTrue(a.hasAtLeastOneCommonSide(b));
+		
+		b = new Box(1, new RealInterval(0) );
+		assertTrue(a.hasAtLeastOneCommonSide(b));
+
+		b = new Box(1, new RealInterval(-1) );
+		assertFalse(a.hasAtLeastOneCommonSide(b));
+		
+		// 3
+		a = new Box(2, new RealInterval(-10,10) );
+		b = new Box(2, new RealInterval(0,1) );
+		assertTrue(a.hasAtLeastOneCommonSide(b));
+
+		// 4
+		a = new Box(2, new RealInterval(-1,1) );
+		b = new Box(2, new RealInterval(2,3) );
+		assertFalse(a.hasAtLeastOneCommonSide(b));
+
+		b.setInterval(1, new RealInterval(0, 0.1));
+		assertTrue(a.hasAtLeastOneCommonSide(b));
+		
+		b.setInterval(1, new RealInterval(-10, -1));
+		assertTrue(a.hasAtLeastOneCommonSide(b));		
 	}
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import symboldiff.exceptions.ExpressionException;
 import symboldiff.exceptions.IncorrectExpression;
 import symboldiff.exceptions.MethodGenerationException;
 import symboldiff.exceptions.MethodInvocationException;
@@ -71,7 +72,7 @@ public class MethodRunner {
 	// transform some unary operations to binary
 	// because ia_math doesn't have method for this function
 	// FE: arcctg => pi/2 - arctg
-	private static boolean disclosureOperation(Expression expr) {
+	private static boolean disclosureOperation(Expression expr) throws ExpressionException {
 		RPN rpn = null;
 		Expression arg = expr.getRightExpression();
 		if (expr.getOperation().equalsIgnoreCase("arcctg")) {
@@ -167,7 +168,7 @@ public class MethodRunner {
 				result = (RealInterval) r;
 			} else {
 				if (exp.isVariable()) {
-					int num = exp.getVariableNumber();//coords.indexOf(exp.getOperation());
+					int num = exp.getNumberOfThisVariable();//coords.indexOf(exp.getOperation());
 					result = /*new Operand*/(box.getInterval(num));
 				} else {
 					double d = exp.getConstantValue();

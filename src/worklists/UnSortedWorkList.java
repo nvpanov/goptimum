@@ -14,7 +14,7 @@ public class UnSortedWorkList extends WorkList {
 	}
 
 	@Override
-	public void add_checked(Box box) {
+	public void addChecked(Box box) {
 		// just add it to the list.
 		// no sorting - nothing to bother about
 		collection.add(box);

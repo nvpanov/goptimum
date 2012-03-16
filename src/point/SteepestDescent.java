@@ -2,13 +2,13 @@ package point;
 
 import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
-import functions.Function;
+import functions.FunctionNEW;
 
 public class SteepestDescent extends PointAlgorithm {
 
 	double[] delta;  
 
-	public SteepestDescent(Function f) {
+	public SteepestDescent(FunctionNEW f) {
 		super();
 		setFunction(f);
 	}
@@ -55,7 +55,7 @@ public class SteepestDescent extends PointAlgorithm {
 			
 			// calculate new coordinates
 			for (int i = 0; i < dim; i++) {
-				RealInterval iGradient = function.calc1Derivative(tmp, i);
+				RealInterval iGradient = function.calculate1Derivative(tmp, i);
 				if (iGradient == null)
 					return Double.MAX_VALUE;
 				double gradient = iGradient.hi();

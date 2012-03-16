@@ -1,10 +1,4 @@
 package functions;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-import symboldiff.exceptions.IncorrectExpression;
-import core.Box;
-import net.sourceforge.interval.ia_math.IAMath;
-import net.sourceforge.interval.ia_math.RealInterval;
-
 /*
 public class Function_SumSin_nD extends Function {
 	private Function_SumSin_nD() {

@@ -10,7 +10,7 @@ public class Function_SixHumpCamelBack_2DTest  extends TestCase {
     Random rnd = new Random();
 	double point[] = new double[2];
 	Box b = new Box(2, new RealInterval());
-	Function f = new Function_SixHumpCamelBack_2D();
+	FunctionNEW f = new Function_SixHumpCamelBack_2D();
 
 	@Test
     public void testPoints() {

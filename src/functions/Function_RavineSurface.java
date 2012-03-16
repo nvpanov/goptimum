@@ -1,40 +1,25 @@
 package functions;
 
-import static net.sourceforge.interval.ia_math.IAMath.pow;
-import symboldiff.exceptions.IncorrectExpression;
-import net.sourceforge.interval.ia_math.RealInterval;
-import core.Box;
 
-
-public class Function_RavineSurface extends Function {
+/*
+ * This class is kept for legacy purposes
+ * And the function is a special function that depends only
+ * on one variable. 
+ * Created to play with Splitting strategy
+ */
+public class Function_RavineSurface extends FunctionNEW {
 	private final int exp = 4;
+	private String equation;
 
 	public Function_RavineSurface(int dim) {
-		this.dim = dim;
-		try {
-			super.init(toStringFull());
-		} catch (IncorrectExpression e) {
-			// actually everything should be OK,
-			// otherwise we will work w/o derivatives
-			e.printStackTrace();
-		}		
+		StringBuilder sb = new StringBuilder("x0^").append(exp);
+		for (int i = 1; i < dim; i++) {
+			sb.append(" + ");
+			sb.append("1e-8*x");
+			sb.append(i);
+			sb.append("^(1/10)");
+		}
+		equation = sb.toString();
+		init(dim, equation);
 	}
-	@Override
-	public void calculate(Box b) {
-		assert(b.getDimension() == this.getDimension());
-		RealInterval x = b.getInterval(0);
-		b.setFunctionValue(pow(x, exp));
-	}
-
-	@Override
-	public double calculatePoint(double... point) {
-		assert(point.length == this.getDimension());
-		return Math.pow(point[0], exp);
-	}
-
-	@Override
-	protected String toStringHuman() {
-		return "x^"+exp;
-	}
-
 }

@@ -7,7 +7,7 @@ import net.sourceforge.interval.ia_math.RealInterval;
 import choosers.Chooser;
 //import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
-import functions.Function;
+import functions.FunctionNEW;
 import point.PointAlgorithm;
 import solvers.IntervalSolver;
 import splitters.Splitter;
@@ -68,14 +68,17 @@ public class IntervalAndPointAlgorithm extends BaseAlgorithm {
 ////////////////////////////////////////
 ////////////////////////////////////////
 	@Override
-	public void setProblem(Function f, Box area) {
+	public void setProblem(FunctionNEW f, Box area) {
 		intervalAlg.setProblem(f, area);
 		pointAlg.setFunction(f);
 	}
+/*
 	@Override
 	public void setProblem(Function f, Box[] optArea) {
 		intervalAlg.setProblem(f, optArea);
+		pointAlg.setFunction(f);
 	}
+*/	
 	@Override
 	protected void setLogic(WorkList wl, Chooser ch, Splitter sp) {
 		intervalAlg.setLogic(wl, ch, sp);

@@ -59,6 +59,7 @@ public class CurrentBestChooserTest extends TestCase {
 					// first iteration: no list was created.
 					// create it.
 					wl = new UnSortedWorkList(box);
+					wl.switchOff1DerivativeCheck(); // 12/23/11
 				}
 			} catch (Exception e) {
 				// wrong interval: a > b;

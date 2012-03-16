@@ -17,7 +17,7 @@ public class SortedWorkList extends WorkList {
 	 * super(new(new))!!   
 	 */
 	private final static Comparator<Box> _sorter = new SortedWorkList.AscendingLowBoundBoxComparator();
-	
+
 	public SortedWorkList() {
 		super(new TreeSet<Box>(_sorter), null);
 	}
@@ -26,7 +26,7 @@ public class SortedWorkList extends WorkList {
 	}
 
 	@Override
-	protected void add_checked(Box box) {
+	protected void addChecked(Box box) {
 		// TreeSet maintains sorting
 		// automatically via our comparator
 		collection.add(box);
@@ -34,8 +34,8 @@ public class SortedWorkList extends WorkList {
 
 	@Override
 	public Box getLeadingBox() {
-		// we do know that it is a TreeSet
-		//Box b = ((TreeSet<Box>)collection).first();
+		if (collection.size() == 0)
+			return null;
 		Box b = collection.iterator().next(); // first element in a sorted list
 		assert(collection.contains(b));
 		return b;

@@ -1,23 +1,25 @@
 package symboldiff;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import symboldiff.exceptions.ExpressionException;
 import symboldiff.exceptions.IncorrectExpression;
 import static symboldiff.Expression.*;
 
 public class Gradient {
 
-	private Expression gradient;
+	//private Expression gradient;
 	private Expression[] pder;
-	private String needCopy = "*/^";
+	private static final String needCopy = "*/^";
 
 	// private Vector<String> coords;
 
 	// return derivative of function with arguments = arg
 	// it is easier to add throws declaration that insert number of try/catch's
 	private Expression derivativeOfFunction(String op, Expression arg)
-			throws IncorrectExpression {
+			throws ExpressionException {
 		if (op.equalsIgnoreCase("arccos")) {
 			return new Expression(new RPN("(0-1)/sqrt(1 - " + arg.toString()
 					+ "^2)"));
@@ -64,7 +66,7 @@ public class Gradient {
 						+ "\n");
 	}
 
-	private Expression derivativeOfOperation(Expression exp, String coord) {
+	private Expression derivativeOfOperation(Expression exp, String coord) throws ExpressionException {
 		Expression left;// = new Expression();
 		Expression right;// = new Expression();
 		Expression parent = null;// = new Expression();
@@ -166,7 +168,7 @@ public class Gradient {
 		return parent;
 	}
 
-	private Expression calculatePartialDerivative(Expression exp, String coord) {
+	private Expression calculatePartialDerivative(Expression exp, String coord) throws ExpressionException {
 		Expression left = exp.getLeftExpression();
 		Expression right = exp.getRightExpression();
 		Expression parent;// = new Expression();
@@ -211,52 +213,90 @@ public class Gradient {
 		}
 		return exp;
 	}
-
+/*
 	public Expression getGradient() {
 		return this.gradient;
 	}
-
+*/
 	public Expression getPartialDerivative(int i) {
 		return this.pder[i];
 	}
 
+	/* calculates gradient for @exp@ using given set of variables.
+	 * it should be used for second derivative because some variables can be missed in first derivative:
+	 * f=x2+y   =>   df/dx = 2x, df/dy = 1   =>   d2f/dx = 2, and nobody will differentiate by y -- there is no such variable   
+	 */
+	public Gradient(Expression exp, List<String> coords) {
+		init(exp, coords);
+	}
+
 	/*
-	 * public Vector<String> getCoords() { return this.coords; }
+	 * calculates gradient (sum of all partial derivatives by all variables that are in the expression)
+	 * use Gradient(exp, coords) to calculate Gradient for given variables
 	 */
 	public Gradient(Expression exp) {
-		int i;
 		List<String> coords = exp.getVariables();
+		init(exp, coords);
+	}
+	/*
+	 * First constructs an @Expression@ from @formula@ than acts absolutely the same as
+	 * @Gradient(Expression exp)@. Throws Exception if fails to parse @formula@  
+	 */
+	public Gradient(String formula) throws ExpressionException {
+		Expression exp = new Expression(formula);
+		List<String> coords = exp.getVariables();
+		init(exp, coords);
+	}
+	
+	/*
+	 * this constructor accepts gradient so it is useful for second derivatives
+	 * do not forget to specify ORIGINAL variables list 
+	 */
+	public Gradient(Gradient g, ArrayList<String> variables) {
+		Expression exp = null;
+		try {
+			exp = new Expression(g.toString());
+		} catch (ExpressionException e) {
+			// TODO Auto-generated catch block
+			//shouldn't happen???
+		}
+		init(exp, variables);
+	}
+
+	private void init(Expression exp, List<String> coords) {
+		int i;
 		final int n = coords.size();
 		this.pder = new Expression[n];
 		for (i = 0; i < n; i++) {
-			this.pder[i] = calculatePartialDerivative(exp.clone(),
-					coords.get(i));
-		}
-		// need to generate sum between partial derivatives.
-		if (n > 1) {
-			Expression tmp = newExpression(this.pder[0], this.pder[1], "+");
-			this.gradient = tmp;
-			for (i = 2; i < n; i++) {
-				tmp = newExpression(this.gradient, this.pder[i], "+");
-				this.gradient = tmp;
+			try {
+				this.pder[i] = calculatePartialDerivative(exp.clone(), coords.get(i));
+			} catch (ExpressionException e) {
+				// shouldn't happen ???? 
+				pder[i] = null;
 			}
-		} else {
-			this.gradient = this.pder[0];
 		}
-
-		Simplifier.simplify(gradient);
-		for (i = 0; i < n; i++) {
-			Simplifier.simplify(pder[i]);
-		}
+//		for (i = 0; i < n; i++) {
+//			Simplifier.simplify(pder[i]);
+//		}
 		
-		gradient.setVariablesList();
 		for (i = 0; i < n; i++) {
 			pder[i].setVariablesList();
-		}		
+		}			
 	}
+	
 
+	String g = null;
 	@Override
 	public String toString() {
-		return getGradient().toString();
+		if(g==null) {
+			StringBuffer sb = new StringBuffer();
+			int i;
+			for (i = 0; i < pder.length-1; i++) {
+				sb.append(pder[i].toString()).append("+");
+			}
+			sb.append(pder[i].toString());
+			g = sb.toString();
+		}
+		return g;
 	}
 }

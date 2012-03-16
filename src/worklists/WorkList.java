@@ -24,6 +24,8 @@ public abstract class WorkList {
 	private static final int updatesThreshold = 10;
 	private static final long memoryThreshold = 1 * 1024*1024; // 1 Mb;
 
+	boolean _dbg_InitialAreaAddedCorrectly = false;
+
 
 	/*
 	 * Has a protected constructor only
@@ -32,17 +34,64 @@ public abstract class WorkList {
 		/*
 		 *  child has to instantiate particular collection
 		 *  sorted and unsorted list uses different collections
-		*/ 
+		 */ 
+		assert(collectionToUse != null);
 		collection = collectionToUse;
 		chooser = null;
 
+		/*
+		assert(area != null); // previously we allowed creation of a worklist w/o search area
+								// now it is forbidden because we treats initial search area
+								// in a different way than the rest of the boxes (see @addSearchArea@).
+		// IT WAS really inconvenient and now we do allow this again*/ 
 		double limit = Double.MAX_VALUE; 
-		if (area != null) {
-			collection.add(area);
-			limit = area.getFunctionValue().hi();
-		}
 		screener = new Screener(limit);
+		addSearchArea(area);
 	}
+	/*
+	 * Screening by derivative will throw away any box on which the derivative 
+	 * doesn't contain 0. Because a point could be a minimum or a maximum if 
+	 * the derivative is equal to zero in this point OR this is a border point. 
+	 * Consider the following case:
+	 * f(x) = x, min_{0<x<1}(f) = f(0), but f'(x) != 0.
+	 * BUT instead of checking if a box contains borders we just add all ages to the
+	 * working list from the very beginning! Much simple and less code: )  
+	 */
+	protected void addAreaAndAllEges(Box area) {
+		assert(collection.size() == 0); 
+		assert(area != null);
+		addChecked(area); // Otherwise add() will call addAllEges() that calls add()
+							// actually now it don't. Nevertheless this is no point in use screener on initial area
+							// especially because usually the function value is not set.
+		final int dim = area.getDimension();
+		for (int i = 0; i < dim; i++) {
+			Box edge1 = area.clone();
+			Box edge2 = area.clone();
+			RealInterval side = area.getInterval(i);
+			edge1.setInterval(i, side.lo());
+			edge2.setInterval(i, side.hi());
+			this.addChecked(edge1); // now add() doesn't screen out by derivatives boxes
+			this.addChecked(edge2); //   with any side with width = 0. nevertheless there is 
+									//   no point to use add() here because function values are not set
+		}
+	}
+	public void addSearchArea(Box area) {
+		if (area == null)
+			return;
+		// we do this only for initial search area
+		assert(collection.size() == 0);
+		_dbg_InitialAreaAddedCorrectly = true;
+		addAreaAndAllEges(area);
+	}
+/*	
+	public void addSearchArea(Box[] area) {
+		throw new RuntimeException("NOT IMPL.");
+		// for (Box b : area) {
+		//	addAllEges(b);
+		// }
+		// check and test it!
+	}
+*/	
 /*
 	@Override
 	protected void finalize() {
@@ -69,7 +118,7 @@ public abstract class WorkList {
 	 * actual adding. Is the list sorted or not depends on 
 	 * implementation of this method.
 	 */
-	protected abstract void add_checked(Box box);
+	protected abstract void addChecked(Box box);
 	
 	/*
 	 * this method returns a box with the lowest
@@ -88,26 +137,26 @@ public abstract class WorkList {
 	 * what Chooser is used.
 	 */
 	public final Box extractNext() {
+		assert (_dbg_InitialAreaAddedCorrectly);
 		if (collection.size() < 1) {
 			return null;
 		}
 		Box b;
 		do {
 			b = chooser.extractNext();
-		} while (b != null && screener.checkByValue(b) == false); // we do not clean the list all the time
-																	// but we do not return bad boxes:)
+			// cnt++;
+		} while (b != null && screener.checkByValue(b) == false); // we do not clean the list all the time but we do not return bad boxes
+		// TODO: if(cnt>CNT && b!=null) cleanList();															
 		return b;
 	}
 	
 	/*
 	 * adds a bunch of boxes.
 	 * current implementation just calls
-	 * add(Box) for each element.
-	 * So, no checks with screener here,
-	 * no list looks, no checks if 
-	 * ListCleaner has to be resurrected.
+	 * @add(Box)@ for each element.
+	 * @add(Box)@ performs all the checks
 	 */
-	public void add(Box[] newBoxes) {
+	public final void add(Box[] newBoxes) {
 		for (Box b : newBoxes)
 			add(b); // add(Box) locks the list
 	}
@@ -117,8 +166,18 @@ public abstract class WorkList {
 	 * and calls add_checked()
 	 */
 	public final void add(Box box) {
+		// do not use here something like "if(collection.size() == 0)" 
+		// because @addAllEges@ calls @add@ and the size is still equal to zero.
 		if (screener.checkPassed(box)) {
-			add_checked(box);
+			if(collection.size() == 0) { // this is the first box -- 
+				addAreaAndAllEges(box); 		// -- has to take care about border points
+										// ...
+										// actually it could be not the very first box
+										// but the list could be cleaned out.
+										// anyway lets play safe and do not add one more flag
+										// for this and trigger it in @clearAll@ and so on..
+			} else
+				addChecked(box);
 		}
 	}
 	/*
@@ -173,10 +232,13 @@ public abstract class WorkList {
 		return new RealInterval(loBorder, hiBorder);
 	}
 	public final Box[] getOptimumArea() {
+		assert(collection.size() > 0);
 		removeRejectedBoxes();
+		assert(collection.size() > 0);
 		
 		//ArrayList<Box> opt = (ArrayList<Box>)list.clone();
 		Box[] opt = collection.toArray(new Box[collection.size()]);
+		
 		
 		// TODO: combine near intervals into one if possible!
 //		IntervalMerger merger = new IntervalMerger(opt);
@@ -210,12 +272,12 @@ public abstract class WorkList {
 	}
 	public int removeRejectedBoxes() {
 		double threshold = screener.getLowBoundMaxValue();
+		int was = collection.size();
 		int removed = removeRejected2(threshold);
 		screener.resetStatistics();
-		/*		
-		System.out.println("WorkList:  -- Cleaned " + removedCount + 
-				" boxes. Actual size is " + collection.size());
-		*/		
+		
+//		System.out.println("WorkList:  -- Cleaned. Was: " + was + ", removed: " + removed + 
+//				", now: " + collection.size());
 		return removed;
 	}
 	// first variant of list cleaning.
@@ -304,5 +366,8 @@ public abstract class WorkList {
 	}
 	public double getLowBoundMaxValue() {
 		return screener.getLowBoundMaxValue();
+	}
+	public void switchOff1DerivativeCheck() {
+		screener.switchOff1DerivativeCheck();
 	}
 }

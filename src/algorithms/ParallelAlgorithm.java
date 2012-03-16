@@ -7,7 +7,7 @@ import core.Box;
 import worklists.WorkList;
 
 import static algorithms.OptimizationStatus.*;
-import functions.Function;
+import functions.FunctionNEW;
 
 public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 	private int generation;
@@ -173,7 +173,7 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 			return status;
 		}
 	}
-	public Function getProblem() {
+	public FunctionNEW getProblem() {
 		return targetFunction;
 	}
 

@@ -4,16 +4,12 @@ package parallelization;
 import static org.junit.Assert.*;
 import net.sourceforge.interval.ia_math.RealInterval;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import core.Box;
 
-import functions.Function;
 import functions.Function_DeJong_nD;
-import functions.Function_SixHumpCamelBack_2D;
-
 import solvers.Bisection_SrtL_CBtC_BigEqS;
 import solvers.Bisection_UnsL_RndC_BigEqS;
 
@@ -35,7 +31,7 @@ public class ParallelExecutorTest {
 		}
 		
 		int dim;
-		dim = 6; Function f = new Function_DeJong_nD(dim);
+		dim = 6; Function_DeJong_nD f = new Function_DeJong_nD(dim);
 		Box area = new Box(dim, new RealInterval(-10, 100));
 		
 		executor = new ParallelExecutor(threads, algorithms);
@@ -56,7 +52,7 @@ public class ParallelExecutorTest {
 		int threads = 2* 3;
 
 		int dim;
-		dim = 16; Function f = new Function_DeJong_nD(dim);
+		dim = 16; Function_DeJong_nD f = new Function_DeJong_nD(dim);
 		Box area = new Box(dim, new RealInterval(-100, 1000));
 		
 		executor = new ParallelExecutor(threads, new Bisection_SrtL_CBtC_BigEqS());

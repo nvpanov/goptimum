@@ -15,7 +15,7 @@ import solvers.IntervalSolver;
 
 import core.Box;
 
-import functions.Function;
+import functions.FunctionNEW;
 import functions.Function_DeJong_nD;
 import functions.Function_RosenbrockG_nD;
 
@@ -37,7 +37,7 @@ public class SteepestDescentTest {
 	public final void testDeJong_small() {
 		final int dim = 2;
 		final double bound = 100;
-		Function f = new Function_DeJong_nD(dim);
+		FunctionNEW f = new Function_DeJong_nD(dim);
 		Box area = new Box(dim, new RealInterval(-bound, bound));
 		solver = new SteepestDescent();
 		solver.setFunction(f);
@@ -53,7 +53,7 @@ public class SteepestDescentTest {
 		final int dim = 40;
 		final double bound = 100;
 		long start = System.currentTimeMillis();
-		Function f = new Function_DeJong_nD(dim);
+		FunctionNEW f = new Function_DeJong_nD(dim);
 		System.out.println(System.currentTimeMillis() - start);
 		/*
 		 * 	20		40		80		160		
@@ -80,7 +80,7 @@ public class SteepestDescentTest {
 	@Test
 	public final void testRosenbrockG_nD() {
 		final int dim = 4;
-		final Function f = new Function_RosenbrockG_nD(dim);
+		final FunctionNEW f = new Function_RosenbrockG_nD(dim);
 		//Box area = new Box(dim, new RealInterval(-rnd.nextInt(10)*10 - 1, rnd.nextInt(10)*20 + 1) );
 		Box area = new Box(dim, new RealInterval(-100, 100) );
 

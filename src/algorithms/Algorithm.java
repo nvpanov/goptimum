@@ -3,7 +3,7 @@ package algorithms;
 
 import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
-import functions.Function;
+import functions.FunctionNEW;
 
 
 public interface Algorithm {
@@ -20,7 +20,7 @@ public interface Algorithm {
 	/*
 	 * sets the target function and search area
 	 */
-	public void setProblem(Function f, Box area);
+	public void setProblem(FunctionNEW f, Box area);
 	
 	/*
 	 * Width of interval extension is a stop criteria.

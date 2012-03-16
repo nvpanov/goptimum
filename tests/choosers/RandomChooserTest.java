@@ -22,14 +22,15 @@ public class RandomChooserTest extends TestCase {
 	private int size = 100;
 	private Random rnd = new Random();
 	private long seed;
+	int dim = 1;
 	
     @Before
     public void setUp() {
-    	wl = new UnSortedWorkList(new Box(1, new RealInterval(0)));
+    	wl = new UnSortedWorkList(new Box(dim, new RealInterval(0)));
 		for (int i = 1; i < size; i++) {
-			wl.add(new Box(1, new RealInterval(i)));
+			wl.add(new Box(dim, new RealInterval(i)));
 		}
-		assertTrue(wl.size() == size);
+		assertTrue(wl.size() == size + 2*dim); // 2*dim because of AddAllAges()
 		c = new RandomChooser(wl);
 		seed = System.currentTimeMillis();
 		//seed = 1321615828854l;
@@ -38,11 +39,13 @@ public class RandomChooserTest extends TestCase {
 
 	@Test
 	public void testExtraction() {
+		int size = wl.size();
 		c.extractNext();
 		assertTrue(wl.size() == size-1);
 	}
 
-	@Ignore	// because I can't understand the logic and the test fails with seed = 1321615828854l;
+	// because I can't understand the logic and the test fails with seed = 1321615828854l;
+	@Ignore	
 	@Test
 	public void testRnd() {
 		ArrayList<ArrayList<Double>> results = new ArrayList<ArrayList<Double>>();

@@ -6,8 +6,6 @@ import worklists.UnSortedWorkList;
 import worklists.WorkList;
 import choosers.Chooser;
 import choosers.CurrentBestChooser;
-import core.Box;
-import functions.Function;
 import algorithms.BaseAlgorithm;
 
 /*

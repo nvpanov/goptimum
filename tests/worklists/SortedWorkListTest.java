@@ -81,10 +81,12 @@ public class SortedWorkListTest {
 		Box b1 = new Box(dim, it); b1.setFunctionValue(it);
 		Box b2 = new Box(dim, it); b2.setFunctionValue(it1);
 		wl = new SortedWorkList(b1);
-		assertTrue(wl.size() == 1);
+		wl.switchOff1DerivativeCheck();
+		// assertTrue(wl.size() == 1); now we adds edges from the search area see @WorkList@
+		int s0 = wl.size();
 		wl.add(b2);
-		assertTrue(wl.size() == 2);
+		assertTrue(wl.size() == s0+1);
 		wl.remove(b1);
-		assertTrue(wl.size() == 1);
+		assertTrue(wl.size() == s0);
 	}
 }

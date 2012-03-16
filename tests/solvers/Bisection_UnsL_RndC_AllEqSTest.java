@@ -45,7 +45,7 @@ public class Bisection_UnsL_RndC_AllEqSTest {
 	//(timeout=12*1000) //12 sec
 	public final void test4() {
 		Algorithm a = new Bisection_UnsL_RndC_AllEqS();
-		RealInterval area = new RealInterval(-10, 10);
+		RealInterval area = new RealInterval(-1, 1);
 		test.f_SixHumpCamelBack(a, area);
 	}
 }

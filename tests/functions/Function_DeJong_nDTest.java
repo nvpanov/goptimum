@@ -21,7 +21,7 @@ public class Function_DeJong_nDTest {
     public void testPoints() {
     	rnd.setSeed(System.currentTimeMillis());    	
     	int dim = rnd.nextInt(10) + 1;
-    	Function f = new Function_DeJong_nD(dim); 
+    	Function_DeJong_nD f = new Function_DeJong_nD(dim); 
     	double point[] = new double[dim];
     	Box b = new Box(dim, new RealInterval());
         for (int i = 0; i < 10; i++) { // 10 tests
@@ -65,14 +65,14 @@ public class Function_DeJong_nDTest {
     	seed = 1295619079035L;
     	rnd.setSeed(seed);
     	int dim = rnd.nextInt(10) + 1;
-    	Function f = new Function_DeJong_nD(dim);
+    	Function_DeJong_nD f = new Function_DeJong_nD(dim);
     	Box box = new Box(dim, new RealInterval(1));
     	for (int i = 0; i < dim; i++)
     		box.setInterval(rnd.nextInt(dim), new RealInterval(rnd.nextInt(6) - rnd.nextInt(3)));
     	
     	RealInterval d1;
     	int argNum = rnd.nextInt(dim);
-    	d1 = f.calc1Derivative(box, argNum);
+    	d1 = f.calculate1Derivative(box, argNum);
     	System.out.println(d1);
     	assertTrue("" + seed, d1 != null);
     	RealInterval checkVal = IAMath.mul(2, box.getInterval(argNum));

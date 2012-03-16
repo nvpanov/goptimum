@@ -5,7 +5,7 @@ import static org.junit.Assert.fail;
 import net.sourceforge.interval.ia_math.RealInterval;
 import algorithms.Algorithm;
 import core.Box;
-import functions.Function;
+import functions.FunctionNEW;
 import functions.Function_DeJong_nD;
 import functions.Function_Price5_2D;
 import functions.Function_Rastrigin10_2D;
@@ -26,14 +26,14 @@ public class TestHarness {
 		final double checkArg = 0;
 		
 		Box box = new Box(dim, area);
-		Function f = new Function_DeJong_nD(dim);
+		FunctionNEW f = new Function_DeJong_nD(dim);
 		return solveFunction(f, box, alg, checkValue, checkArg);
 	}
 	public final TestData f_DeJong_NotSim(Algorithm alg, int dim) {
 		final double checkValue = 10*10*dim;
 		final double checkArg = 10;
 		Box area = new Box(dim, new RealInterval(10, 200));
-		Function f = new Function_DeJong_nD(dim);
+		FunctionNEW f = new Function_DeJong_nD(dim);
 		return solveFunction(f, area, alg, checkValue, checkArg);
 	}
 	public final TestData f_Price5_Zero(Algorithm alg, RealInterval area) {
@@ -42,7 +42,7 @@ public class TestHarness {
 		final int dim = 2;
 		final double checkValue = 0;
 		final double checkArg = 0;
-		Function f = new Function_Price5_2D();
+		FunctionNEW f = new Function_Price5_2D();
 		Box box = new Box(dim, area);
 		return solveFunction(f, box, alg, checkValue, checkArg);
 	}
@@ -53,7 +53,7 @@ public class TestHarness {
 		if ( !area.contains(checkArg) )
 			throw new IllegalArgumentException();
 
-		Function f = new Function_Rastrigin10_2D();
+		FunctionNEW f = new Function_Rastrigin10_2D();
 		Box box = new Box(dim, area);
 		return solveFunction(f, box, alg, checkValue, checkArg);
 	}
@@ -68,12 +68,12 @@ public class TestHarness {
 			throw new IllegalArgumentException("Interval is square, I know, " +
 					"but it doesn't contain proper Y value");
 		final double checkArg = Double.NaN;
-		Function f = new Function_SixHumpCamelBack_2D();
+		FunctionNEW f = new Function_SixHumpCamelBack_2D();
 		Box box = new Box(dim, area);
 		return solveFunction(f, box, alg, checkValue, checkArg);
 	}
 	public final TestData f_RosenbrockGn(Algorithm alg, int dim, RealInterval area) {
-		Function f = new Function_RosenbrockG_nD(dim);
+		FunctionNEW f = new Function_RosenbrockG_nD(dim);
 		Box box = new Box(dim, area);
 		final double checkValue = 0;
 		final double checkArg = 1;
@@ -81,7 +81,7 @@ public class TestHarness {
 	}
 	
 	
-	protected TestData solveFunction(Function f, Box area, Algorithm algorithm, double checkValue, double checkArg) {
+	protected TestData solveFunction(FunctionNEW f, Box area, Algorithm algorithm, double checkValue, double checkArg) {
 		algorithm.setProblem(f, area);
 
 		long t0 = System.currentTimeMillis();

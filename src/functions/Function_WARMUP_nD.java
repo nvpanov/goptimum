@@ -1,15 +1,13 @@
 package functions;
 
-import core.Box;
-
-
 /*
  * This function is just a constant and uses for WARMUP only
  */
+/*
 public class Function_WARMUP_nD extends Function {
 
 	public Function_WARMUP_nD(int dim) {
-		this.dim = dim;
+		super(dim);
 	}
 
 	public void calculate(Box b) {
@@ -22,12 +20,13 @@ public class Function_WARMUP_nD extends Function {
 	}
 
 	@Override
-	protected String toStringFull() {
+	public String toStringFull() {
 		return "x";
 	}
 
 	@Override
-	protected String toStringHuman() {
+	public String toStringHuman() {
 		return toStringFull();
 	}
 }
+*/

@@ -9,7 +9,7 @@ import core.Box;
 public class Function_Price5_2DTest extends TestCase {
     @Test
     public void testPoints() {
-    	Function f = new Function_Price5_2D();
+    	Function_Price5_2D f = new Function_Price5_2D();
     	Random rnd = new Random();
     	double point[] = new double[2];
     	Box b = new Box(2, new RealInterval());
@@ -39,7 +39,7 @@ public class Function_Price5_2DTest extends TestCase {
     
     @Test
     public void testWrongDimension() {
-    	Function f = new Function_Price5_2D();
+    	Function_Price5_2D f = new Function_Price5_2D();
     	Random rnd = new Random();
         int dim;
         do {

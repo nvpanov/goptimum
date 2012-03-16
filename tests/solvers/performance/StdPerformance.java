@@ -16,13 +16,12 @@ import point.SteepestDescent;
 
 import core.Box;
 
-import functions.Function;
+import functions.FunctionNEW;
 import functions.Function_DeJong_nD;
 import functions.Function_Price5_2D;
 import functions.Function_Rastrigin10_2D;
 import functions.Function_RosenbrockG_nD;
 import functions.Function_SixHumpCamelBack_2D;
-import functions.Function_WARMUP_nD;
 
 import algorithms.Algorithm;
 import algorithms.IntervalAndPointAlgorithm;
@@ -58,7 +57,7 @@ public class StdPerformance {
 //		new RealInterval(1000, 10000),
 //		new RealInterval(-10000, 10000),
 	};
-	public static @DataPoints Function[] targetFunctions = {
+	public static @DataPoints FunctionNEW[] targetFunctions = {
 //		new Function_WARMUP_nD(4),
 		new Function_Price5_2D(),
 		new Function_Rastrigin10_2D(),
@@ -93,7 +92,7 @@ public class StdPerformance {
 	}
 
 	@Theory
-	public void performanceMeasurement(Algorithm alg, RealInterval area, Function f, boolean warmup) {
+	public void performanceMeasurement(Algorithm alg, RealInterval area, FunctionNEW f, boolean warmup) {
 		Box box = new Box(f.getDimension(), area);
 		
 		for (int i = 0; i < RUNS; i++) {

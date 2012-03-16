@@ -59,6 +59,10 @@ public class Box implements Cloneable {
 	public void setInterval(int n, RealInterval i) {
 		intervals[n] = i; // out of range checking will be automatically done by JVM
 	}
+	public void setInterval(int n, double val) {
+		RealInterval iVal = new RealInterval(val);
+		setInterval(n, iVal);		
+	}	
 
 	public void setFunctionValue(RealInterval i) {
 		functionValue = i;		
@@ -168,4 +172,21 @@ public class Box implements Cloneable {
 		//updateHistory(result);
 		return result;		
 	}
+
+	/*
+	 * returns true if this box has at least one common edge point
+	 * with @box@. Used in screening by derivative in @Screener@ 
+	 */
+	public boolean hasAtLeastOneCommonSide(Box box) {
+		final int dim = getDimension();
+		assert (dim == box.getDimension());
+		for (int i = 0; i < dim; i++) {
+			RealInterval a = this.getInterval(i);
+			RealInterval b = box.getInterval(i);
+			if (a.isIntersects(b))
+				return true;
+		}
+		return false;
+	}
+
 }

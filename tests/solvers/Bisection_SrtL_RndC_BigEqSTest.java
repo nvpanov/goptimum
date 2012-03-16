@@ -43,7 +43,7 @@ public class Bisection_SrtL_RndC_BigEqSTest {
 	@Test//(timeout=12*1000) //120 sec
 	public final void test4() {
 		Algorithm a = new Bisection_SrtL_RndC_BigEqS();
-		RealInterval area = new RealInterval(-rnd.nextInt(10)*100 - 1, rnd.nextInt(10)*200 + 1);
+		RealInterval area = new RealInterval(-1, 1);
 		test.f_SixHumpCamelBack(a, area);
 	}
 }

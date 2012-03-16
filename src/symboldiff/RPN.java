@@ -8,22 +8,17 @@ public class RPN extends StringParser {
     
   private String[] parsed;
   private String[] rpn;
-    
-    private int prior(String str) {
-        if (isUnaryOperation(str)) {
-          return 4;
-        }
-        else if (str.equalsIgnoreCase("*") || str.equalsIgnoreCase("/") ||
-                 str.equalsIgnoreCase("^")) {
-          return 3;
-        }
-        else if (str.equalsIgnoreCase("+") || str.equalsIgnoreCase("-")) {
-          return 2;
-        }
-        else if (str.equalsIgnoreCase("(")) {
-          return 1;
-        }
-      return 0;
+  
+  static int prior(String str) {
+	  	if (isUnaryOperation(str)) 					return 50;
+        if (str.equals("^"))						return 40;	// ^ has more priority: 2*x^2
+        if (str.equals("*") || str.equals("/") )	return 30;
+        if (str.equals("+") || str.equals("-"))		return 20;
+        if (str.equals("("))						return 10;
+        
+        System.out.println("Unknown operation "+ str);
+        assert(false); // "Unknown operation!", 
+        return 100000;
     }
   
     // find operand for corresponding operation
@@ -57,12 +52,22 @@ public class RPN extends StringParser {
       return out;
     }
     
-    private String[] generate_rpn(String[] parsed) {
+    private String[] generate_rpn(String[] parsed) throws IncorrectExpression {
       Stack<String> stack = new Stack<String>();
       String[] out = new String[parsed.length];
       int i, j;
         j = 0;
         for (i = 0; i < parsed.length; i++) {
+        	if (parsed[i].length() == 0) {
+        		String exp = "";
+        		for (int t = 0; t < parsed.length; t++) {
+        			if (parsed[t].length() == 0)
+        				exp += "???";
+        			else 
+        				exp += parsed[t];
+        		}
+        		throw new IncorrectExpression("Expression >" + exp + "< is incorrect. Something should be instead of '???'");
+        	}
             if (parsed[i].charAt(0) == ')') {
                 while (stack.lastElement().charAt(0) != '(') {
                     out[j++] = stack.pop();
@@ -112,7 +117,7 @@ public class RPN extends StringParser {
       //this.parsed = new StringParser(expr).getParsedExpr();
         super(expr);
         if (expr.length() == 0)
-        	throw new IllegalArgumentException();
+        	throw new IncorrectExpression("Empty string as an expression");
         this.parsed = getParsedExpr();
       String[] tmp = generate_rpn(this.parsed); 
       int i, N = 0;

@@ -15,10 +15,13 @@ import com.sun.org.apache.bcel.internal.generic.ISUB;
 import net.sourceforge.interval.ia_math.IAMath;
 import net.sourceforge.interval.ia_math.RealInterval;
 import static net.sourceforge.interval.ia_math.IAMath.*;
+import static java.lang.Double.*;
 
 import core.Box;
 
+import symboldiff.exceptions.ExpressionException;
 import symboldiff.exceptions.IncorrectExpression;
+import symboldiff.exceptions.UnsupportedFunction;
 
 public class Expression implements Cloneable {
 	private Expression left = null;
@@ -40,14 +43,21 @@ public class Expression implements Cloneable {
 			"arcctg", "sin", "cos", "tg", "ctg", "ln", "exp", "sqrt", "negate" };
 
 	private ArrayList<String> coords;
+	private static enum ExpType{unset, constant, notAconstant, variable, binaryOperation, notAbinaryOperation, unaryOperation, notAnUnaryOperation};
 
 	// List supports random access: get(i)
 	// while Set -- doesn't
 	public ArrayList<String> getVariables() {
 		if (coords == null) {
-// 			assert( !isVariable() ); // WTF??
 			coords = new ArrayList<String>();
 			coords.addAll(getVariables(this));
+			Collections.sort(coords);  // sorting will ensure that if f=x1+x0, x0 is var #0, and x1 is var #1.
+										// w/o sorting the numbers of vars depends on its position in expression
+			
+			if (coords.size() == 0) { //nvp 1/7/2012: there are no variables: f=1.0
+				coords.add("0xDEADBEEF"); // just a placeholder to make the size not be zero
+											// Otherwise gradients crash
+			}
 		}
 		return coords;
 	}
@@ -106,7 +116,6 @@ public class Expression implements Cloneable {
 			variablesRight = getVariables(expr.getRightExpression());
 			variablesLeft.addAll(variablesRight); // no duplicates and auto-sorting thanks to TreeSet
 		}
-		
 		return variablesLeft;
 	}
 
@@ -124,10 +133,10 @@ public class Expression implements Cloneable {
 			// this construction means that either the value is PI or
 			// it is ANY number 
 			// all other cases will cause exception
-			return true;
 		} catch (Exception e) {
 			return false;
 		}
+		return true;
 	}
 	public boolean isVariable() {
 		return !(isOperation() || isConstant());
@@ -143,6 +152,25 @@ public class Expression implements Cloneable {
 	public boolean isBinaryOperation() {
 		return isOperationInternal(getOperation(), binary_operations);
 	}
+	public boolean isAdd() {
+		return op.equals("+");
+	}
+	public boolean isSub() {
+		return op.equals("-");
+	}
+	public boolean isMul() {
+		return op.equals("*");
+	}
+	public boolean isDiv() {
+		return op.equals("/");
+	}
+	public boolean isPow() {
+		return op.equals("^");
+	}
+	public boolean isNegate() {
+		return op.equals("negate");
+	}
+	
 	// also used by StringParser. Thats why it receives operation as string	
 	protected static boolean isOperationInternal(String thisOp, String[] operations) {
 		// Honest checking. 
@@ -166,53 +194,76 @@ public class Expression implements Cloneable {
 	@Override
 	public String toString() {
 		StringBuffer out = printExpression(this);
-		removeExtraBrackets(out);
+//		removeExtraBrackets(out);
 		return out.toString();
 	}
-	private static StringBuffer printExpression(Expression e/*, int priorityOfRoot*/) {
+	private static StringBuffer printExpression(Expression e) {
 		StringBuffer out = new StringBuffer();
+		int priority = e.isBinaryOperation() ? RPN.prior(e.getOperation()) : Integer.MAX_VALUE;
+		return printExpression(e, priority, out);
+	}
+	private static StringBuffer printExpression(Expression e, int priorityOfHigherOp, StringBuffer out) {
 		if (e == null)
 			return out;
-		
-		if (e.isBinaryOperation()) {
-			out.append("(");
-		}
-		out.append(printExpression(e.getLeftExpression()));
-
-		// already print left branch, now is going to print this node
-		// if t unary operation it requires brackets before the argument (right part)
 		String strOperation = e.getOperation();
+		int thisPriority = priorityOfHigherOp;
+		Expression left = e.getLeftExpression();
+		Expression right = e.getRightExpression();
 
-		boolean needsBrackets = false;
-		if (e.isUnaryOperation() ) {
-			needsBrackets = true;
+		// does this binary needs brackets?
+		boolean binaryOpNeedsBrakets = e.isBinaryOperation(); // at least it should be binary
+		// if current operation is unary it requires brackets before the argument (right part)
+		boolean rightNeedsBrakets = false;
+		
+		if(binaryOpNeedsBrakets) {
+			thisPriority = RPN.prior(strOperation);
+			binaryOpNeedsBrakets = thisPriority < priorityOfHigherOp; // it definitely needs brackets if next op has higher priority.
+			// also brackets are required if left or right part contains non-comutative operation: x-(y+z). priority is the same.
+			if (thisPriority == priorityOfHigherOp && // operations have equal priority but
+					(e.isSub() || e.isDiv()) &&       // this op is a non-commutative one and 
+					hasAnotherBinaryOperationsSameOrLowPriority(right, strOperation) ) { // right is an expression contains equal or lower operations
+				rightNeedsBrakets = true; // in this case right part does need brackets
+			}			
+		} else if (e.isUnaryOperation() ) { // initially binaryOpNeedsBrakets = e.isBinaryOperation()
+			rightNeedsBrakets = true;
 			if ("negate".equals(strOperation) ) {
 				strOperation = "-";
-				needsBrackets = false;
+				rightNeedsBrakets = false;
 			}
-		}
+		} 
+		
+		if (binaryOpNeedsBrakets)
+			out.append("(");
+		printExpression(left, thisPriority, out);
+
+		// already print left branch, now is going to print this node
 
 		out.append(strOperation);
 		
-		if (needsBrackets) {
+		if (rightNeedsBrakets) // unary op or complex right part in non-commutative binary op
 			out.append("(");
-		}
-		out.append(printExpression(e.getRightExpression()));
-		if (needsBrackets) {
+		printExpression(right, thisPriority, out);
+		if (rightNeedsBrakets || binaryOpNeedsBrakets)
 			out.append(")");
-		}
-		if (e.isBinaryOperation()) {
-			out.append(")");
-		}
 		return out;
 	}
-	private static void removeExtraBrackets(StringBuffer out) {
+	private static boolean hasAnotherBinaryOperationsSameOrLowPriority(Expression e, String op) {
+		if (e == null)
+			return false;
+		if ( e.isBinaryOperation() && !op.equals(e.getOperation()) )
+			if (RPN.prior(op) >= RPN.prior(e.getOperation()))
+				return true;
+		return hasAnotherBinaryOperationsSameOrLowPriority(e.left, op) || 
+				hasAnotherBinaryOperationsSameOrLowPriority(e.right, op);
+	}
+/*	private static void removeExtraBrackets(StringBuffer out) {
 		// (x binaryOp y)
 		if (out.charAt(0) == '(') {
 			out.deleteCharAt(0);
 			out.deleteCharAt(out.length()-1);
 		}		
 	}
+*/	
 	public String toStringGraph() {
 		final int rootPos = 30;
 		int step = 4;
@@ -323,10 +374,10 @@ public class Expression implements Cloneable {
 	/*
 	 * constructors and factory
 	 */
-	public Expression(RPN rpn) {
+	public Expression(RPN rpn) throws ExpressionException {
 		init(rpn);
 	}
-	public Expression(String exp) throws IncorrectExpression {
+	public Expression(String exp) throws ExpressionException {
 		RPN rpn = new RPN(exp);
 		init(rpn);
 	}
@@ -338,6 +389,13 @@ public class Expression implements Cloneable {
 		exp.setConstantValue(constant);
 		return exp;
 	}
+	/*
+	public static Expression newVariable(String varName) {
+		Expression exp = new Expression();
+		exp.op = varName;
+		return exp;
+	}
+	*/
 	public static Expression newExpression(Expression left, Expression right, String op) {
 		Expression exp = new Expression();
 		exp.addExpressions(left, right, op);
@@ -346,7 +404,7 @@ public class Expression implements Cloneable {
 	
 	
 
-	protected void init(RPN rpn) {
+	protected void init(RPN rpn) throws ExpressionException {
 		String[] srpn = rpn.getRPN();
 		int length = srpn.length;
 		op = srpn[length - 1];
@@ -360,8 +418,23 @@ public class Expression implements Cloneable {
 			if (right != null) {
 				throw new IllegalStateException("Something wrong with the expression");
 			}
+			if (isVariable()) {
+				if ( op.contains("(") ) // user entered some function that we don't know. So we decided that this is a variable.
+					throw new UnsupportedFunction("Unsupported function " + op); // But variables can't contain brackets 
+			}
 		}
 		setVariablesList();
+		
+		//System.out.println("\n\n=======\n"+toString() + "\n\n" + toStringGraph() + "\n\n");
+		
+		try {
+			evaluate(new Box(this.getDimension(), new RealInterval(1)));
+			double p[] = new double[this.getDimension()]; // all zeroes
+			evaluate(p);
+		} catch (UnsupportedOperationException e) {
+			// there is at least one unsupported function
+			throw new UnsupportedFunction("Unsupported function " + op);
+		}
 	}
 
 	// return new object of expression which has the same
@@ -370,9 +443,9 @@ public class Expression implements Cloneable {
 	public Expression clone() {
 		Expression c = null; 
 		try {
-			c = new Expression(new RPN(toString()));
-		} catch (IncorrectExpression e) {
-			// we are coping proper expression so everything should be OK here.
+			c = new Expression(toString());
+		} catch (ExpressionException e) {
+			// we are coping a proper expression so everything should be OK here.
 			e.printStackTrace();
 		}
 		return c;
@@ -387,13 +460,12 @@ public class Expression implements Cloneable {
 		setLeftExpression(e.getLeftExpression());
 		setRightExpression(e.getRightExpression());
 		setOperation(e.getOperation());
-		setMethod(e.getMethod());		
+		setMethod(e.getMethod());	
 	}
 	public void setTo(double d) {
 		setLeftExpression(null);
 		setRightExpression(null);
-		setOperation(""+d);
-		setMethod(null);		
+		setConstantValue(d);
 	}
 	
 	public void setLeftExpression(Expression e) {
@@ -460,10 +532,11 @@ public class Expression implements Cloneable {
 	///////////////////////////////////////////////////////////////////
 	
 	public RealInterval evaluate(Box area) {
+		assert(area.getDimension() == getVariables().size());
 		if (isConstant())
 			return new RealInterval(getConstantValue());
 		if (isVariable())
-			return area.getInterval(getVariableNumber());
+			return area.getInterval(getNumberOfThisVariable());
 		// it is an expression
 		RealInterval l = null, r;
 		if (left != null) // left could be null for unary expressions
@@ -471,8 +544,21 @@ public class Expression implements Cloneable {
 		r = right.evaluate(area);
 		return evaluate(op, l, r);		
 	}
+	// evaluate for points
+	public double evaluate(double... point) {
+		assert(point.length == getVariables().size());
+		if (isConstant())
+			return getConstantValue();
+		if (isVariable())
+			return point[getNumberOfThisVariable()];
+		// it is an expression
+		double l = Double.NaN, r;
+		if (left != null) // left could be null for unary expressions
+			l = left.evaluate(point);
+		r = right.evaluate(point);
+		return evaluate(op, l, r);		
+	}
 	private static RealInterval evaluate(String op, RealInterval l, RealInterval r) {
-		/*
 		switch (op) {
 			case "+":
 				return add(l, r);
@@ -480,8 +566,12 @@ public class Expression implements Cloneable {
 				return sub(l, r);
 			case "*":
 				return mul(l, r);
-			case "\\":
+			case "/":
 				return div(l, r);
+			case "^":
+				if (l.contains(0)) // @power@ doesn't allow 0 in argument
+					return intPow(l, r);
+				return power(l, r);
 				
 			case "negate":
 				return negate(r);
@@ -509,14 +599,71 @@ public class Expression implements Cloneable {
 				return sqrt(r);
 	
 			default:
-				throw new UnsupportedOperationException("Unknown operation: " + op);
+				throw new UnsupportedOperationException("Unsupported operation for intervals: " + op);
 		}
-		*/
-		return null;
+	}	
+	private static double evaluate(String op, double l, double r) {
+		switch (op) {
+			case "+":
+				return l + r;
+			case "-":
+				return l - r;
+			case "*":
+				return (l * r);
+			case "/":
+				return (l / r);
+			case "^":
+				return Math.pow(l, r);
+				
+			case "negate":
+				return -(r);
+			case "arccos":
+				return Math.acos(r);
+			case "arcsin":
+				return Math.asin(r);
+			case "arctg":
+				return Math.atan(r);
+			//case "arcctg":
+				//
+			case "sin":
+				return Math.sin(r);
+			case "cos":
+				return Math.cos(r);
+			case "tg":
+				return Math.tan(r);
+			//case "ctg":
+				//
+			case "ln":
+				return Math.log(r);
+			case "exp":
+				return Math.exp(r);
+			case "sqrt":
+				return Math.sqrt(r);
+	
+			default:
+				throw new UnsupportedOperationException("Unsupported operation for doubles: " + op);
+		}
 	}
-
-	public int getVariableNumber() {
+	/*
+	 * returns position in list of variables of the variable
+	 * represented by this Expression.
+	 * returns -1 if this is not a variable.
+	 */
+	public int getNumberOfThisVariable() {
 		return getVariables().indexOf(getOperation());
 	}
-	
+	public int getDimension() {
+		return numOfVars();
+	}
+	public int numOfVars() {
+		return getVariables().size();
+	}
+	public int length() {
+		return length(this);
+	}
+	public static int length(Expression exp) {
+		if (exp == null)
+			return 0;
+		return 1 + length(exp.left) + length(exp.right);
+	}
 }

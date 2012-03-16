@@ -25,7 +25,7 @@ import worklists.SortedWorkList;
 import worklists.WorkList;
 import choosers.Chooser;
 import choosers.CurrentBestChooser;
-import functions.Function;
+import functions.FunctionNEW;
 import functions.Function_DeJong_nD;
 import functions.Function_RavineSurface;
 import functions.Function_RosenbrockG_nD;
@@ -42,9 +42,9 @@ public class IntervalAndPointAlgorithmTest {
 	//@Ignore
 	@Test
 	public final void test_DeJong() {
-		int dim = 20;
+		int dim = 12;
 		Box area = new Box(dim, new RealInterval(-10, 100));
-		Function f = new Function_DeJong_nD(dim);
+		Function_DeJong_nD f = new Function_DeJong_nD(dim);
 		IntervalSolver iSolver = new Bisection_SrtL_CBtC_BigEqS();
 		//iSolver.setProblem(f, area);
 		
@@ -73,7 +73,7 @@ public class IntervalAndPointAlgorithmTest {
 		RealInterval area = new RealInterval(-rnd.nextInt(10)*100 - 1, rnd.nextInt(10)*200 + 1);
 
 		IntervalSolver iSolver = new Bisection_SrtL_CBtC_BigEqS();
-		Function f = new Function_RosenbrockG_nD(dim);
+		FunctionNEW f = new Function_RosenbrockG_nD(dim);
 		PointAlgorithm pointAlg = new SteepestDescent();
 		//pointAlg.setFunction(f);
 
@@ -89,7 +89,7 @@ public class IntervalAndPointAlgorithmTest {
 	public final void test_RavineSurface() {
 		int dim = 2;
 		Box area = new Box(dim, new RealInterval(-10, 100));
-		Function f = new Function_RavineSurface(dim);
+		FunctionNEW f = new Function_RavineSurface(dim);
 		IntervalSolver iSolver = new Bisection_SrtL_CBtC_BigEqS();
 		PointAlgorithm pointAlg = new SteepestDescent();
 		Algorithm algo = new IntervalAndPointAlgorithm(iSolver, pointAlg);
@@ -103,5 +103,5 @@ public class IntervalAndPointAlgorithmTest {
 		assertTrue(opt.wid() < 1);
 		assertTrue(opt.lo() > -1e-3);
 	}
-	
+
 }
