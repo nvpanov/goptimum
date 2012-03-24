@@ -211,28 +211,33 @@ public class Expression implements Cloneable {
 		Expression right = e.getRightExpression();
 
 		// does this binary needs brackets?
-		boolean binaryOpNeedsBrakets = e.isBinaryOperation(); // at least it should be binary
+		boolean binaryOpNeedsBrackets = e.isBinaryOperation(); // at least it should be binary
 		// if current operation is unary it requires brackets before the argument (right part)
-		boolean rightNeedsBrakets = false;
+		boolean rightNeedsBrackets = false;
 		
-		if(binaryOpNeedsBrakets) {
+		if(binaryOpNeedsBrackets) {
 			thisPriority = RPN.prior(strOperation);
-			binaryOpNeedsBrakets = thisPriority < priorityOfHigherOp; // it definitely needs brackets if next op has higher priority.
+			binaryOpNeedsBrackets = thisPriority < priorityOfHigherOp; // it definitely needs brackets if next op has higher priority.
 			// also brackets are required if left or right part contains non-comutative operation: x-(y+z). priority is the same.
 			if (thisPriority == priorityOfHigherOp && // operations have equal priority but
-					(e.isSub() || e.isDiv()) &&       // this op is a non-commutative one and 
-					hasAnotherBinaryOperationsSameOrLowPriority(right, strOperation) ) { // right is an expression contains equal or lower operations
-				rightNeedsBrakets = true; // in this case right part does need brackets
+					(e.isSub() || e.isDiv() || e.isPow()) &&       // this op is a non-commutative one and 
+					/*nextBinaryOperationsSameOrLowPriorityNeedsBrackets*/
+					nextBinaryOperationsSamePriorityNeedsBrackets(right, strOperation) ) { // right is an expression contains equal or lower operations
+				rightNeedsBrackets = true; // in this case right part does need brackets
+//				thisPriority = -1;
+				// ^^ nvp 3/23/2012: get rid of double brackets in case of complex arguments in unary functions: ln((x+y));
 			}			
-		} else if (e.isUnaryOperation() ) { // initially binaryOpNeedsBrakets = e.isBinaryOperation()
-			rightNeedsBrakets = true;
+		} else if (e.isUnaryOperation() ) { // initially binaryOpNeedsBrackets = e.isBinaryOperation()
+			rightNeedsBrackets = true;
+			thisPriority = -1;
+			// ^^ nvp 3/23/2012: get rid of double brackets in case of complex arguments in unary functions: ln((x+y));
 			if ("negate".equals(strOperation) ) {
 				strOperation = "-";
-				rightNeedsBrakets = false;
+				rightNeedsBrackets = (right.isAdd() || right.isSub()); // nvp 3/23/2012 : -(a+b); while -(a*b) is OK
 			}
 		} 
 		
-		if (binaryOpNeedsBrakets)
+		if (binaryOpNeedsBrackets)
 			out.append("(");
 		printExpression(left, thisPriority, out);
 
@@ -240,21 +245,31 @@ public class Expression implements Cloneable {
 
 		out.append(strOperation);
 		
-		if (rightNeedsBrakets) // unary op or complex right part in non-commutative binary op
+		if (rightNeedsBrackets) // unary op or complex right part in non-commutative binary op
 			out.append("(");
 		printExpression(right, thisPriority, out);
-		if (rightNeedsBrakets || binaryOpNeedsBrakets)
+		if (rightNeedsBrackets || binaryOpNeedsBrackets)
 			out.append(")");
 		return out;
 	}
-	private static boolean hasAnotherBinaryOperationsSameOrLowPriority(Expression e, String op) {
-		if (e == null)
+	//private static boolean nextBinaryOperationsSameOrLowPriorityNeedsBrackets(Expression nextE, String prevOp) {
+	private static boolean nextBinaryOperationsSamePriorityNeedsBrackets(Expression nextE, String prevOp) {	
+		if (nextE == null)
 			return false;
-		if ( e.isBinaryOperation() && !op.equals(e.getOperation()) )
-			if (RPN.prior(op) >= RPN.prior(e.getOperation()))
-				return true;
-		return hasAnotherBinaryOperationsSameOrLowPriority(e.left, op) || 
-				hasAnotherBinaryOperationsSameOrLowPriority(e.right, op);
+		if ( nextE.isBinaryOperation() ) {
+			if (!prevOp.equals(nextE.getOperation() )) {
+				//if (RPN.prior(prevOp) >= RPN.prior(nextE.getOperation())) 
+				// ^^ nvp 3/23/2012 : not "OrLow Priority any more (otherwise double brackets in some cases)
+				if (RPN.prior(prevOp) == RPN.prior(nextE.getOperation()))
+					return true;
+				return false;
+			} else { // this op equals previous
+				if (prevOp.equals("+") || prevOp.equals("*")) // + and * are commutative operations  
+					return false;
+				return true; // '-' and '/' and '^' 
+			}
+		}
+		return false; // not a binary
 	}
 /*	private static void removeExtraBrackets(StringBuffer out) {
 		// (x binaryOp y)
@@ -480,7 +495,11 @@ public class Expression implements Cloneable {
 	public void setConstantValue(double d) {
 		if (left != null || right != null)
 			throw new IllegalArgumentException("Node has chaild nodes.");
-		this.op = Double.toString(d);
+		// nvp 3/23/2012 : get rid from all this 1.0, 2.0, etc.
+		if (d == (int)d) // xxx.0
+			this.op = Integer.toString((int)d);
+		else
+			this.op = Double.toString(d);
 	}
 	public void setMethod(Method m) {
 		this.method = m;

@@ -123,7 +123,7 @@ public class Gradient {
 					parent = newExpression(left1, right1, "/");
 				}
 			} else if (exp.getOperation().equals("^")) {
-				if (!exp.getRightExpression().hasVar(coord)) {
+				if (!exp.getRightExpression().hasVar(coord)) {  /// f(x)^const 
 					Expression pow = new Expression(exp.getRightExpression()
 							.toString() + "-1");
 					/*
@@ -145,18 +145,33 @@ public class Gradient {
 				 * parent.setOperation("^"); parent.addExpressions(coef, exp,
 				 * "*"); }
 				 */
-				else {
-					// (f(x)^g(x))' = (g'(x)*ln(f(x)) + g(x)/f(x))*f(x)^g(x)
-					Expression add = new Expression("("
-							+ exp.getLeftExpression() + ")/("
-							+ exp.getRightExpression() + ")");
-					Expression coef = new Expression("ln("
-							+ exp.getRightExpression() + ")");
-					Expression tmp_tmp_left = calculatePartialDerivative(exp
-							.getRightExpression().clone(), coord);
-					Expression tmp = newExpression(tmp_tmp_left, coef, "*");
-					left = newExpression(tmp, add, "+");
-					parent = newExpression(left, exp, "*");
+
+				//__ nvp 3/18/12
+				else if (!exp.getLeftExpression().hasVar(coord)) { 
+					// (constant^f(x))' = ln(constant)*constant^f(x) * f(x)'
+					String constant = exp.getLeftExpression().toString();
+					Expression coef = new Expression("ln(" + constant + ")*" + 
+											constant + "^" + exp.getRightExpression().toString());
+					Expression deriv = calculatePartialDerivative(exp.getRightExpression().clone(), coord);
+					parent = newExpression(coef, deriv, "*");
+				}
+				// ^^
+				else { // both sides
+					// (f(x)^g(x))' = (g'(x)*ln(f(x)) + f'(x)*g(x)/f(x))*f(x)^g(x)
+					//                                  ^^^^ !! nvp 3/19/12
+					Expression f = exp.getLeftExpression();
+					Expression g = exp.getRightExpression();
+
+					Expression df = calculatePartialDerivative(f, coord);
+					Expression dg = calculatePartialDerivative(g, coord);
+
+					Expression ln_f  = newExpression(null,      f.clone(), "ln");
+					Expression gDIVf = newExpression(g.clone(), f.clone(), "div");
+					
+					Expression leftSum  = newExpression(dg, ln_f,  "*");
+					Expression rightSum = newExpression(df, gDIVf, "*");
+					Expression sum = newExpression(leftSum, rightSum, "+");
+					parent = newExpression(sum, exp, "*");
 				}
 			}
 		} catch (IncorrectExpression e) {

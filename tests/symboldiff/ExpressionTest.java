@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import core.Box;
 
+import symboldiff.exceptions.ExpressionException;
 import symboldiff.exceptions.IncorrectExpression;
 
 public class ExpressionTest {
@@ -69,5 +70,25 @@ public class ExpressionTest {
 		assertEquals("1-2*3/4", exp.toString());
 		exp = new Expression("1-(2*3/4)-(5+6*(7-8+9))");
 		assertEquals("1-2*3/4-(5+6*(7-8+9))", exp.toString());
+	}
+	@Test
+	public final void test0() throws Exception {
+		exp = new Expression("a/b*c");
+		assertEquals("a/b*c", exp.toString());
+		exp = new Expression("a/(b*c)");
+		assertEquals("a/(b*c)", exp.toString());
+		exp = new Expression("a/b/c");
+		assertEquals("a/b/c", exp.toString());
+		exp = new Expression("a/(b/c)");
+		assertEquals("a/(b/c)", exp.toString());
+		exp = new Expression("a^b^c");
+		assertEquals("a^b^c", exp.toString());
+		exp = new Expression("a^(b^c)");
+		assertEquals("a^(b^c)", exp.toString());
 	}	
+	@Test
+	public void test1() throws ExpressionException {
+		exp = new Expression("(a+b)/(c+d)");
+		assertEquals("(a+b)/(c+d)", exp.toString());		
+	}
 }

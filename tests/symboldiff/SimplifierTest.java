@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import symboldiff.Simplifier.ExpAndOp;
@@ -29,65 +28,65 @@ public class SimplifierTest {
 		formula = "-(2*2)";
 		exp = new Expression(formula);
 		Simplifier.removeNegateForConsts(exp);
-		assertEquals("-2.0*2", exp.toString() );
+		assertEquals("-2*2", exp.toString() );
 		Simplifier.simplify(exp);
-		assertEquals("-4.0", exp.toString() );
+		assertEquals("-4", exp.toString() );
 		formula = "-(2*x)";
 		exp = new Expression(formula);
 		Simplifier.removeNegateForConsts(exp);
-		assertEquals("-2.0*x", exp.toString() );
+		assertEquals("-2*x", exp.toString() );
 		Simplifier.simplify(exp);
-		assertEquals("-2.0*x", exp.toString() );		
+		assertEquals("-2*x", exp.toString() );		
 		
 		formula = "-(x*x)";
 		exp = new Expression(formula);
 		Simplifier.removeNegateForConsts(exp);
-		assertEquals("-(x*x)", exp.toString() );
+		assertEquals("-x*x", exp.toString() );
 		Simplifier.simplify(exp);
-		assertEquals("-(x^2.0)", exp.toString() );
+		assertEquals("-x^2", exp.toString() );
 		/////////////////////////////////////////
 		formula = "-(2+2)";
 		exp = new Expression(formula);
 		Simplifier.removeNegateForConsts(exp);
-		assertEquals("-2.0+-2.0", exp.toString() );
+		assertEquals("-2+-2", exp.toString() );
 		Simplifier.simplify(exp);
-		assertEquals("-4.0", exp.toString() );
+		assertEquals("-4", exp.toString() );
 		
 		formula = "-(2+x)";
 		exp = new Expression(formula);
 		Simplifier.removeNegateForConsts(exp);
 		assertEquals("-(2+x)", exp.toString() );
 		Simplifier.simplify(exp);
-		assertEquals("-(2.0+x)", exp.toString() );		
+		assertEquals("-(2+x)", exp.toString() );		
 		
 		formula = "-(x+x)";
 		exp = new Expression(formula);
 		Simplifier.removeNegateForConsts(exp);
 		assertEquals("-(x+x)", exp.toString() );
 		Simplifier.simplify(exp);
-		assertEquals("-2.0*x", exp.toString() );
+		assertEquals("-2*x", exp.toString() );
 		////////////////////////////////////////
 		formula = "y*-3*y*(2+3)";
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("-15.0*y^2.0", exp.toString() );
+		assertEquals("-15*y^2", exp.toString() );
 	}
 	@Test 
-	public final void testFold1() throws Exception {
+	public final void test_MullAdd() throws Exception {
 		formula = "2*x+x";
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("3.0*x", exp.toString() );		
+		assertEquals("3*x", exp.toString() );		
 
 		formula = "2*x+2*x";
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("4.0*x", exp.toString() );		
+		assertEquals("4*x", exp.toString() );		
 
 		formula = "x+x+x+x";
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("4.0*x", exp.toString() );		
+		assertEquals("4*x", exp.toString() );		
 	}
 
 	@Test 
@@ -95,101 +94,89 @@ public class SimplifierTest {
 		formula = "-(x/x)";
 		exp = new Expression(formula);
 		Simplifier.fold(exp);
-		assertEquals("-1.0", exp.toString() );
+		assertEquals("-1", exp.toString() );
 		Simplifier.simplify(exp);
-		assertEquals("-1.0", exp.toString() );
+		assertEquals("-1", exp.toString() );
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("-1.0", exp.toString() );
+		assertEquals("-1", exp.toString() );
 	}
 	@Test 
-	public final void testFold_1() throws Exception {
+	public final void testFold_PowAndMul() throws Exception {
 		formula = "y*(y^2)";
 		exp = new Expression(formula);
 //		Simplifier.fold(exp);
-//		assertEquals("y^3.0", exp.toString() );
+//		assertEquals("y^3", exp.toString() );
 		Simplifier.simplify(exp);
-		assertEquals("y^3.0", exp.toString() );
-		exp = new Expression(formula);
-		Simplifier.simplify(exp);
-		assertEquals("y^3.0", exp.toString() );
+		assertEquals("y^3", exp.toString() );
 	}
 	@Test//(timeout=1*1000) 
-	public final void testFold() throws Exception {
+	public final void testFold_Mull() throws Exception {
 		formula = "2*x*2";
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("4.0*x", exp.toString() );
+		assertEquals("4*x", exp.toString() );
 		
 		formula = "2*2";
 		exp = new Expression(formula);
 		Simplifier.fold(exp);
-		assertEquals("4.0", exp.toString() );
+		assertEquals("4", exp.toString() );
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("4.0", exp.toString() );
+		assertEquals("4", exp.toString() );
 		
 		formula = "x*x";
 		exp = new Expression(formula);
 		Simplifier.fold(exp);
-		assertEquals("x^2.0", exp.toString() );
+		assertEquals("x^2", exp.toString() );
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("x^2.0", exp.toString() );
+		assertEquals("x^2", exp.toString() );
 		
-		formula = "(x1*2.0)*x2";
+		formula = "(x1*2)*x2";
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("2.0*x1*x2", exp.toString() );
+		assertEquals("2*x1*x2", exp.toString() );
 
 		formula = "(x1+x1)*x2";
 //		exp = new Expression(formula);
 //		Simplifier.fold(exp);
-//		assertEquals("(x1*2.0)*x2", exp.toString() );
+//		assertEquals("(x1*2)*x2", exp.toString() );
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("2.0*x1*x2", exp.toString() );
+		assertEquals("2*x1*x2", exp.toString() );
 
-		formula = "y*y*3*y";
-		exp = new Expression(formula);
-//		Simplifier.fold(exp);
-//		assertEquals("3.0*(y^3.0)", exp.toString() );
-		Simplifier.simplify(exp);
-		assertEquals("3.0*y^3.0", exp.toString() );
-	
 		formula = "y*y*(2+3)";
 		exp = new Expression(formula);
 		Simplifier.fold(exp);
-		assertEquals("5.0*y^2.0", exp.toString() );
+		assertEquals("5*y^2", exp.toString() );
 
 		formula = "y*3*y*(2+3)";
 		exp = new Expression(formula);
-		Simplifier.fold(exp);
-		assertEquals("(3.0*y^2.0*5.0", exp.toString() );
-		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("15.0*y^2.0", exp.toString() );
+		assertEquals("15*y^2", exp.toString() );
 
-		formula = "x*x+y*y*3*y*(2+3)";
-		exp = new Expression(formula);
-		Simplifier.fold(exp);
-		assertEquals("x^2.0+3.0*y^3.0*5.0", exp.toString() );
-		
 		formula = "2+x+2+x+6+y";
 		exp = new Expression(formula);
-		Simplifier.fold(exp);
-		assertEquals("10.0+y+2.0*x", exp.toString() );	
-		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("10.0+y+2.0*x", exp.toString() );	
+		assertEquals("10+2*x+y", exp.toString() );	
 
 		formula = "z*(-2)*x*2*z";
 		exp = new Expression(formula);
-		Simplifier.fold(exp);
-		assertEquals("-2*x*z^2.0*2.0", exp.toString() );	
+		assertEquals("z*-2*x*2*z", exp.toString() );
+		Simplifier.simplify(exp);
+		assertEquals("-4*x*z^2", exp.toString() );
+
+/// fails...
+		formula = "y*y*3*y";
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("-4.0*x*z^2.0", exp.toString() );		
+		assertEquals("3*y^3", exp.toString() );
+		
+		formula = "x*x+y*y*3*y*(2+3)";
+		exp = new Expression(formula);
+		Simplifier.simplify(exp);
+		assertEquals("15*y^2+x^2", exp.toString() );
 	}	
 	@Test
 	public final void testSort() throws Exception {
@@ -213,12 +200,12 @@ public class SimplifierTest {
 		formula = "1+2-x";
 		exp = new Expression(formula);
 		Simplifier.reduceConstants(exp);
-		assertTrue(Long.toString(seed), exp.toString().equals("3.0-x") );
+		assertTrue(Long.toString(seed), exp.toString().equals("3-x") );
 
 		formula = "1-2";
 		exp = new Expression(formula);
 		Simplifier.reduceConstants(exp);
-		assertTrue(Long.toString(seed), exp.toString().equals("-1.0") );
+		assertTrue(Long.toString(seed), exp.toString().equals("-1") );
 	}
 	
 	@Test
@@ -231,11 +218,11 @@ public class SimplifierTest {
 		formula = "0*x";
 		exp = new Expression(formula);
 		Simplifier.removeZeros(exp);
-		assertEquals("0.0", exp.toString());
+		assertEquals("0", exp.toString());
 		formula = "x*0";
 		exp = new Expression(formula);
 		Simplifier.removeZeros(exp);
-		assertEquals("0.0", exp.toString());
+		assertEquals("0", exp.toString());
 		
 		formula = "0+x";
 		exp = new Expression(formula);
@@ -249,7 +236,7 @@ public class SimplifierTest {
 		formula = "0/x";
 		exp = new Expression(formula);
 		Simplifier.removeZeros(exp);
-		assertEquals("0.0", exp.toString());
+		assertEquals("0", exp.toString());
 		
 		formula = "(x+1-0) * 0 + x - 0 + 1";
 		exp = new Expression(formula);
@@ -257,7 +244,7 @@ public class SimplifierTest {
 		assertEquals("x+1", exp.toString());
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("1.0+x", exp.toString());
+		assertEquals("1+x", exp.toString());
 		
 		formula = "x^0";
 		exp = new Expression(formula);
@@ -269,7 +256,7 @@ public class SimplifierTest {
 		exp = new Expression(formula);
 		Simplifier.removeZeros(exp);
 //		System.out.println(exp);
-		assertEquals("0.0", exp.toString());
+		assertEquals("0", exp.toString());
 		
 		
 	}
@@ -307,7 +294,7 @@ public class SimplifierTest {
 		exp = new Expression(formula);
 		Simplifier.removeOnes(exp);
 //		System.out.println(exp);
-		assertTrue(""+seed, exp.toString().equals("1.0") );		
+		assertTrue(""+seed, exp.toString().equals("1") );		
 		
 		formula = "1/(x*y)";
 		exp = new Expression(formula);
@@ -315,7 +302,7 @@ public class SimplifierTest {
 		assertEquals("1/(x*y)", exp.toString());		
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("1.0/(x*y)", exp.toString());		
+		assertEquals("1/(x*y)", exp.toString());		
 	}
 	@Test
 	public final void testMakeTreeDipperNotWide0() throws Exception {
@@ -368,15 +355,15 @@ public class SimplifierTest {
 	    Expression d1_0 = grad.getPartialDerivative(0);
 	    
 	    Simplifier.simplify(d1_0);
-	    assertEquals("-1.0", d1_0.toString());
+	    assertEquals("-1", d1_0.toString());
 	}
 	
 	@Test
 	public final void testNegate() throws Exception {
-		formula = "-1";//"0.0-(2*x0)";
+		formula = "-1";//"0-(2*x0)";
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("-1.0", exp.toString());
+		assertEquals("-1", exp.toString());
 		formula = "0-x";
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
@@ -388,10 +375,10 @@ public class SimplifierTest {
 	}
 	@Test
 	public final void test_RastriginG_nD_part1a_simplification() throws Exception {
-		formula = "(2*(x1-(x0^2)))*(0.0-(2*x0))";
+		formula = "(2*(x1-(x0^2)))*(0-(2*x0))";
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("-4.0*x0*(x1-x0^2)", exp.toString());
+		assertEquals("-4*x0*(x1-x0^2)", exp.toString());
 	}
 	@Test//(timeout=1*1000)
 	public final void test_RastriginG_nD_part1_diff() throws Exception {
@@ -404,13 +391,13 @@ public class SimplifierTest {
 	    //System.out.println("df/dx1: " + d1_0);	    
 	    
 	    Simplifier.simplify(d1_0);
-	    assertEquals("-4.0*x0*(x1-x0^2)", d1_0.toString()); // adiff: ((-4) * x0 * (x1 - (x0^2)))
+	    assertEquals("-4*x0*(x1-x0^2)", d1_0.toString()); // adiff: ((-4) * x0 * (x1 - (x0^2)))
 	    
 	    Expression d1_1 = grad.getPartialDerivative(1);
 	    //System.out.println("df/dx1: " + d1_1);	    
 	    Simplifier.simplify(d1_1);
 	    //System.out.println("Simplified df/dx1: " + d1_1);
-	    assertEquals("2.0*(x1-x0^2)", d1_1.toString());
+	    assertEquals("2*(x1-x0^2)", d1_1.toString());
 	}
 	@Test
 	public final void test_RastriginG_nD_1() throws Exception {
@@ -418,13 +405,13 @@ public class SimplifierTest {
 		exp = new Expression(formula);
 		Gradient grad = new Gradient(exp);
 		Simplifier.simplify(grad.getPartialDerivative(0));
-		assertEquals("20000.0*x", grad.toString());
+		assertEquals("20000*x", grad.toString());
 
 		formula = "100*(x)^2";
 		exp = new Expression(formula);
 		grad = new Gradient(exp);
 		Simplifier.simplify(grad.getPartialDerivative(0));
-		assertEquals("200.0*x", grad.toString());		
+		assertEquals("200*x", grad.toString());		
 	}	
 	@Test
 	public final void test_RastriginG_nD_simplify_small() throws Exception {
@@ -432,21 +419,21 @@ public class SimplifierTest {
 		exp = new Expression(formula);
 		Gradient grad = new Gradient(exp);
 		Simplifier.simplify(grad.getPartialDerivative(0)); //nvp 01/19/12 -- Gradient doesn't call simplify() anymore
-		assertEquals("2.0*(x0-1.0)", grad.toString());
+		assertEquals("2*(x0-1)", grad.toString());
 
 		formula = "((x1-(x0^2))^2)";
 		exp = new Expression(formula);
 		grad = new Gradient(exp);
 		Simplifier.simplify(grad.getPartialDerivative(0));
 		Simplifier.simplify(grad.getPartialDerivative(1));
-		assertEquals("-4.0*x0*(x1-x0^2)+2.0*(x1-x0^2)", grad.toString()); // adiff: ((-2*(x1-(x0^2))*(2*x0)) + 2*(x1-(x0^2))) 
+		assertEquals("-4*x0*(x1-x0^2)+2*(x1-x0^2)", grad.toString()); // adiff: ((-2*(x1-(x0^2))*(2*x0)) + 2*(x1-(x0^2))) 
 
 		formula = "(100*((x1-(x0^2))^2))+((x0-1)^2)";
 		exp = new Expression(formula);
 		grad = new Gradient(exp); // adiff: (-(400 * x0 * (x1 - (x0^2))) + (2 * (-1 + x0)))     +     (200 * (x1 - (x0^2)))
 		Simplifier.simplify(grad.getPartialDerivative(0));
 		Simplifier.simplify(grad.getPartialDerivative(1));
-		assertEquals("-400.0*x0*(x1-x0^2)+2.0*(x0-1.0)+200.0*(x1-x0^2)", grad.toString());
+		assertEquals("-400*x0*(x1-x0^2)+2*(x0-1)+200*(x1-x0^2)", grad.toString());
 	}
 		
 	@Test
@@ -471,7 +458,7 @@ public class SimplifierTest {
 //		System.out.println(exp.toStringGraph() + "\n==================");
 		//System.out.println(exp);
 		if (dim == 2)
-			assertEquals("100.0*(x1-x0^2)^2+(x0-1.0)^2", exp.toString());
+			assertEquals("100*(x1-x0^2)^2+(x0-1)^2", exp.toString());
 
 		Gradient grad = new Gradient(exp);
 	    
@@ -479,11 +466,11 @@ public class SimplifierTest {
 		Simplifier.simplify(d1_0);
 	    
 	    // http://www.adiff.com :	 (-(400 * x0 * (x1 - (x0^2))) + (2 * (-1 + x0)))
-	    assertEquals("-400.0*x0*(x1-x0^2)+2.0*(x0-1.0)", d1_0.toString());
+	    assertEquals("-400*x0*(x1-x0^2)+2*(x0-1)", d1_0.toString());
 
 	    Expression d1_1 = grad.getPartialDerivative(1);
 		Simplifier.simplify(d1_1);
-	    assertEquals("200.0*(x1-x0^2)", d1_1.toString());
+	    assertEquals("200*(x1-x0^2)", d1_1.toString());
 	}
 	
 	@Test
@@ -491,18 +478,18 @@ public class SimplifierTest {
 		String f = "((((x1+x1)+(x3*x3))+x2)+x2)+(x2*(x3+x3))";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("2.0*x1+2.0*x2+2.0*x2*x3+x3^2.0", exp.toString());
+		assertEquals("2*x1+2*x2+2*x2*x3+x3^2", exp.toString());
 	}
 	@Test
 	public void t3() throws ExpressionException {
-		String f = "2.0*(x2*x3)";
+		String f = "2*(x2*x3)";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("2.0*x2*x3", exp.toString());
+		assertEquals("2*x2*x3", exp.toString());
 		
-		exp = new Expression("(x3^2.0)+(2.0*(x2*x3))");
+		exp = new Expression("(x3^2)+(2*(x2*x3))");
 		Simplifier.simplify(exp);
-		assertEquals("2.0*x2*x3+x3^2.0", exp.toString());
+		assertEquals("2*x2*x3+x3^2", exp.toString());
 	}
 	@Test
 	public void t4() throws ExpressionException {
@@ -514,19 +501,19 @@ public class SimplifierTest {
 		f = "x-x";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("0.0", exp.toString());
+		assertEquals("0", exp.toString());
 		f = "x-1-x";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("-1.0", exp.toString());
+		assertEquals("-1", exp.toString());
 		f = "-x+x";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("0.0", exp.toString());
+		assertEquals("0", exp.toString());
 		f = "-x/x";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("-1.0", exp.toString());
+		assertEquals("-1", exp.toString());
 	}
 	
 	@Test
@@ -534,7 +521,7 @@ public class SimplifierTest {
 		formula = "y*-3*y*(2+3)";
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
-		assertEquals("-15.0*y^2.0", exp.toString() );
+		assertEquals("-15*y^2", exp.toString() );
 	}
 	
 	@Test
@@ -559,11 +546,11 @@ public class SimplifierTest {
 		String f = "-2+x";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("x-2.0", exp.toString());
+		assertEquals("x-2", exp.toString());
 		f = "x-(-2)";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("2.0+x", exp.toString());
+		assertEquals("2+x", exp.toString());
 		f = "-(-2)";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
@@ -619,22 +606,22 @@ public class SimplifierTest {
 		f = "2*(-x)";
 		exp = new Expression(f);
 		Simplifier.removeNegateInMulOrDiv(exp);
-		assertEquals("-2.0*x", exp.toString());
+		assertEquals("-2*x", exp.toString());
 		assertFalse(exp.toStringGraph().contains("negate"));
 		Simplifier.simplify(exp);
-		assertEquals("-2.0*x", exp.toString());		
+		assertEquals("-2*x", exp.toString());		
 		f = "-x/x";
 		exp = new Expression(f);
 		Simplifier.removeNegateInMulOrDiv(exp);
-		assertEquals("-(x/x)", exp.toString());
+		assertEquals("-x/x", exp.toString());
 		Simplifier.simplify(exp);
-		assertEquals("-1.0", exp.toString());		
+		assertEquals("-1", exp.toString());		
 		f = "-1/1+1/-1-1/-1";
 		exp = new Expression(f);
 		Simplifier.removeNegateInMulOrDiv(exp);
-//		assertEquals("(((-1.0*1)/1)+(1/(-1.0*1)))-(1/(-1.0*1))", exp.toString());
+//		assertEquals("(((-1*1)/1)+(1/(-1*1)))-(1/(-1*1))", exp.toString());
 		Simplifier.simplify(exp);
-		assertEquals("-1.0", exp.toString());		
+		assertEquals("-1", exp.toString());		
 		
 		f = "a/b";
 		exp = new Expression(f);
@@ -644,12 +631,12 @@ public class SimplifierTest {
 		f = "a/-b";
 		exp = new Expression(f);
 		Simplifier.removeNegateInMulOrDiv(exp);
-		assertEquals("-(a/b)", exp.toString());		
+		assertEquals("-a/b", exp.toString());		
 		
 		f = "-a/b";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("-(a/b)", exp.toString());		
+		assertEquals("-a/b", exp.toString());		
 		
 		f = "-a/-b";
 		exp = new Expression(f);
@@ -665,12 +652,12 @@ public class SimplifierTest {
 		f = "a*-b";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("-(a*b)", exp.toString());		
+		assertEquals("-a*b", exp.toString());		
 		
 		f = "-a*b";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("-(a*b)", exp.toString());		
+		assertEquals("-a*b", exp.toString());		
 		
 		f = "-a*-b";
 		exp = new Expression(f);
@@ -703,7 +690,7 @@ public class SimplifierTest {
 		assertEquals("-x/y^z", exp.toString());
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("-(x/y^z)", exp.toString());
+		assertEquals("-x/y^z", exp.toString());
 		f = "x/y^-z";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
@@ -711,19 +698,19 @@ public class SimplifierTest {
 		f = "x*y^-(4/2)";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("x/y^2.0", exp.toString());
+		assertEquals("x/y^2", exp.toString());
 		f = "x/y^-2";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
 		assertEquals("x*y^2", exp.toString());
 		
-		f = "y^-1.0/x^1.0";
+		f = "y^-1/x^1";
 		exp = new Expression(f);
 		Simplifier.removeNegativeInPower(exp);
-		assertEquals("1.0/x^1.0/y", exp.toString());
+		assertEquals("1/x^1/y", exp.toString());
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("1.0/y/x", exp.toString());
+		assertEquals("1/y/x", exp.toString());
 	}
 	@Test
 	public void testFold2() throws ExpressionException {
@@ -736,6 +723,14 @@ public class SimplifierTest {
 		Simplifier.simplify(exp);
 //		assertEquals("x-(y+z)", exp.toString());
 		f = "a/(b/(c/(d/e)))";
+		// (((d/e)^-1*c)^-1*b)^-1*a  =  ( ((e/d)c )^-1*b)^-1*a  =  {[(ec/d)^-1*b]^-1*b}^-1*a   = 
+		//      = (d/ec * b)^-1*a  =  (db/ec)^-1*a   =   aec/db    =  a/b*c/d*e  
+		exp = new Expression(f);
+		assertEquals("a/(b/(c/(d/e)))", exp.toString());
+		Simplifier.simplify(exp);
+		assertEquals("a/b*c/d*e", exp.toString());
+		
+		f = "(((d/e)^-1*c)^-1*b)^-1*a";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
 		assertEquals("a/b*c/d*e", exp.toString());
@@ -749,9 +744,9 @@ public class SimplifierTest {
 		formula = "1/(x*y)";
 		exp = new Expression(formula);
 		Simplifier.fold(exp);
-		assertEquals("1.0/x/y", exp.toString());
+		assertEquals("1/x/y", exp.toString());
 		Simplifier.simplify(exp);
-		assertEquals("1.0/(x*y)", exp.toString());
+		assertEquals("1/(x*y)", exp.toString());
 	}
 	@Test
 	public void testFold_getOperandsFromAllChildrenWithThisOrComplimentOp() throws ExpressionException {
@@ -839,5 +834,11 @@ public class SimplifierTest {
 		assertEquals("/y", operands.get(1).toString());
 		assertEquals("/z", operands.get(2).toString());
 	}
+	@Test
+	public void test1() throws ExpressionException {
+		exp = new Expression("(a+b)/(b+a)");
+		Simplifier.simplify(exp);
+		assertEquals("1", exp.toString());		
+	}	
 	
 }

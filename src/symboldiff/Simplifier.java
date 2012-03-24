@@ -312,6 +312,9 @@ public class Simplifier {
 		Expression l = exp.getLeftExpression();
 		Expression r = exp.getRightExpression();
 		
+		if ( l == null || r == null) 
+			return optimized;
+		
 		if ( !(l.isNegate() || r.isNegate() )) 
 			return optimized;
 		
@@ -1088,7 +1091,7 @@ public class Simplifier {
 				// 2. process new variable (sequence)
 				processedButNotAdded = false; // actual for sequences only. this is not a sequence yet.
 				cnt = 1; // set counter to ONE because new "e" was already encountered
-				if (!e_o.e.getOperation().equals(typeOfChainOp)){
+				if (!e_o.op.equals(typeOfChainOp)){
 					// nvp 3/11/12: *x, /y, /z: y's cnt is 1 (due to "cnt = 1; // set counter to ONE because new "e" was already encountered")
 					//              so it will be x*y.
 					cnt = -1; // so if it is not "positive" op set cnt to -1.

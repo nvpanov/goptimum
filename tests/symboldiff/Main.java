@@ -34,7 +34,7 @@ public class Main {
 		exp = new Expression("(-1-2)");
 		assertEquals("-1-2", exp.toString());
 		Simplifier.simplify(exp);
-		assertEquals("-3.0", exp.toString());
+		assertEquals("-3", exp.toString());
 	}
 	@Test
 	public void t3() throws Exception {
@@ -50,8 +50,8 @@ public class Main {
 		Gradient g = new Gradient(exp);
 		Simplifier.simplify(g.getPartialDerivative(0)); //nvp 01/19/12 -- Gradient doesn't call simplify() anymore
 		Simplifier.simplify(g.getPartialDerivative(1));
-		assertEquals("x3^2.0", g.getPartialDerivative(0).toString());
-		assertEquals("2.0*x2*x3", g.getPartialDerivative(1).toString());
+		assertEquals("x3^2", g.getPartialDerivative(0).toString());
+		assertEquals("2*x2*x3", g.getPartialDerivative(1).toString());
 	}
 	@Test
 	public void t1() throws Exception {
@@ -66,7 +66,7 @@ public class Main {
 	    for (int i = 0; i < 3; i++)
 	    	Simplifier.simplify(grad.getPartialDerivative(i));
 	    assertEquals("x1*x1+x2*x2+x3*x3*x2", expr.toString());
-	    assertEquals("2.0*x1+2.0*x2+x3^2.0+2.0*x2*x3", grad.toString() );
+	    assertEquals("2*x1+2*x2+x3^2+2*x2*x3", grad.toString() );
 	}
 	
 	@Test
@@ -76,7 +76,7 @@ public class Main {
 		Gradient d1f = new Gradient(new Expression(deJong_.toString()));
 		for (int i = 0; i < dim; i++)
 			Simplifier.simplify(d1f.getPartialDerivative(i));
-		assertEquals("2.0*x0+2.0*x1", d1f.toString());
+		assertEquals("2*x0+2*x1", d1f.toString());
 		
 		Box b = new Box(dim, new RealInterval(1.2640918036031814) );
 		RealInterval df_dx1_val = d1f.getPartialDerivative(1).evaluate(b);
@@ -99,7 +99,7 @@ public class Main {
 
 //		System.out.println(g);
 		Expression df_dx = g.getPartialDerivative(0); // adiff.com: (2.1 * (4 * (x^3))) => (8.4 * (x^3))
-		assertEquals("8.4*x^3.0", df_dx.toString());
+		assertEquals("8.4*x^3", df_dx.toString());
 		//System.out.println(df_dx);
 	}
 
@@ -111,13 +111,13 @@ public class Main {
 		System.out.println("df: " + df_dx);
 		Simplifier.simplify(df_dx);
 		System.out.println("simple: " + df_dx);
-		assertEquals("-4.0*x^3.0", df_dx);
+		assertEquals("-4*x^3", df_dx);
 	}
 	@Test
 	public void testSixHumpDiff_2() throws Exception {
-		Expression f = new Expression("0.0+6*1.0*x^(6-1)*0.3333333333333333+0.0+2*1.0*x^(2-1)*4.0-0.0+4*1.0*x^(4-1)*2.1+y*1.0+0.0-0.0+0.0");
+		Expression f = new Expression("0+6*1*x^(6-1)*0.3333333333333333+0+2*1*x^(2-1)*4-0+4*1*x^(4-1)*2.1+y*1+0-0+0");
 		Simplifier.removeZeros(f);
-		assertEquals("6*1.0*x^(6-1)*0.3333333333333333+2*1.0*x^(2-1)*4.0+4*1.0*x^(4-1)*2.1+y*1.0", f.toString());		
+		assertEquals("6*1*x^(6-1)*0.3333333333333333+2*1*x^(2-1)*4+4*1*x^(4-1)*2.1+y*1", f.toString());		
 	}	
 	
 	@Test
@@ -127,7 +127,7 @@ public class Main {
 		Simplifier.simplify(df_dx);
 
 		// adiff.com: (y + ((1/3) * (6 * (x^5))) + (-2.1 * (4 * (x^3))) + (4 * (2 * x)))
-		assertEquals("2.0*x^5.0+8.0*x-8.4*x^3.0+y", df_dx.toString());
+		assertEquals("2*x^5+8*x-8.4*x^3+y", df_dx.toString());
 		
 		Expression adiff_x = new Expression("(y + ((1/3) * (6 * (x^5))) + (-2.1 * (4 * (x^3))) + (4 * (2 * x)))");
 		for (int i = 0; i < 100; i++) {
@@ -143,5 +143,127 @@ public class Main {
 			assertTrue(b.toString(), Math.abs(a.hi() - r.hi()) < 1e-3 );
 		}
 	}	
+	@Test
+	public void testDiff() throws Exception {
+		Expression exp, df;
+		Gradient g;
+		exp = new Expression("a/b*c");
+		g = new Gradient(exp);
+		df = g.getPartialDerivative(0);
+		Simplifier.simplify(df);
+		assertEquals("c/b", df.toString());
+		df = g.getPartialDerivative(1);
+		Simplifier.simplify(df);
+		assertEquals("-(a/b^2*c)", df.toString());
+		df = g.getPartialDerivative(2);
+		Simplifier.simplify(df);
+		assertEquals("a/b", df.toString());
+
+		exp = new Expression("a/(b*c)");
+		g = new Gradient(exp);
+		df = g.getPartialDerivative(0);
+		Simplifier.simplify(df);
+		assertEquals("c^-1/b", df.toString());
+		df = g.getPartialDerivative(1);
+		Simplifier.simplify(df);
+		assertEquals("-(a/(b*c)^2*c)", df.toString()); //(-a * c * ((b * c)^(-2)))
+		df = g.getPartialDerivative(2);
+		Simplifier.simplify(df);
+		assertEquals("-(a*b/(b*c)^2)", df.toString());
+
+		exp = new Expression("a^(b)");
+		g = new Gradient(exp);
+		df = g.getPartialDerivative(0);
+		Simplifier.simplify(df);
+		assertEquals("a^(b-1)*b", df.toString());  // b * (a^(-1 + b))
+		df = g.getPartialDerivative(1);
+		Simplifier.simplify(df);
+		assertEquals("a^b*ln(a)", df.toString());  // ((a^b) * log(a))
+
+		exp = new Expression("a^b^c");
+		g = new Gradient(exp);
+		df = g.getPartialDerivative(0);
+		Simplifier.simplify(df);
+		assertEquals("a^(b^c-1)*b^c", df.toString());
+		df = g.getPartialDerivative(1);
+		Simplifier.simplify(df);
+		assertEquals("c*a^(b^c)*(b^(c-1)*ln(a)", df.toString());  // c * (a^(b^c)) * (b^(-1 + c)) * log(a)
+		
+		
+		exp = new Expression("a^(b^c)");
+		g = new Gradient(exp);
+		df = g.getPartialDerivative(0);
+		Simplifier.simplify(df);
+		assertEquals("a^(b^c-1)*b^c", df.toString());
+		df = g.getPartialDerivative(1);
+		Simplifier.simplify(df);
+		assertEquals("c*a^(b^c)*(b^(c-1)*ln(a)", df.toString());  // c * (a^(b^c)) * (b^(-1 + c)) * log(a)
+
+
+		exp = new Expression("b^b");
+		g = new Gradient(exp);
+		df = g.getPartialDerivative(0);
+		Simplifier.simplify(df);
+		assertEquals("b^b*(ln(b)+1)", df.toString());
+
+
+				
+	}
+	@Test
+	public void testDiff2() throws ExpressionException {
+		// http://www.analyzemath.com/calculus/multivariable/partial_derivatives.html
+		checkDerivatives("x^2*y + 2*x + y", "2+2*x*y", "1+x^2");
+		checkDerivatives("sin(x* y) + cos( x )", "cos(x*y)*y-sin(x)", "cos(x*y)*x");
+//		checkDerivatives("x*e^(x* y)", "(1+x*y)e^(x*y)", "x^2*e^(x*y)");  // TODO!
+		checkDerivatives("ln ( x^2 + 2* y)", "2/(2*y+x^2)*x", "2/(2*y+x^2)");
+		checkDerivatives("y* x^2 + 2* y", "2*x*y", "2+x^2");
+//		checkDerivatives("x *e^(x + y)","(x+1)*e^(x+y)","x*e^(x+y)"); TODO
+		checkDerivatives("ln ( 2 *x + y* x)", "1/x", "1/(y+2)"); 
+		checkDerivatives("x *sin(x - y)", "x*cos(x-y)+sin(x-y)", "-x*cos(x-y)");
+		
+		// http://www.analyzemath.com/calculus/multivariable/second_order_derivative.html
+		checkDerivatives2("sin (x *y)", "y*cos(x*y)", "-y^2*sin(x*y)", "x cos (x y)", "- x2 sin (x y) ");
+		checkDerivatives2("x3 + 2 x y", "3 x2 + 2 y", "6x", "2x", "0");
+		checkDerivatives2("x^3*y^4 + x^2", "3 x2y4 + 2 x y", "6x y4 + 2y", "4 x3y3 + x2 ", "12 x3y2");
+		
+		// ....
+		checkDerivatives("x^3+3^(x+1)-ln(x^ln(5+3^(1/2)))", "3*x^2+3*x^1*ln(3)-ln(5+3^(1/2))/x");
+		checkDerivatives("e^x/(x^(1/3))", "e^x/(x^(1/3)*(1-1/x)");
+		checkDerivatives("(1+x)*sin(x)*ln(x)", "(sin(x)+cos(x)+x*cos(x)*ln(x))*((1+x)*sin(x)/x)/x");
+		checkDerivatives("sin(x)/(2*x+1)", "(2*x*cos(x)+cos(x)-2*sin(x))/(2*x+1)^2");
+		checkDerivatives("(2x+1)^2", "8*x+4");
+		checkDerivatives("sin(x)^2", "2*sin(x)*cos(x)");
+		checkDerivatives("sin(x^2)", "2*sin(x)*cos(x)");
+		
+//		checkDerivatives("", "");
+		fail("see TODO");
+	}
+	
+	public static void checkDerivatives(String expression, String... diffs) throws ExpressionException {
+		Expression exp, df;
+		Gradient g;
+		exp = new Expression(expression);
+		g = new Gradient(exp);
+		for (int i = 0; i < diffs.length; i++) {
+			df = g.getPartialDerivative(i);
+			Simplifier.simplify(df);
+			assertEquals(diffs[i], df.toString());
+		}
+	}
+	public static void checkDerivatives2(String expression, String... diffs) throws ExpressionException {
+		Expression exp, df;
+		Gradient g, g2;
+		exp = new Expression(expression);
+		g = new Gradient(exp);
+		for (int i = 0; i < diffs.length; i+=2) {
+			df = g.getPartialDerivative(i);
+			Simplifier.simplify(df);
+			assertEquals(diffs[i], df.toString());
+			g2 = new Gradient(df);
+			df = g2.getPartialDerivative(0);
+			Simplifier.simplify(df);
+			assertEquals(diffs[i+1], df.toString());			
+		}
+	}
 
 }
