@@ -685,4 +685,60 @@ public class Expression implements Cloneable {
 			return 0;
 		return 1 + length(exp.left) + length(exp.right);
 	}
+	
+	// as far as we implementing custom equals
+	// we need to implement hashCode as well
+	@Override
+	public int hashCode() {
+		// not very fast implementation
+		// but simple. 
+		// Anyway it uses the same fields as
+		// equals() do, so it is correct.
+		// TODO: rewrite on something like
+		//        int hash = 37;
+		//        hash = hash*17 + areaCode;
+		//        hash = hash*17 + number;
+		return toString().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object object) {
+	    //check for self-comparison
+	    if ( this == object ) return true;
+
+	    //use instanceof instead of getClass here for two reasons
+	    //1. if need be, it can match any supertype, and not just one class;
+	    //2. it renders an explicit check for "that == null" redundant, since
+	    //it does the check for null already - "null instanceof [type]" always
+	    //returns false. (See Effective Java by Joshua Bloch.)
+	    if ( !(object instanceof Expression) ) return false;
+	    //Alternative to the above line :
+	    //if ( aThat == null || aThat.getClass() != this.getClass() ) return false;
+
+	    //cast to native object is now safe
+	    Expression that = (Expression)object;
+	    return this.equals(that);
+	}
+	public boolean equals(Expression that) {
+	    //now a proper field-by-field evaluation can be made
+	    if (!this.op.equals(that.op))
+	    	return false;
+	    if (this.left == null && that.left != null ||
+	    	this.left != null && that.left == null ||
+	    	this.right== null && that.right!= null ||
+	    	this.right!= null && that.right== null )
+	    		return false;
+
+	    if (this.left != null) {
+	    	if (!this.left.equals(that.left) )
+	    		return false; 
+	    }
+	    if (this.right != null) {
+	    	if (!this.right.equals(that.right) )
+	    		return false; 
+	    }
+	    return true;
+	}
+	
+	
 }

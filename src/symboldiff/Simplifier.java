@@ -9,8 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+
+import sun.org.mozilla.javascript.internal.ast.NewExpression;
 
 public class Simplifier {
 //	protected static enum ExpType {constant, interval, operation};
@@ -796,7 +796,7 @@ public class Simplifier {
 		return optimized;
 	}
 //// { foldMul_AddSub : 2x+x=3x, 2x-x=x; x/2-x/2 = 0	
-	private static LinkedList<ExpAndOp> foldMul_AddSub(LinkedList<ExpAndOp> operands, boolean optimized) {
+	static LinkedList<ExpAndOp> foldMul_AddSub(LinkedList<ExpAndOp> operands, boolean optimized) {
 		if (operands.size() == 0)
 			return operands;
 		String rootOperationInThisExpressionChain = operands.getFirst().op;
@@ -810,8 +810,10 @@ public class Simplifier {
 			ExpAndOp foldedExp = foldEqualsAccurateWithinMultipier(e_o, it, operands); 
 						// ^^ finds expression in the list that is equal to *iterator accurate within const., f.e: 2xy & xy
 						// folds them and remove them from the list
-			if (foldedExp != null)
+			if (foldedExp != null) {
 				folded.add(foldedExp);
+				it = operands.listIterator();
+			}
 		}
 		if (folded.size() != 0) {
 			folded.addAll(operands);
@@ -825,15 +827,17 @@ public class Simplifier {
 	 * fold them and remove that similar expression or variable from the 
 	 * @allOperands@ list. Returns folded expression or null if nothing can be folded     
 	 */
-	private static ExpAndOp foldEqualsAccurateWithinMultipier(ExpAndOp thisE_O,
+	static ExpAndOp foldEqualsAccurateWithinMultipier(ExpAndOp thisE_O,
 			ListIterator<ExpAndOp> iterator, LinkedList<ExpAndOp> allOperands) {
+		
+//		LinkedList<ExpAndOp> toRemove = new LinkedList<>();
 
 		// 1. can thisExp be folded in theory?
 		Expression thisExp = thisE_O.e;
 		if ( thisExp.isVariable() || thisExp.isMul() /*|| thisExp.isDiv()*/ ) {
 			Map<Expression, Expression> partsCandidate = new HashMap<>();
 			Map<Expression, Expression> partsThis = new HashMap<>();
-			splitByMuls(thisExp, partsThis);
+			splitByMuls(thisExp, partsThis, null);
 			assert(partsThis.size() > 0);
 			// 10. search from iteratorToNext till the end.
 			// the following could be optimized!
@@ -842,10 +846,17 @@ public class Simplifier {
 			while (tailIterator.hasNext()) {
 				ExpAndOp candidateE_O = tailIterator.next();
 				partsCandidate.clear();
-				splitByMuls(candidateE_O.e, partsCandidate);
+				splitByMuls(candidateE_O.e, partsCandidate, null);
 				Map<String, Expression> commonMultipliers = commonMultipliers(partsThis, partsCandidate);
 				if (commonMultipliers == null)
 					continue;
+				
+//				toRemove.add(candidateE_O,)
+				boolean removed = allOperands.remove(thisE_O);
+				assert(removed);
+				removed = allOperands.remove(candidateE_O);
+				assert(removed);
+				
 				Expression common = commonMultipliers.get("common");
 				assert (common != null);
 				Expression p1 = commonMultipliers.get("part_1");
@@ -854,6 +865,7 @@ public class Simplifier {
 				assert (p2 != null);
 				
 				Expression twoParts;
+				String resultOperation = "+";
 				if (thisE_O.op.equals("+")) {
 					if (candidateE_O.op.equals("+"))
 						twoParts = Expression.newExpression(p1, p2, "+");
@@ -867,12 +879,12 @@ public class Simplifier {
 						twoParts = Expression.newExpression(p2, p1, "-");
 					else {
 						assert (candidateE_O.op.equals("-"));
-						Expression negateP1 = Expression.newExpression(null, p1, "negate");
-						twoParts = Expression.newExpression(negateP1, p2, "-");
+						resultOperation = "-";
+						twoParts = Expression.newExpression(p1, p2, "+");
 					}					
 				}
 				Expression simplified = Expression.newExpression(common, twoParts, "*");
-				return new ExpAndOp(simplified, "+");				
+				return new ExpAndOp(simplified, resultOperation);				
 			}
 			
 		} // thisExp can't be folded
@@ -938,19 +950,31 @@ public class Simplifier {
 		return false;		
 	}
 */	
-	private static void splitByMuls(Expression e, Map<Expression, Expression> subexpressions) {
+	static void splitByMuls(Expression e, Map<Expression, Expression> subexpressions, Expression previousMultiplier) {
 		if (e == null)
 			return;
-		if (e.isMul()) {
-			// we need both parts of the expression as keys
-			subexpressions.put(e.getLeftExpression(),  e.getRightExpression());
-			subexpressions.put(e.getRightExpression(), e.getLeftExpression ());
-		} else if (e.isVariable()) {
-			subexpressions.put(e,  Expression.newConstant(1));
+		Expression leftMulByPrev, rightMulByPrev;
+		if (previousMultiplier == null) {
+			previousMultiplier = Expression.newConstant(1);
+			leftMulByPrev  = e.getLeftExpression();
+			rightMulByPrev = e.getRightExpression();
+		} else {
+			leftMulByPrev  = Expression.newExpression(e.getLeftExpression(), previousMultiplier, "*");
+			rightMulByPrev = Expression.newExpression(e.getRightExpression(), previousMultiplier, "*");
 		}
 		
-		splitByMuls(e.getLeftExpression(),  subexpressions);
-		splitByMuls(e.getRightExpression(), subexpressions);			
+		subexpressions.put(e, previousMultiplier);
+
+		if (e.isMul()) {
+			subexpressions.put(leftMulByPrev,  e.getRightExpression());
+			subexpressions.put(rightMulByPrev, e.getLeftExpression ());
+			// we need both parts of the expression as keys
+			subexpressions.put(e.getRightExpression(), leftMulByPrev );
+			subexpressions.put(e.getLeftExpression (), rightMulByPrev);			
+				
+			splitByMuls(e.getLeftExpression(),  subexpressions, rightMulByPrev);
+			splitByMuls(e.getRightExpression(), subexpressions, leftMulByPrev );
+		}
 	}
 	private static Map<String, Expression> commonMultipliers(Map<Expression, Expression> one, Map<Expression, Expression> two) {
 		Map<String, Expression> result = null;

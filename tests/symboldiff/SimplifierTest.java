@@ -3,7 +3,10 @@ package symboldiff;
 import static org.junit.Assert.*;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.Random;
 
 import org.junit.Before;
@@ -23,6 +26,7 @@ public class SimplifierTest {
 		seed = System.currentTimeMillis();
 		rnd.setSeed(seed);
 	}
+	
 	@Test//(timeout=1*1000) 
 	public final void testRemoveNegateForConsts() throws Exception {
 		formula = "-(2*2)";
@@ -82,6 +86,21 @@ public class SimplifierTest {
 		exp = new Expression(formula);
 		Simplifier.simplify(exp);
 		assertEquals("4*x", exp.toString() );		
+
+		formula = "3*x-x";
+		exp = new Expression(formula);
+		Simplifier.simplify(exp);
+		assertEquals("2*x", exp.toString() );		
+
+		formula = "3*x-4*x";
+		exp = new Expression(formula);
+		Simplifier.simplify(exp);
+		assertEquals("-x", exp.toString() );		
+
+		formula = "3*x-x-x-x";
+		exp = new Expression(formula);
+		Simplifier.simplify(exp);
+		assertEquals("0", exp.toString() );		
 
 		formula = "x+x+x+x";
 		exp = new Expression(formula);
@@ -475,10 +494,10 @@ public class SimplifierTest {
 	
 	@Test
 	public void t2() throws ExpressionException {
-		String f = "((((x1+x1)+(x3*x3))+x2)+x2)+(x2*(x3+x3))";
+		String f = "((((x1+x1)+(x3*x3))+x2)+x2)+(x2*(x3+x3))"; // 2*x1+x3^2+2*x2+x2*2*x3 = x2(2+2x3)+2x1+x3^2 = ((1+x3)x2+x1)*2+x3^2 :: OK 
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("2*x1+2*x2+2*x2*x3+x3^2", exp.toString());
+		assertEquals("((1+x3)*x2+x1)*2+x3^2", exp.toString());
 	}
 	@Test
 	public void t3() throws ExpressionException {
@@ -835,10 +854,83 @@ public class SimplifierTest {
 		assertEquals("/z", operands.get(2).toString());
 	}
 	@Test
-	public void test1() throws ExpressionException {
+	public void test_Feature_cancellationOfLikeTerms() throws ExpressionException {
 		exp = new Expression("(a+b)/(b+a)");
 		Simplifier.simplify(exp);
 		assertEquals("1", exp.toString());		
+	}
+
+	@Test
+	public void internalTest_splitByMuls() throws ExpressionException {
+		Map<Expression, Expression> parts = new HashMap<>();
+		exp = new Expression("a*b");
+		Simplifier.splitByMuls(exp, parts, null);
+		assertTrue(parts.size() == 2+1);
+
+		parts = new HashMap<>();
+		exp = new Expression("a*b*c"); // abc, a*bc, ab*c
+		Simplifier.splitByMuls(exp, parts, null);
+		assertTrue(parts.size() == 6+1);
+
+		parts = new HashMap<>();
+		exp = new Expression("a*b*(c+d)");
+		Simplifier.splitByMuls(exp, parts, null);
+		assertTrue(parts.size() == 6+1);
+		assertEquals(parts.get(new Expression("a*b")), new Expression("c+d"));
+		assertEquals(parts.get(new Expression("c+d")), new Expression("a*b"));
+		assertEquals(parts.get(new Expression("a")), new Expression("b*(c+d)"));
+		assertEquals(parts.get(new Expression("a*b*(c+d)")), new Expression("1"));
+	}
+	@Test
+	public void internalTest_foldEqualsAccurateWithinMultipier() throws ExpressionException {
+		LinkedList<ExpAndOp> operands = new LinkedList<>();
+		operands.add(new ExpAndOp(new Expression("a*b*c"), "+"));
+		operands.add(new ExpAndOp(new Expression("a*z"), "+"));
+		operands.add(new ExpAndOp(new Expression("a*k"), "-"));
+		operands.add(new ExpAndOp(new Expression("a*w"), "-"));
+		operands.add(new ExpAndOp(new Expression("q*w"), "+"));
+		operands.add(new ExpAndOp(new Expression("w"), "-"));
+		operands.add(new ExpAndOp(new Expression("none"), "-"));
+		ListIterator<ExpAndOp> it = operands.listIterator();
+		int size = operands.size();
+
+		ExpAndOp e_o = it.next();
+		ExpAndOp foldedExp = Simplifier.foldEqualsAccurateWithinMultipier(e_o, it, operands);
+		assertFalse(foldedExp == null);
+		assertEquals("+a*(b*c+z)", foldedExp.toString());
+		assertEquals(size-2, operands.size());
+
+		it = operands.listIterator();
+		e_o = it.next();
+		foldedExp = Simplifier.foldEqualsAccurateWithinMultipier(e_o, it, operands);
+		assertEquals("-a*(k+w)", foldedExp.toString());
+
+		it = operands.listIterator();
+		e_o = it.next();
+		foldedExp = Simplifier.foldEqualsAccurateWithinMultipier(e_o, it, operands);
+		assertEquals("+w*(q-1)", foldedExp.toString());
+
+		size = operands.size();
+		it = operands.listIterator();
+		e_o = it.next();
+		foldedExp = Simplifier.foldEqualsAccurateWithinMultipier(e_o, it, operands);
+		assertEquals(null, foldedExp);
+		assertEquals(size, operands.size());
+	}
+	@Test
+	public void internalTest_foldMul_AddSub() throws ExpressionException {
+		LinkedList<ExpAndOp> operands = new LinkedList<>();
+		operands.add(new ExpAndOp(new Expression("2*a"), "-"));
+		operands.add(new ExpAndOp(new Expression("a"), "+"));
+		LinkedList<ExpAndOp> folded = Simplifier.foldMul_AddSub(operands, false);
+		assertEquals(0, operands.size());
+		assertEquals(1, folded.size());
+		assertEquals("+a*(1-2)", folded.getFirst().toString());
+	}
+	@Test
+	public void test_foldMul_AddSub() throws ExpressionException {
+		exp = new Expression("(x+y)*a+(x+y)*b");
+		Simplifier.simplify(exp);
+		assertEquals("(a+b)*(x+y)", exp.toString());
 	}	
-	
 }
