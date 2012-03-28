@@ -166,12 +166,13 @@ public class Gradient {
 					Expression dg = calculatePartialDerivative(g, coord);
 
 					Expression ln_f  = newExpression(null,      f.clone(), "ln");
-					Expression gDIVf = newExpression(g.clone(), f.clone(), "div");
+					Expression gDIVf = newExpression(g.clone(), f.clone(), "/");
 					
 					Expression leftSum  = newExpression(dg, ln_f,  "*");
 					Expression rightSum = newExpression(df, gDIVf, "*");
 					Expression sum = newExpression(leftSum, rightSum, "+");
-					parent = newExpression(sum, exp, "*");
+					Expression fPOWg = newExpression(f, g, "pow");
+					parent = newExpression(sum, fPOWg, "*");
 				}
 			}
 		} catch (IncorrectExpression e) {

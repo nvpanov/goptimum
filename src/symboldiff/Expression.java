@@ -436,6 +436,12 @@ public class Expression implements Cloneable {
 			if (isVariable()) {
 				if ( op.contains("(") ) // user entered some function that we don't know. So we decided that this is a variable.
 					throw new UnsupportedFunction("Unsupported function " + op); // But variables can't contain brackets 
+/* -- impossible case. input expression is trimmed, so 'x y' => 'xy' 
+ 				if ( op.contains(" ") ) { // user entered something like x y,  we decided that this is a variable.
+					// But variables can't contain spaces
+					throw new IncorrectExpression("Something is wrong with the expression. Probably some operation is missed between this variables: '" + op + "'"); 
+				}
+*/				
 			}
 		}
 		setVariablesList();

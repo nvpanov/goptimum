@@ -111,7 +111,7 @@ public class Main {
 		System.out.println("df: " + df_dx);
 		Simplifier.simplify(df_dx);
 		System.out.println("simple: " + df_dx);
-		assertEquals("-4*x^3", df_dx);
+		assertEquals("-4*x^3", df_dx.toString());
 	}
 	@Test
 	public void testSixHumpDiff_2() throws Exception {
@@ -154,7 +154,7 @@ public class Main {
 		assertEquals("c/b", df.toString());
 		df = g.getPartialDerivative(1);
 		Simplifier.simplify(df);
-		assertEquals("-(a/b^2*c)", df.toString());
+		assertEquals("-a/b^2*c", df.toString());
 		df = g.getPartialDerivative(2);
 		Simplifier.simplify(df);
 		assertEquals("a/b", df.toString());
@@ -166,10 +166,10 @@ public class Main {
 		assertEquals("c^-1/b", df.toString());
 		df = g.getPartialDerivative(1);
 		Simplifier.simplify(df);
-		assertEquals("-(a/(b*c)^2*c)", df.toString()); //(-a * c * ((b * c)^(-2)))
+		assertEquals("-a/(b*c)^2*c", df.toString()); //(-a * c * ((b * c)^(-2)))
 		df = g.getPartialDerivative(2);
 		Simplifier.simplify(df);
-		assertEquals("-(a*b/(b*c)^2)", df.toString());
+		assertEquals("-a*b/(b*c)^2", df.toString());
 
 		exp = new Expression("a^(b)");
 		g = new Gradient(exp);
@@ -184,7 +184,7 @@ public class Main {
 		g = new Gradient(exp);
 		df = g.getPartialDerivative(0);
 		Simplifier.simplify(df);
-		assertEquals("a^(b^c-1)*b^c", df.toString());
+		assertEquals("a^(b^c-1)*b^c", df.toString()); // ????????????????
 		df = g.getPartialDerivative(1);
 		Simplifier.simplify(df);
 		assertEquals("c*a^(b^c)*(b^(c-1)*ln(a)", df.toString());  // c * (a^(b^c)) * (b^(-1 + c)) * log(a)
@@ -212,31 +212,43 @@ public class Main {
 	@Test
 	public void testDiff2() throws ExpressionException {
 		// http://www.analyzemath.com/calculus/multivariable/partial_derivatives.html
-		checkDerivatives("x^2*y + 2*x + y", "2+2*x*y", "1+x^2");
+		checkDerivatives("x^2*y + 2*x + y", "(1+x*y)*2", "1+x^2");
 		checkDerivatives("sin(x* y) + cos( x )", "cos(x*y)*y-sin(x)", "cos(x*y)*x");
 //		checkDerivatives("x*e^(x* y)", "(1+x*y)e^(x*y)", "x^2*e^(x*y)");  // TODO!
 		checkDerivatives("ln ( x^2 + 2* y)", "2/(2*y+x^2)*x", "2/(2*y+x^2)");
 		checkDerivatives("y* x^2 + 2* y", "2*x*y", "2+x^2");
 //		checkDerivatives("x *e^(x + y)","(x+1)*e^(x+y)","x*e^(x+y)"); TODO
-		checkDerivatives("ln ( 2 *x + y* x)", "1/x", "1/(y+2)"); 
-		checkDerivatives("x *sin(x - y)", "x*cos(x-y)+sin(x-y)", "-x*cos(x-y)");
+		checkDerivatives("x *sin(x - y)", "cos(x-y)*x+sin(x-y)", "-cos(x-y)*x");
 		
 		// http://www.analyzemath.com/calculus/multivariable/second_order_derivative.html
-		checkDerivatives2("sin (x *y)", "y*cos(x*y)", "-y^2*sin(x*y)", "x cos (x y)", "- x2 sin (x y) ");
-		checkDerivatives2("x3 + 2 x y", "3 x2 + 2 y", "6x", "2x", "0");
-		checkDerivatives2("x^3*y^4 + x^2", "3 x2y4 + 2 x y", "6x y4 + 2y", "4 x3y3 + x2 ", "12 x3y2");
+		checkDerivatives2("sin (x *y)", "cos(x*y)*y", "-sin(x*y)*y^2", "cos(x*y)*x", "-sin(x*y)*x^2");
+		checkDerivatives2("x^3 + 2* x* y", "2*y+3*x^2", "6*x", "2*x", "0");
+		checkDerivatives2("x^3*y^4 + x^2*y", "2*x*y+3*x^2*y^4", "2*y+6*x*y^4", "4*x^3*y^3+x^2 ", "12*x^3*y^2");
 		
 		// ....
-		checkDerivatives("x^3+3^(x+1)-ln(x^ln(5+3^(1/2)))", "3*x^2+3*x^1*ln(3)-ln(5+3^(1/2))/x");
-		checkDerivatives("e^x/(x^(1/3))", "e^x/(x^(1/3)*(1-1/x)");
-		checkDerivatives("(1+x)*sin(x)*ln(x)", "(sin(x)+cos(x)+x*cos(x)*ln(x))*((1+x)*sin(x)/x)/x");
-		checkDerivatives("sin(x)/(2*x+1)", "(2*x*cos(x)+cos(x)-2*sin(x))/(2*x+1)^2");
-		checkDerivatives("(2x+1)^2", "8*x+4");
-		checkDerivatives("sin(x)^2", "2*sin(x)*cos(x)");
-		checkDerivatives("sin(x^2)", "2*sin(x)*cos(x)");
+//		checkDerivatives("e^x/(x^(1/3))", "e^x/(x^(1/3)*(1-1/x)"); TODO
+		checkDerivatives("sin(x)/(2*x+1)", "((1+2*x)*cos(x)-2*sin(x))/(1+2*x)^2");
+		// ^^^ orig: (2*x*cos(x)+cos(x)-2*sin(x))/(2*x+1)^2  
+		//           ((1+2*x)*cos(x)   -2*sin(x))/(1+2*x)^2
+		checkDerivatives("(2*x+1)^2", "(1+2*x)*4");
+		checkDerivatives("sin(x)^2", "2*cos(x)*sin(x)");
+		checkDerivatives("sin(x^2)", ""); // ????????????????
 		
 //		checkDerivatives("", "");
+// fails: 
+		checkDerivatives("x^3+3^(x+1)-ln(x^ln(5+3^(1/2)))", "3*x^2+3*x^1*ln(3)-ln(5+3^(1/2))/x"); //????
+
+		checkDerivatives("ln ( 2 *x + y* x)", "1/x", "1/(y+2)"); 
+
+		
 		fail("see TODO");
+	}
+	@Test
+	public void testDiff2_fails() throws ExpressionException {
+		checkDerivatives("(1+x)*sin(x)*ln(x)", "(sin(x)+cos(x)+x*cos(x)*ln(x))*((1+x)*sin(x)/x)/x");
+		// ^^^ orig: (sin(x)+cos(x)+x*cos(x)*ln(x))*((1+x)*sin(x)/x)/x
+		// (1+x)*cos(x)
+		// ((1+x)*cos(x)+sin(x))*ln(x)+(1+x)*sin(x)/x
 	}
 	
 	public static void checkDerivatives(String expression, String... diffs) throws ExpressionException {
@@ -255,7 +267,7 @@ public class Main {
 		Gradient g, g2;
 		exp = new Expression(expression);
 		g = new Gradient(exp);
-		for (int i = 0; i < diffs.length; i+=2) {
+		for (int i = 0; i < diffs.length/2; i+=2) {
 			df = g.getPartialDerivative(i);
 			Simplifier.simplify(df);
 			assertEquals(diffs[i], df.toString());
