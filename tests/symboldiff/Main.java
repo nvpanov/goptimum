@@ -180,16 +180,13 @@ public class Main {
 		Simplifier.simplify(df);
 		assertEquals("a^b*ln(a)", df.toString());  // ((a^b) * log(a))
 
-		exp = new Expression("a^b^c");
+		exp = new Expression("b^b");
 		g = new Gradient(exp);
 		df = g.getPartialDerivative(0);
 		Simplifier.simplify(df);
-		assertEquals("a^(b^c-1)*b^c", df.toString()); // ????????????????
-		df = g.getPartialDerivative(1);
-		Simplifier.simplify(df);
-		assertEquals("c*a^(b^c)*(b^(c-1)*ln(a)", df.toString());  // c * (a^(b^c)) * (b^(-1 + c)) * log(a)
-		
-		
+		assertEquals("(1+ln(b))*b^b", df.toString());
+
+// fails:		
 		exp = new Expression("a^(b^c)");
 		g = new Gradient(exp);
 		df = g.getPartialDerivative(0);
@@ -197,17 +194,17 @@ public class Main {
 		assertEquals("a^(b^c-1)*b^c", df.toString());
 		df = g.getPartialDerivative(1);
 		Simplifier.simplify(df);
-		assertEquals("c*a^(b^c)*(b^(c-1)*ln(a)", df.toString());  // c * (a^(b^c)) * (b^(-1 + c)) * log(a)
+		assertEquals("a^b^c*b^(c-1)*c*ln(a)", df.toString());  // c * (a^(b^c)) * (b^(-1 + c)) * log(a)
 
-
-		exp = new Expression("b^b");
+// fails:
+		exp = new Expression("(a^b)^c");
 		g = new Gradient(exp);
 		df = g.getPartialDerivative(0);
 		Simplifier.simplify(df);
-		assertEquals("b^b*(ln(b)+1)", df.toString());
-
-
-				
+		assertEquals("a^(b-1)*a^b^(c-1)*b*c", df.toString());  // TODO: actually this is equal to 'a^b^c*b*c/a' !!
+		df = g.getPartialDerivative(1);
+		Simplifier.simplify(df);
+		assertEquals("a^b^(c-1)*a*b*c*ln(a)", df.toString());  // c * (a^(b^c)) * (b^(-1 + c)) * log(a)
 	}
 	@Test
 	public void testDiff2() throws ExpressionException {

@@ -139,7 +139,10 @@ public class Expression implements Cloneable {
 		return true;
 	}
 	public boolean isVariable() {
-		return !(isOperation() || isConstant());
+		if (isOperation() || isConstant() )
+			return false;
+		assert(left == null && right == null);
+		return true;
 	}
 	public boolean isOperation() {
 		return isBinaryOperation() || isUnaryOperation();

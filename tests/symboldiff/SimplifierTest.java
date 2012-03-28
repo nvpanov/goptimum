@@ -932,5 +932,15 @@ public class SimplifierTest {
 		exp = new Expression("(x+y)*a+(x+y)*b");
 		Simplifier.simplify(exp);
 		assertEquals("(a+b)*(x+y)", exp.toString());
-	}	
+	}
+	@Test
+	public void testPowers_feature() throws ExpressionException {
+		exp = new Expression("a^(b-1)*a^b^(c-1)*b*c");
+		Simplifier.simplify(exp);
+		assertEquals("a^b^c*b*c/a", exp.toString());
+		
+		exp = new Expression("a^b*a^b^(c-1)*c*ln(a)");
+		Simplifier.simplify(exp);
+		assertEquals("c * ln(a) * a^b^c", exp.toString());
+	}		
 }

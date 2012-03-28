@@ -171,7 +171,7 @@ public class Gradient {
 					Expression leftSum  = newExpression(dg, ln_f,  "*");
 					Expression rightSum = newExpression(df, gDIVf, "*");
 					Expression sum = newExpression(leftSum, rightSum, "+");
-					Expression fPOWg = newExpression(f, g, "pow");
+					Expression fPOWg = newExpression(f, g, "^");
 					parent = newExpression(sum, fPOWg, "*");
 				}
 			}
