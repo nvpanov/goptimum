@@ -28,7 +28,7 @@ public class FunctionNEW {
 		try {
 			f = FunctionFactory.newFunction(equation);
 		} catch (ExpressionException e) {
-			System.out.println("Can't create the following function:" + equation);
+			System.out.println("Can't create the following function: " + equation + ". " + e.getMessage());
 			System.exit(-1);
 		}
 		assert(dim == f.getDimension());

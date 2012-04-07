@@ -12,6 +12,7 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
+import symboldiff.Gradient;
 import symboldiff.Simplifier.ExpAndOp;
 import symboldiff.exceptions.ExpressionException;
 
@@ -590,11 +591,11 @@ public class SimplifierTest {
 		f = "(-a)-( b)";
 		exp = new Expression(f);
 		Simplifier.removeNegateInAddOrSub(exp);
-		assertEquals("-a-b", exp.toString());
+		assertEquals("-(a+b)", exp.toString());
 		
 		f = "(-a)-(-b)";
 		exp = new Expression(f);
-		Simplifier.simplify(exp);
+		Simplifier.removeNegateInAddOrSub(exp);
 		assertEquals("b-a", exp.toString());
 		
 		////
@@ -616,7 +617,7 @@ public class SimplifierTest {
 		f = "(-a)+(-b)";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("-a-b", exp.toString());		
+		assertEquals("-(a+b)", exp.toString());		
 	}
 	@Test
 	public void removeNegateInMulOrDiv() throws ExpressionException {
@@ -691,7 +692,7 @@ public class SimplifierTest {
 		f = "-(x/-y)";
 		exp = new Expression(f);
 		Simplifier.simplify(exp);
-		assertEquals("x/y", exp.toString());
+		assertEquals("x/y", exp.toString()); 
 
 		f = "-(-x/2)";
 		exp = new Expression(f);
@@ -932,9 +933,17 @@ public class SimplifierTest {
 		exp = new Expression("(x+y)*a+(x+y)*b");
 		Simplifier.simplify(exp);
 		assertEquals("(a+b)*(x+y)", exp.toString());
+		
+		exp = new Expression("ln(y)*y^sin(x^2)+ln(y)*y^sin(x^2)");
+		Simplifier.simplify(exp);
+		assertEquals("2*ln(y)*y^sin(x^2)", exp.toString());
 	}
 	@Test
 	public void testPowers_feature() throws ExpressionException {
+		exp = new Expression("a^(b-1)*a^b");
+		Simplifier.simplify(exp);
+		assertEquals("a^b", exp.toString());
+		
 		exp = new Expression("a^(b-1)*a^b^(c-1)*b*c");
 		Simplifier.simplify(exp);
 		assertEquals("a^b^c*b*c/a", exp.toString());
@@ -943,4 +952,13 @@ public class SimplifierTest {
 		Simplifier.simplify(exp);
 		assertEquals("c * ln(a) * a^b^c", exp.toString());
 	}		
+	@Test
+	public void testConstantsInFunctions() throws ExpressionException {
+		exp = new Expression("sin(pi)");
+		Simplifier.simplify(exp);
+		assertEquals("0", exp.toString()); 
+		// TODO: CONVERT TO INTERVAL!!!
+	}		
+	
+	
 }

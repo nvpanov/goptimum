@@ -219,18 +219,6 @@ public class StringParser extends Expression {
       				"it contains " + c + details);
     	}
 	}
-
-	private String remove_whitespaces(String expr) {
-      StringBuffer result = new StringBuffer();
-      int i;
-        for (i = 0; i < expr.length(); i++) {
-            if (expr.charAt(i) != ' ') {
-                result.append(expr.charAt(i));
-            }
-        }
-      return result.toString();
-    }
-  
     public String[] getParsedExpr() {
       return this.parsed_expr;
     }
@@ -239,13 +227,20 @@ public class StringParser extends Expression {
       return this.orig_expr;
     }
     
+    private static final int maxLength = 100;
     public StringParser(String expr) throws IncorrectExpression {
-        if (expr != null) {
-            checkBracketCorrectness(expr);
-        	expr = expr.toLowerCase();
-            this.orig_expr = expr;
-            this.parsed_expr = parse_string(remove_whitespaces(expr));
+        if (expr == null) {
+        	throw new IncorrectExpression("null-string as an expression");
         }
+        expr = expr.replace(" ", "");
+        if (expr.length() == 0)
+        	throw new IncorrectExpression("Empty string as an expression");
+        if (expr.length() > maxLength)
+        	throw new IncorrectExpression("Too long string as an expression. So far the maximum length is " + maxLength);
+        checkBracketCorrectness(expr);
+        expr = expr.toLowerCase();
+        this.orig_expr = expr;
+        this.parsed_expr = parse_string(expr);
     }
     protected StringParser() {
     }

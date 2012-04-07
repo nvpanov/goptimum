@@ -40,11 +40,12 @@ public class Simplifier {
 								 removeNegativeInPower(simplified);
 								 removeNegateForConsts(simplified);
 								 promoteNegateFromVariablesToExpressions(simplified);
+								 calcFunctionsFromConsts(simplified);
 								 
 			/*wasExpChanged |= */fold(simplified);
 								 //foldMul_AddSub(); // 2x+x => 3x it was moved inside fold
 			
-			/*wasExpChanged |= */reduceConstants(simplified); // probably now fold() do all the job
+			/*wasExpChanged |= */reduceConstants(simplified); // TODO: probably now fold() do all the job 
 			/*wasExpChanged |= */removeZeros(simplified); // remove meaningless operation and also cleans after fold()
 			/*wasExpChanged |= */removeOnes(simplified);  // ---//---
                                  removeNegateInAddOrSub(simplified); // helps fold() and also cleans after fold()
@@ -68,7 +69,6 @@ public class Simplifier {
 //			throw new SimplificationStoped("Simplification was stoped after " + turns + " iterations.");
 	}
 
-
 	/*
 	 * -2+x = > x-2; x-(-2) = > x+2
 	 */
@@ -89,7 +89,7 @@ public class Simplifier {
 		// part a
 		if (l.isConstant() && l.getConstantValue() < 0) {
 			Expression newVal = Expression.newConstant(-l.getConstantValue());
-			Expression newLeft = Expression.newExpression(null, newVal, "negate");
+			Expression newLeft = Expression.newExpression(null, newVal, "negate"); // -c => (-c)
 			exp.setLeftExpression(newLeft); // this will continued in second case
 		} 
 		// first case part b
@@ -102,25 +102,38 @@ public class Simplifier {
 		// second case (actually it holds the first cases as well)
 		l = exp.getLeftExpression(); // left or right children could be changed in case 1
 		r = exp.getRightExpression(); // so we need to update them!
-		if (!l.isNegate() && !r.isNegate())
-			return changed;
-		
-		if (exp.isAdd()) {
-			if (l.isNegate()) { // if _left_ is negate we have to swap them. 
-				Expression tmp = l.getRightExpression(); // negate's argument
-				exp.setLeftExpression(r);
-				exp.setRightExpression(tmp);
-			} else /*if (r.isNegate() )*/ {
-				exp.setRightExpression(r.getRightExpression()); // again the value of negate
+		if (l.isNegate() || r.isNegate()) {
+			if (exp.isAdd()) { 
+				if (l.isNegate() && r.isNegate()) { // (-a) + (-b) => -(a+b)
+					exp.setOperation("negate"); exp.setLeftExpression(null);
+					exp.setRightExpression(Expression.newExpression(l.getRightExpression(), r.getRightExpression(), "+"));
+					return true; // otherwise exp.setOperation("+") will mess up everything
+				} 
+				if (l.isNegate()) { // if _left_ is negate we will swap them
+					exp.setLeftExpression(r);
+					exp.setRightExpression(l);
+				} 
+				// this part works for both cases: 
+				//	2) if r is negate we just get rid of it, 
+				//	1) if l was negate we have already swapped l with r and now negate is in "r"
+				// 	in both cases we need to get rid from negate and keep its value only.
+				exp.setRightExpression(exp.getRightExpression().getRightExpression());
+				exp.setOperation("-");
+			} else { // "-"
+				if (l.isNegate() && r.isNegate()) { // (-a) - (-b) => b - a (swap and remove both negates)
+					Expression positiveR = r.getRightExpression();
+					Expression positiveL = l.getRightExpression();
+					exp.setLeftExpression(positiveR);
+					exp.setRightExpression(positiveL);
+				} else if (l.isNegate()) { // (-a) - b => -(a+b) 
+					exp.setOperation("negate"); exp.setLeftExpression(null);
+					exp.setRightExpression(Expression.newExpression(l.getRightExpression(), r, "+"));
+				} else { // a - (-b) => a + b
+					exp.setRightExpression(r.getRightExpression());
+					exp.setOperation("+");
+				}
 			}
-			exp.setOperation("-");
-			return true;			
-		} else { // "-"
-			if (r.isNegate()) { 
-				exp.setRightExpression(r.getRightExpression()); // again the value of negate
-				exp.setOperation("+");
-				return true;
-			}
+			return true;
 		}
 		return changed;
 	}
@@ -143,25 +156,48 @@ public class Simplifier {
 		l = exp.getLeftExpression(); // left or right children could be changed during recursion
 		r = exp.getRightExpression(); // so we need to update them!
 		
+		boolean negR = r.isNegate();
+		boolean negL = l.isNegate();
+		if (negR && negL) {
+			exp.setLeftExpression (l.getRightExpression());
+			exp.setRightExpression(r.getRightExpression());
+			return true;
+		}
 		Expression negate = null, other = null;
-		if ( l.isNegate() ) {
+		if (negL) {
 			negate = l;
 			other  = r;
-		} else if ( r.isNegate() ) { 
+		} else if ( negR ) { 
 			negate = r;
 			other  = l;
-		}
-		if (negate == null)
+		} else
 			return changed;
 
-		negate.setTo(negate.getRightExpression()); 
-
+		Expression newL, newR;
+		Expression newOther, newNeg;
+		newNeg = negate.getRightExpression(); // in all cases we will get rig from negate.
 		if (other.isConstant()) {
-			other.setTo(Expression.newConstant(-other.getConstantValue()));
-			return true;
-		} 
-		Expression newExp = Expression.newExpression(null, exp.clone(), "negate");
-		exp.setTo(newExp);
+			newOther = Expression.newConstant(-other.getConstantValue());
+		} else { // 'other' is not a constant
+			Expression newExp = Expression.newExpression(null, null, exp.getOperation());
+			exp.setTo(Expression.newExpression(null, newExp, "negate"));
+			newOther = other;
+			// now we need to attach new values to the right positions
+			// the following code is uniform for both cases and to use it in this case we just
+			// reassign a pointer from exp to newExp which actually needs the arguments. 
+			// previous clause of 'if' works with exp directly. 
+			exp = newExp;
+		}
+		// determining where to attach this new values. it is important in 'div' case
+		if (other == r) { 
+			newR = newOther;
+			newL = newNeg;
+		} else {
+			newL = newOther;
+			newR = newNeg;
+		}
+		exp.setLeftExpression(newL);
+		exp.setRightExpression(newR); 
 		return true;
 	}
 
@@ -595,7 +631,7 @@ public class Simplifier {
 			return true; 
 			// else next block with setLeft/RightExpressions will be executed.
 		}
-		// exp can be left the same, while left and right expression can be simplified: 1+2+x
+		// exp can be the same, while left and right expression can be simplified: 1+2+x
 		exp.setLeftExpression(l);
 		exp.setRightExpression(r);
 		return success;//exp;	
@@ -1355,4 +1391,16 @@ public class Simplifier {
 		}
 	}
 	/*private*/ static AlphabeticallySorter alphabeticallySorter = new AlphabeticallySorter();
+	
+	private static boolean calcFunctionsFromConsts(Expression exp) {
+		if (exp == null)
+			return false;
+		if (exp.isUnaryOperation() && exp.getRightExpression().isConstant()) {
+			double dVal = Expression.evaluate(exp.getOperation(), Double.NaN, exp.getRightExpression().getConstantValue());
+			assert(!Double.isNaN(dVal));
+			exp.setTo(dVal);
+			return true;
+		} 
+		return false;		
+	}	
 }

@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import org.junit.runner.Computer;
+
 import com.sun.org.apache.bcel.internal.generic.ISUB;
 
 import net.sourceforge.interval.ia_math.IAMath;
@@ -41,9 +43,10 @@ public class Expression implements Cloneable {
 
 	protected static final String unary_operations[] = { "arccos", "arcsin", "arctg",
 			"arcctg", "sin", "cos", "tg", "ctg", "ln", "exp", "sqrt", "negate" };
+	protected static final String ambiguous[] = {"%", "&", "~", "|", "`", "\"", "\\", "<", ">", "=", ",", ".", "?", "!"};
 
 	private ArrayList<String> coords;
-	private static enum ExpType{unset, constant, notAconstant, variable, binaryOperation, notAbinaryOperation, unaryOperation, notAnUnaryOperation};
+	//private static enum ExpType{unset, constant, notAconstant, variable, binaryOperation, notAbinaryOperation, unaryOperation, notAnUnaryOperation};
 
 	// List supports random access: get(i)
 	// while Set -- doesn't
@@ -222,14 +225,11 @@ public class Expression implements Cloneable {
 			thisPriority = RPN.prior(strOperation);
 			binaryOpNeedsBrackets = thisPriority < priorityOfHigherOp; // it definitely needs brackets if next op has higher priority.
 			// also brackets are required if left or right part contains non-comutative operation: x-(y+z). priority is the same.
-			if (thisPriority == priorityOfHigherOp && // operations have equal priority but
-					(e.isSub() || e.isDiv() || e.isPow()) &&       // this op is a non-commutative one and 
-					/*nextBinaryOperationsSameOrLowPriorityNeedsBrackets*/
+			if (thisPriority == priorityOfHigherOp && 				// operations have equal priority but
+					(e.isSub() || e.isDiv() || e.isPow()) &&        // this ops are non-commutative  
 					nextBinaryOperationsSamePriorityNeedsBrackets(right, strOperation) ) { // right is an expression contains equal or lower operations
 				rightNeedsBrackets = true; // in this case right part does need brackets
-//				thisPriority = -1;
-				// ^^ nvp 3/23/2012: get rid of double brackets in case of complex arguments in unary functions: ln((x+y));
-			}			
+			}
 		} else if (e.isUnaryOperation() ) { // initially binaryOpNeedsBrackets = e.isBinaryOperation()
 			rightNeedsBrackets = true;
 			thisPriority = -1;
@@ -433,31 +433,46 @@ public class Expression implements Cloneable {
 			right = new Expression(new RPN(rpn.find_operand(length - 1, true)));
 		}
 		else { // could only be a variable or constant
-			if (right != null) {
+			if (right != null) 
 				throw new IllegalStateException("Something wrong with the expression");
-			}
-			if (isVariable()) {
-				if ( op.contains("(") ) // user entered some function that we don't know. So we decided that this is a variable.
-					throw new UnsupportedFunction("Unsupported function " + op); // But variables can't contain brackets 
+				// some sanity checks were here. moved down
 /* -- impossible case. input expression is trimmed, so 'x y' => 'xy' 
- 				if ( op.contains(" ") ) { // user entered something like x y,  we decided that this is a variable.
-					// But variables can't contain spaces
-					throw new IncorrectExpression("Something is wrong with the expression. Probably some operation is missed between this variables: '" + op + "'"); 
-				}
-*/				
+ 			if ( op.contains(" ") ) { // user entered something like x y,  we decided that this is a variable.
+				// But variables can't contain spaces
+				throw new IncorrectExpression("Something is wrong with the expression. Probably some operation is missed between this variables: '" + op + "'"); 
 			}
+*/				
 		}
 		setVariablesList();
 		
 		//System.out.println("\n\n=======\n"+toString() + "\n\n" + toStringGraph() + "\n\n");
 		
+		// sanity checks:
+		List<String> vars = getVariables();
+		for (String v : vars) {
+			if ( v.contains("(") ) // user entered some function that we don't know. So we decided that this is a variable.
+				throw new UnsupportedFunction("Unsupported function " + op); // But variables can't contain brackets
+			for (String amb : ambiguous)
+				if ( v.contains(amb) )
+					throw new IncorrectExpression("Ambiguous name of following variable: '" + v + 
+							"'. Actually nothing is really wrong, but just to avoid any confusion...");
+			for (int i = 0; i < v.length(); i++)
+				if (v.charAt(i) > 127) // Simplifyer.isEqualsAccurateWithinConstants() depends on it!
+					throw new IncorrectExpression("Please use only ASCII (non-unicode) characters for variable names. " +
+							"Just to avoid a possibility to mess up similar-looking but actually different characters.");
+			/* ^^^
+			 * Java Strings are conceptually encoded as UTF-16. In UTF-16, the ASCII character set is encoded 
+			 * as the values 0 - 127 and the encoding for any non ASCII character (which may consist of more 
+			 * than one Java char) is guaranteed not to include the numbers 0 - 127
+			 */
+		}
 		try {
 			evaluate(new Box(this.getDimension(), new RealInterval(1)));
 			double p[] = new double[this.getDimension()]; // all zeroes
 			evaluate(p);
-		} catch (UnsupportedOperationException e) {
+		} catch (Exception e) {
 			// there is at least one unsupported function
-			throw new UnsupportedFunction("Unsupported function " + op);
+			throw new IncorrectExpression("The expression can't be evaluated. " + e.getMessage() + "");
 		}
 	}
 
@@ -465,7 +480,20 @@ public class Expression implements Cloneable {
 	// operations/operands inside
 	@Override
 	public Expression clone() {
-		Expression c = null; 
+		Expression clone = newExpression(null, null, op);
+		if (this.left != null)
+			clone.left = this.left.clone();
+		else
+			clone.left = null;
+		if (this.right != null)
+			clone.right = this.right.clone();
+		else
+			clone.right = null;
+		clone.setVariablesList(this.getVariables());
+		assert(this.equals(clone));
+		return clone;
+		
+/*		
 		try {
 			c = new Expression(toString());
 		} catch (ExpressionException e) {
@@ -473,6 +501,7 @@ public class Expression implements Cloneable {
 			e.printStackTrace();
 		}
 		return c;
+*/		
 	}
 	
 
@@ -587,6 +616,7 @@ public class Expression implements Cloneable {
 		return evaluate(op, l, r);		
 	}
 	private static RealInterval evaluate(String op, RealInterval l, RealInterval r) {
+		try {
 		switch (op) {
 			case "+":
 				return add(l, r);
@@ -628,9 +658,14 @@ public class Expression implements Cloneable {
 	
 			default:
 				throw new UnsupportedOperationException("Unsupported operation for intervals: " + op);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Issue during interval evaluation of '" + op + "' :" + e.getMessage() );
 		}
 	}	
-	private static double evaluate(String op, double l, double r) {
+	/*private */static double evaluate(String op, double l, double r) {
+	// ^^^ because is used in Simplifier.calcFunctionsFromConsts() 	
+		try {	
 		switch (op) {
 			case "+":
 				return l + r;
@@ -670,6 +705,9 @@ public class Expression implements Cloneable {
 	
 			default:
 				throw new UnsupportedOperationException("Unsupported operation for doubles: " + op);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Issue during evaluation of '" + op + "' : " + e.getMessage() );
 		}
 	}
 	/*

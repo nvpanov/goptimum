@@ -13,7 +13,6 @@ import org.junit.Test;
 import core.Box;
 
 import symboldiff.exceptions.ExpressionException;
-import symboldiff.exceptions.IncorrectExpression;
 
 public class ExpressionTest {
 	Expression exp;

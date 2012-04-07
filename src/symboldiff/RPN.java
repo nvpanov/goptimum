@@ -116,8 +116,6 @@ public class RPN extends StringParser {
     public RPN(String expr) throws IncorrectExpression {
       //this.parsed = new StringParser(expr).getParsedExpr();
         super(expr);
-        if (expr.length() == 0)
-        	throw new IncorrectExpression("Empty string as an expression");
         this.parsed = getParsedExpr();
       String[] tmp = generate_rpn(this.parsed); 
       int i, N = 0;

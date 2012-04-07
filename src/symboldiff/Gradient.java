@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import symboldiff.exceptions.DifferentiateExpression;
 import symboldiff.exceptions.ExpressionException;
 import symboldiff.exceptions.IncorrectExpression;
 import static symboldiff.Expression.*;
@@ -150,8 +151,8 @@ public class Gradient {
 				else if (!exp.getLeftExpression().hasVar(coord)) { 
 					// (constant^f(x))' = ln(constant)*constant^f(x) * f(x)'
 					String constant = exp.getLeftExpression().toString();
-					Expression coef = new Expression("ln(" + constant + ")*" + 
-											constant + "^" + exp.getRightExpression().toString());
+					Expression coef = new Expression("ln(" + constant + ")*(" + 
+											constant + ")^(" + exp.getRightExpression().toString()+")");
 					Expression deriv = calculatePartialDerivative(exp.getRightExpression().clone(), coord);
 					parent = newExpression(coef, deriv, "*");
 				}
@@ -242,7 +243,7 @@ public class Gradient {
 	 * it should be used for second derivative because some variables can be missed in first derivative:
 	 * f=x2+y   =>   df/dx = 2x, df/dy = 1   =>   d2f/dx = 2, and nobody will differentiate by y -- there is no such variable   
 	 */
-	public Gradient(Expression exp, List<String> coords) {
+	public Gradient(Expression exp, List<String> coords) throws DifferentiateExpression {
 		init(exp, coords);
 	}
 
@@ -250,7 +251,7 @@ public class Gradient {
 	 * calculates gradient (sum of all partial derivatives by all variables that are in the expression)
 	 * use Gradient(exp, coords) to calculate Gradient for given variables
 	 */
-	public Gradient(Expression exp) {
+	public Gradient(Expression exp) throws DifferentiateExpression {
 		List<String> coords = exp.getVariables();
 		init(exp, coords);
 	}
@@ -268,18 +269,13 @@ public class Gradient {
 	 * this constructor accepts gradient so it is useful for second derivatives
 	 * do not forget to specify ORIGINAL variables list 
 	 */
-	public Gradient(Gradient g, ArrayList<String> variables) {
+	public Gradient(Gradient g, ArrayList<String> variables) throws ExpressionException {
 		Expression exp = null;
-		try {
-			exp = new Expression(g.toString());
-		} catch (ExpressionException e) {
-			// TODO Auto-generated catch block
-			//shouldn't happen???
-		}
+		exp = new Expression(g.toString());
 		init(exp, variables);
 	}
 
-	private void init(Expression exp, List<String> coords) {
+	private void init(Expression exp, List<String> coords) throws DifferentiateExpression {
 		int i;
 		final int n = coords.size();
 		this.pder = new Expression[n];
@@ -287,8 +283,7 @@ public class Gradient {
 			try {
 				this.pder[i] = calculatePartialDerivative(exp.clone(), coords.get(i));
 			} catch (ExpressionException e) {
-				// shouldn't happen ???? 
-				pder[i] = null;
+				throw new DifferentiateExpression("Can't calculate partial derivative: " + e.getMessage());
 			}
 		}
 //		for (i = 0; i < n; i++) {
