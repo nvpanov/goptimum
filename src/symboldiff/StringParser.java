@@ -227,7 +227,7 @@ public class StringParser extends Expression {
       return this.orig_expr;
     }
     
-    private static final int maxLength = 100;
+    private static final int maxLength = 200;
     public StringParser(String expr) throws IncorrectExpression {
         if (expr == null) {
         	throw new IncorrectExpression("null-string as an expression");

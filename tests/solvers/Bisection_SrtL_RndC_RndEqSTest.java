@@ -1,19 +1,15 @@
 package solvers;
 
-import java.util.Random;
 import net.sourceforge.interval.ia_math.RealInterval;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import testharness.TestHarness;
 import algorithms.Algorithm;
 
 public class Bisection_SrtL_RndC_RndEqSTest {
-	protected Random rnd = new Random();
 	protected TestHarness test = new TestHarness();
 
-	//	@Ignore
 	@Test(timeout=12*1000) //12 sec
 	public final void test1() {
 		Algorithm a = new Bisection_SrtL_RndC_RndEqS();
@@ -24,7 +20,7 @@ public class Bisection_SrtL_RndC_RndEqSTest {
 	@Test(timeout=12*1000) //12 sec
 	public final void test11() {
 		Algorithm a = new Bisection_SrtL_RndC_RndEqS();
-		final int dim = rnd.nextInt(9)+1;
+		final int dim = 2;
 		test.f_DeJong_NotSim(a, dim);
 	}
 	@Test(timeout=12*1000) //12 sec

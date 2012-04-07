@@ -14,14 +14,15 @@ import splitters.Splitter;
 import worklists.WorkList;
 
 public class IntervalAndPointAlgorithm extends BaseAlgorithm {
-	private BaseAlgorithm intervalAlg;
-	private PointAlgorithm pointAlg;
+	protected BaseAlgorithm intervalAlg;
+	protected PointAlgorithm pointAlg;
 	private int iterationCount = 0;
 	public IntervalAndPointAlgorithm(IntervalSolver intervalAlg, PointAlgorithm pointAlg) {
 		assert(intervalAlg != null && pointAlg != null);
 		this.intervalAlg = (BaseAlgorithm)intervalAlg;
 		this.pointAlg = pointAlg;		
 	}
+	protected IntervalAndPointAlgorithm() {} // for Solver
 	
 	@Override
 	public void solve() {

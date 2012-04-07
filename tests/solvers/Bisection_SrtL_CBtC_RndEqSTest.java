@@ -29,7 +29,7 @@ public class Bisection_SrtL_CBtC_RndEqSTest {
 	@Test(timeout=12*1000) //12 sec
 	public final void test2() {
 		Algorithm a = new Bisection_SrtL_CBtC_RndEqS();
-		RealInterval area = new RealInterval(-90, 200);
+		RealInterval area = new RealInterval(-1, 1);
 		test.f_Price5_Zero(a, area);
 	}
 	@Test(timeout=12*1000) //12 sec
@@ -41,7 +41,7 @@ public class Bisection_SrtL_CBtC_RndEqSTest {
 	@Test(timeout=12*1000) //12 sec
 	public final void test4() {
 		Algorithm a = new Bisection_SrtL_CBtC_RndEqS();
-		RealInterval area = new RealInterval(-10, 20);
+		RealInterval area = new RealInterval(-2, 2);
 		test.f_SixHumpCamelBack(a, area);
 	}	
 }

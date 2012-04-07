@@ -64,18 +64,16 @@ public class IntervalAndPointAlgorithmTest {
 //	@Ignore
 	@Test//(timeout=3*1000) //3 sec
 	public final void test_RosenbrockGn() {
-		int dim = 16;
-		//RealInterval area = new RealInterval(-100, 100);
-		//d=8	- 1s, (with debug output)
+		int dim = 8;
+		RealInterval area = new RealInterval(-100, 100);
+		//d=8	- 1s, (with debug output) !!! now it 3!!!!
 		// 	16	- 8s,
 		//  32	- 90
 		
-		RealInterval area = new RealInterval(-rnd.nextInt(10)*100 - 1, rnd.nextInt(10)*200 + 1);
+		//RealInterval area = new RealInterval(-rnd.nextInt(10)*100 - 1, rnd.nextInt(10)*200 + 1);
 
 		IntervalSolver iSolver = new Bisection_SrtL_CBtC_BigEqS();
-		FunctionNEW f = new Function_RosenbrockG_nD(dim);
 		PointAlgorithm pointAlg = new SteepestDescent();
-		//pointAlg.setFunction(f);
 
 		Algorithm algo = new IntervalAndPointAlgorithm(iSolver, pointAlg);
 		long start = System.currentTimeMillis();

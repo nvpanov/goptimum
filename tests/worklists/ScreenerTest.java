@@ -64,9 +64,6 @@ public class ScreenerTest {
 
 	@Test
 	public final void check1Derivative() {
-		Function_Rastrigin10_2D f = new Function_Rastrigin10_2D();
-		// f = x^2 + y^2 - cos(18*x) - cos(18*y)
-		// f'x = 2x + 18sin(18x). 0 in 0
 		s = new Screener(0);
 		
 		Box b;

@@ -589,7 +589,6 @@ public class Expression implements Cloneable {
 	///////////////////////////////////////////////////////////////////
 	
 	public RealInterval evaluate(Box area) {
-		assert(area.getDimension() == getVariables().size());
 		if (isConstant())
 			return new RealInterval(getConstantValue());
 		if (isVariable())
