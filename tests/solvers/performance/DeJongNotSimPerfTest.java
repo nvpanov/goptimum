@@ -21,7 +21,7 @@ public class DeJongNotSimPerfTest {
 	protected final int warmup = 0;
 	int dim = 1;
 	
-/*
+
 	@BenchmarkOptions(benchmarkRounds = runs, warmupRounds = warmup)
 	@Test
 	public final void DeJongNotSimPerf_BisectionAll_d5() {
@@ -35,7 +35,7 @@ public class DeJongNotSimPerfTest {
 		int dim = 5;
 		run(a, dim);
 	}	
-*/	
+	
 	@BenchmarkOptions(benchmarkRounds = runs, warmupRounds = warmup)
 	@Test
 	public final void DeJongNotSimPerf_PointInterval_d5() {

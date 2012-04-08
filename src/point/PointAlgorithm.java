@@ -11,6 +11,8 @@ public abstract class PointAlgorithm /*implements Runnable*/ {
 	protected final int maxSteps = 100;
 	protected final double stepFromSearchAreaSizeFactor = 0.25;
 	
+	protected final boolean logging = false;
+	
 	protected double optVal;
 	protected double optArg[];
 	
@@ -23,7 +25,7 @@ public abstract class PointAlgorithm /*implements Runnable*/ {
 	public double localMinimum(Box area) {
 		minimize(area);
 		if (!area.contains(optArg)) {
-			System.out.println("Point algorithm found local optima that is outside the search area. Return middle point..");
+			if (logging) System.out.println("Point algorithm found local optima that is outside the search area. Return middle point..");
 			optArg = middleAreaPoint(area);
 			optVal = function.calculatePoint(optArg);
 		}
