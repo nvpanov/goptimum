@@ -61,7 +61,29 @@ public class ExpressionTest {
 		res = exp.evaluate(area);
 		check = IAMath.add(IAMath.mul(iVal,iVal), 3);
 		assertTrue(Math.abs(res.lo() - check.lo()) < 1e-3);
-		assertTrue(Math.abs(res.hi() - check.hi()) < 1e-3);		
+		assertTrue(Math.abs(res.hi() - check.hi()) < 1e-3);
+		
+//		res = exp.evaluate((Box)null);
+
+		try {
+			exp = new Expression("f(x)");
+			fail("exception expected");
+		} catch (Exception e) {
+			assertTrue(e.getMessage().contains("Unsupported function f(x)"));			
+		}
+		double[] p = {2,0};		
+		exp = new Expression("x/0");
+		try {
+			exp.evaluate(p);
+			fail("exception expected");
+		} catch (AssertionError e) { }		
+
+		exp = new Expression("x/y");
+		try {
+			exp.evaluate(p);
+			fail("exception expected");
+		} catch (AssertionError e) { }		
+
 	}
 	@Test
 	public final void testBrackets() throws Exception {

@@ -704,6 +704,37 @@ public class SimplifierTest {
 	public void removeNegativeInPower() throws ExpressionException {
 		//x*y^-z => x/y^z; x/y^-z => x*y^z
 		String f;
+		// negative in mantissa
+		f = "-x^y"; 
+		exp = new Expression(f);
+		Simplifier.removeNegativeInPower(exp);
+		assertEquals("-x^y", exp.toString());
+		assertTrue(exp.isNegate());
+		
+		f = "-x^2";
+		exp = new Expression(f);
+		Simplifier.removeNegativeInPower(exp);
+		assertEquals("x^2", exp.toString());
+		
+		f = "-x^-2";
+		exp = new Expression(f);
+		Simplifier.removeNegativeInPower(exp);
+		assertEquals("-x^-2", exp.toString());
+		assertTrue(exp.isNegate());
+
+		f = "-x^3";
+		exp = new Expression(f);
+		Simplifier.removeNegativeInPower(exp);
+		assertEquals("-x^3", exp.toString());
+		assertTrue(exp.isNegate());
+
+		f = "-x^-y";
+		exp = new Expression(f);
+		Simplifier.removeNegativeInPower(exp);
+		assertEquals("-x^-y", exp.toString());
+		assertTrue(exp.isNegate());
+		
+		////
 		f = "-x*y^-z";
 		exp = new Expression(f);
 		Simplifier.removeNegativeInPower(exp);

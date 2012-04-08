@@ -28,6 +28,12 @@ public class Function_RosenbrockG_nDTest {
 		assertEquals("100*(x1-x0^2)^2+(x0-1)^2", f.toString());
 		f = new Function_RosenbrockG_nD(3);
 		assertEquals("100*((x1-x0^2)^2+(x2-x1^2)^2)+(x0-1)^2+(x1-1)^2", f.toString());
+		try {
+			f = new Function_RosenbrockG_nD(1);
+			fail("exception expected");
+		} catch (IllegalArgumentException e) {
+			// OK.
+		}
 	}
 	@Test
     public void testPoints() {

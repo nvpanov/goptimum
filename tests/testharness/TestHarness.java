@@ -87,6 +87,7 @@ public class TestHarness {
 		long t0 = System.currentTimeMillis();
 		algorithm.solve();
 		long time = System.currentTimeMillis() - t0;
+		
 
 		final int dim = area.getDimension();
 		Box[] optArea = algorithm.getOptimumArea();

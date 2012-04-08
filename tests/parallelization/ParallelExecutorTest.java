@@ -46,7 +46,7 @@ public class ParallelExecutorTest {
 		assertTrue(opt.wid() < executor.getPrecision());
 		assertTrue(Math.abs(opt.hi() - 0) < executor.getPrecision());
 	}
-	
+	@Ignore	
 	@Test
 	public void testDeJong2() {
 		int threads = 2* 3;

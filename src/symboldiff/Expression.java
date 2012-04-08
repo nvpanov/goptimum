@@ -470,9 +470,13 @@ public class Expression implements Cloneable {
 			evaluate(new Box(this.getDimension(), new RealInterval(1)));
 			double p[] = new double[this.getDimension()]; // all zeroes
 			evaluate(p);
-		} catch (Exception e) {
+		} catch (UnsupportedOperationException e) {
 			// there is at least one unsupported function
 			throw new IncorrectExpression("The expression can't be evaluated. " + e.getMessage() + "");
+		} 
+		catch (Exception | AssertionError e) {
+			// it is OK here -- input data is zeroes
+			// do nothing. will fall later in evaluation if there is a real problem
 		}
 	}
 
@@ -598,7 +602,10 @@ public class Expression implements Cloneable {
 		if (left != null) // left could be null for unary expressions
 			l = left.evaluate(area);
 		r = right.evaluate(area);
-		return evaluate(op, l, r);		
+		RealInterval res = evaluate(op, l, r);
+		assert( !Double.isInfinite(res.lo()) && !Double.isInfinite(res.hi()) );
+		assert( !Double.isNaN(res.lo()) && !Double.isNaN(res.hi()) );
+		return res;
 	}
 	// evaluate for points
 	public double evaluate(double... point) {
@@ -612,7 +619,9 @@ public class Expression implements Cloneable {
 		if (left != null) // left could be null for unary expressions
 			l = left.evaluate(point);
 		r = right.evaluate(point);
-		return evaluate(op, l, r);		
+		double res = evaluate(op, l, r);
+		assert( !Double.isInfinite(res) && !Double.isNaN(res) );
+		return res;
 	}
 	private static RealInterval evaluate(String op, RealInterval l, RealInterval r) {
 		try {

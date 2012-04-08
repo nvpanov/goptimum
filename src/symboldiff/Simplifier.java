@@ -222,9 +222,8 @@ public class Simplifier {
 			exp.setLeftExpression( l.getRightExpression() );
 			if (r.isConstant() && r.getConstantValue()%2 == 0)
 				return true;
-			Expression newExp = Expression.newExpression(exp.getLeftExpression(), 
-														exp.getRightExpression(), 
-														exp.getOperation());
+			Expression newExp = 
+					Expression.newExpression(exp.getLeftExpression(), r, "^");
 			exp.setTo(Expression.newExpression(null, newExp, "negate"));
 			return true;
 		}
