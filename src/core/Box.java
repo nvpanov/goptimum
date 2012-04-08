@@ -189,4 +189,17 @@ public class Box implements Cloneable {
 		return false;
 	}
 
+	/*
+	 * returns true if the box arguments (not function) contains this point 
+	 */
+	public boolean contains(double... point) {
+		final int dim = getDimension();
+		assert dim == point.length : "Dimension mismatch"; 
+		for (int i = 0; i < dim; i++) {
+			if ( !getInterval(i).contains(point[i]) )
+				return false;
+		}
+		return true;
+	}
+
 }

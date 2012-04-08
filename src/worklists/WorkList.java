@@ -25,6 +25,8 @@ public abstract class WorkList {
 	private static final long memoryThreshold = 1 * 1024*1024; // 1 Mb;
 
 	boolean _dbg_InitialAreaAddedCorrectly = false;
+	
+	private static final boolean logging = false;
 
 
 	/*
@@ -169,6 +171,7 @@ public abstract class WorkList {
 		// do not use here something like "if(collection.size() == 0)" 
 		// because @addAllEges@ calls @add@ and the size is still equal to zero.
 		if (screener.checkPassed(box)) {
+			if (logging) System.out.println("     -> Box " + box.getFunctionValue() + " PASSED the screening.");
 			if(collection.size() == 0) { // this is the first box -- 
 				addAreaAndAllEges(box); 		// -- has to take care about border points
 										// ...
@@ -178,6 +181,8 @@ public abstract class WorkList {
 										// for this and trigger it in @clearAll@ and so on..
 			} else
 				addChecked(box);
+		} else {
+			if (logging) System.out.println("     -> Box " + box.getFunctionValue() + " FAILD the screening.");
 		}
 	}
 	/*
@@ -276,8 +281,8 @@ public abstract class WorkList {
 		int removed = removeRejected2(threshold);
 		screener.resetStatistics();
 		
-//		System.out.println("WorkList:  -- Cleaned. Was: " + was + ", removed: " + removed + 
-//				", now: " + collection.size());
+		System.out.println("WorkList:  -- Cleaned. Was: " + was + ", removed: " + removed + 
+				", now: " + collection.size());
 		return removed;
 	}
 	// first variant of list cleaning.
