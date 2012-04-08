@@ -281,7 +281,7 @@ public abstract class WorkList {
 		int removed = removeRejected2(threshold);
 		screener.resetStatistics();
 		
-		System.out.println("WorkList:  -- Cleaned. Was: " + was + ", removed: " + removed + 
+		if (logging) System.out.println("WorkList:  -- Cleaned. Was: " + was + ", removed: " + removed + 
 				", now: " + collection.size());
 		return removed;
 	}
