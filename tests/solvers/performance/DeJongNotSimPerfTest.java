@@ -17,20 +17,25 @@ public class DeJongNotSimPerfTest {
 	public MethodRule benchmarkRun = new BenchmarkRule();
 	  
 	protected TestHarness test = new TestHarness();
-	protected final int runs = 1;
-	protected final int warmup = 0;
-	int dim = 1;
-	
+	protected final int runs = 3;
+	protected final int warmup = 1;
+	int dim = 16;
 
+	//(w=1,i=3)
+	// dim									1		2		4		8	10	16
+	// Bisection_SrtL_CBtC_AllEqS			0.2		0.2		0.2		0.2		--
+	// Bisection_SrtL_CBtC_BigEqS			0		0		0.17	8.7		--
+	// PointIntervalBis_SrtL_CBtC_BigEqS	0.2		0.2		0.2		0.18	0.3
 	@BenchmarkOptions(benchmarkRounds = runs, warmupRounds = warmup)
 	@Test
-	public final void DeJongNotSimPerf_BisectionAll_d5() {
+	public final void DeJongNotSimPerf_BisectionAll() {
 		Algorithm a = new Bisection_SrtL_CBtC_AllEqS();
 		run(a, dim);
 	}
+	
 	@BenchmarkOptions(benchmarkRounds = runs, warmupRounds = warmup)
 	@Test
-	public final void DeJongNotSimPerf_BisectionBig_d5() {
+	public final void DeJongNotSimPerf_BisectionBig() {
 		Algorithm a = new Bisection_SrtL_CBtC_BigEqS();
 		int dim = 5;
 		run(a, dim);
@@ -38,7 +43,7 @@ public class DeJongNotSimPerfTest {
 	
 	@BenchmarkOptions(benchmarkRounds = runs, warmupRounds = warmup)
 	@Test
-	public final void DeJongNotSimPerf_PointInterval_d5() {
+	public final void DeJongNotSimPerf_PointInterval() {
 		Algorithm a = new PointIntervalBis_SrtL_CBtC_BigEqS();
 		int dim = 5;
 		run(a, dim);
