@@ -4,7 +4,6 @@ package solvers;
 import java.util.Random;
 import net.sourceforge.interval.ia_math.RealInterval;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import testharness.TestHarness;

@@ -3,14 +3,10 @@ package solvers;
 import java.util.Random;
 import net.sourceforge.interval.ia_math.RealInterval;
 
-import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import testharness.TestHarness;
 import testharness.TestData;
-import testharness.TestResultAveraging;
 import algorithms.Algorithm;
 
 public class Bisection_SrtL_CBtC_BigEqSTest {
