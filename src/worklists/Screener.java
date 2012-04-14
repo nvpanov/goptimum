@@ -5,11 +5,50 @@ import core.Box;
 import functions.FunctionFactory;
 import functions.FunctionNEW;
 
+@SuppressWarnings("unused") // for profiling variables
 class Screener {
 	private volatile double lowBoundMaxValue = Double.MAX_VALUE;
 	private double lowBoundMaxValueDelta;
 	private int updatesCount;
 	private boolean useDerivativesCheck = true;
+	private int byValueOnly = 0;
+	private int byFirstOnly = 0;
+	private int byValAndFirst = 0;
+	private int bySecondOnly = 0;
+	private int byValAndFirstAndSecond = 0;
+	private int byValAndSecond = 0;
+	private int byFirstAndSecond = 0;
+	private int total = 0;
+	private long time2Der = 0;
+	private long time1Der = 0;
+	private long timeBorder = 0;
+	private long timeByValue = 0;
+	private static final boolean profiling = true;
+	
+	// if not interested in profiling -- comment this out for performance
+	// GC doesn't like classes with finalize
+	@Override
+	public void finalize() {
+		assert profiling : "Comment this method out! Use it for profiling only.";
+		assert total == byValueOnly + byValAndFirst + byValAndSecond + byValAndFirstAndSecond + 
+				byFirstOnly + byFirstAndSecond + bySecondOnly : "Screening checksum faild";
+		
+		System.out.println("-------Screening stats {{");
+		System.out.println(">"+FunctionFactory.getTargetFunction() + "<");
+		System.out.println("  By Value  only: " + byValueOnly + "\t\t (" + (100*byValueOnly/total) + "%)");
+		System.out.println("  By First  only: " + byFirstOnly + "\t\t (" + (100*byFirstOnly/total) + "%)");
+		System.out.println("  By Second only: " + bySecondOnly + "\t\t (" + (100*bySecondOnly/total) + "%)");
+		System.out.println("      val+1d:     " + byValAndFirst + "\t\t (" + (100*byValAndFirst/total) + "%)");
+		System.out.println("      val+2d:     " + byValAndSecond + "\t\t (" + (100*byValAndSecond/total) + "%)");
+		System.out.println("      1d+2d:      " + byFirstAndSecond + "\t\t (" + (100*byFirstAndSecond/total) + "%)");
+		System.out.println("      val+1d+2d:  " + byValAndFirstAndSecond + "\t\t (" + (100*byValAndFirstAndSecond/total) + "%)");
+		long totalT = time2Der + time1Der + timeBorder + timeByValue;
+		System.out.println("   byVal Time:  " + timeByValue + "\t\t (" + (100*timeByValue/totalT) + "%)");		
+		System.out.println("   by1D  Time:  " + time1Der + "\t\t (" + (100*time1Der/totalT) + "%)");		
+		System.out.println("   by2D  Time:  " + time2Der + "\t\t (" + (100*time2Der/totalT) + "%)");
+		System.out.println("   borderTime:  " + timeBorder + "\t\t (" + (100*timeBorder/totalT) + "%)");
+		System.out.println("}} Screening stats ------\n");
+	}
 	
 	public Screener(double startLimit) {
 		resetStatistics();
@@ -21,7 +60,68 @@ class Screener {
 	}
 
 	public boolean checkPassed(Box box) {
+		if (profiling )
+			return checkPassed_Profiling(box);
 		return checkByValue(box) && checkDerivatives(box); 
+	}
+	/*
+	 * Logic is equal to @checkPassed()@ but this version is also
+	 * collecting statistics about effectiveness of each screening type.
+	 */
+	public boolean checkPassed_Profiling(Box box) {
+		boolean byV  = false;
+		boolean by1D = false;
+		boolean by2D = false;
+		long startT = System.nanoTime();
+		boolean check = checkByValue(box);
+		long stopT = System.nanoTime();
+		timeByValue += stopT-startT;
+		if (!check) {
+			byV = true;
+			byValueOnly++;
+		}
+		startT = System.nanoTime();
+		check = isBorder(box);
+		stopT = System.nanoTime();
+		timeBorder += stopT-startT;
+		if (!check) {
+			startT = System.nanoTime();
+			check = check1Derivative(box);
+			stopT = System.nanoTime();
+			time1Der += stopT-startT;
+			if (!check) {
+				by1D = true;
+				if (byV) {
+					byValAndFirst++;
+					byValueOnly--;
+				} else
+					byFirstOnly++;
+			}
+			startT = System.nanoTime();
+			check = check2Derivative(box);
+			stopT = System.nanoTime();
+			time2Der += stopT-startT;
+			if (!check) {
+				by2D = true;
+				if (byV) {
+					if (by1D) {
+						byValAndFirst--;
+						byValAndFirstAndSecond++;
+					} else {
+						byValAndSecond++;
+					}
+				} else if (by1D) {
+					byFirstOnly--;
+					byFirstAndSecond++;
+				} else 
+					bySecondOnly++;
+			}
+		}
+		if (byV || by1D || by2D) {
+			total++; // check sum
+			return false;
+		}
+		return true;
 	}
 
 	/*  
