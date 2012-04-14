@@ -62,7 +62,7 @@ public class Function_DeJong_nDTest {
     @Test
     public void test1Der() {
     	long seed = System.currentTimeMillis();
-    	seed = 1295619079035L;
+//    	seed = 1295619079035L;
     	rnd.setSeed(seed);
     	int dim = rnd.nextInt(10) + 1;
     	Function_DeJong_nD f = new Function_DeJong_nD(dim);

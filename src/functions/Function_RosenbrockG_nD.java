@@ -1,8 +1,10 @@
 package functions;
 
-/**
- * @author  nvpanov
- */
+// http://www.zsd.ict.pwr.wroc.pl/files/docs/functions.pdf
+// p.6
+// f(1) = 0
+// [-2.048, 2.048]
+
 public class Function_RosenbrockG_nD extends FunctionNEW {
 	public Function_RosenbrockG_nD(int dim) {
 		if (dim < 2)

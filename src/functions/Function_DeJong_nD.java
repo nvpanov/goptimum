@@ -1,9 +1,10 @@
 package functions;
 
-/*
- * The class is kept for backward compatibility with previously written tests
- * And this function is not more than a \sum x_i^2
- */
+// http://www.zsd.ict.pwr.wroc.pl/files/docs/functions.pdf
+// p.2
+// f(x) = 0, x = 0
+// [-5.12, 5.12]
+
 public class Function_DeJong_nD extends FunctionNEW {
 
 	public Function_DeJong_nD(int dim) {
