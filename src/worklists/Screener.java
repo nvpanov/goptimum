@@ -6,35 +6,47 @@ import functions.FunctionFactory;
 import functions.FunctionNEW;
 
 class Screener {
-	private int notImpl = 1; // stub
 	private volatile double lowBoundMaxValue = Double.MAX_VALUE;
 	private double lowBoundMaxValueDelta;
 	private int updatesCount;
-	private boolean use1Derivative = true;
+	private boolean useDerivativesCheck = true;
 	
 	public Screener(double startLimit) {
 		resetStatistics();
 		lowBoundMaxValue = startLimit;		
 	}
-	public void switchOff1DerivativeCheck() {
-		use1Derivative = false;
+	// for test purposes mostly
+	public void switchOffDerivativesCheck() {
+		useDerivativesCheck = false;
 	}
 
 	public boolean checkPassed(Box box) {
-		return checkByValue(box) && 
-				check1Derivative(box) && 
-				check2Derivative();
+		return checkByValue(box) && checkDerivatives(box); 
 	}
 
-	protected boolean check2Derivative() {
-		if(notImpl > 0) {
-			notImpl--;
-//			System.out.println("Screener.check2Derivative() not implemented and always returns true!");
+	/*  
+	 * SECOND derivative
+	 * a function can reach a minimum on an interval only if
+	 * 1) this is a border point of initial search area
+	 * 2) the function is concave on this interval.
+ 	 */
+	protected boolean checkDerivatives(Box box) {
+		if (!useDerivativesCheck)
+			return true;
+		if (isBorder(box)) // we can't screen out any border point of original search area
+			return true;   // because of derivatives. 
+		return check1Derivative(box) & check2Derivative(box);
+	}
+	private boolean isBorder(Box box) {
+		for (int i = box.getDimension()-1; i >= 0; --i) {
+			if (box.getInterval(i).wid() == 0) // A workaround for edges. Worklist adds zero-width
+												// edges for initial search area. 
+												// See Worklist.addAreaAndAllEges()
+				return true;
 		}
-		return true;
+		return false;			
 	}
-
-	/*
+	/* FIRST derivative
 	 * A point could be a minimum or a maximum if and only if the derivative
 	 * is equal to zero in this point. 
 	 * Therefore interval extensions of all partial derivatives have to contain zero.
@@ -42,37 +54,38 @@ class Screener {
 	 * f(x) = x, min_{0<x<1}(f) = f(0), but f'(x) != 0.
 	 * BUT instead of performing such checks each time we just have to add all ages to the
 	 * working list from the very beginning! Much simple and less code: )
-	 * Because of this it doesn't screen out boxes with at least 
+	 * Because of this it doesn't screen out boxes with at least one side width = 0
 	 */
+	 
 	protected boolean check1Derivative(Box box) {
-		if (!use1Derivative)
-			return true;
-		for (int i = box.getDimension()-1; i >= 0; --i) {
-			if (box.getInterval(i).wid() == 0)
-				return true; // a workaround for edges. the only chance for a side to got its width = 0
-								// is to be added as a border edge. See WorkList.addSearchArea().  
-		}
 		FunctionNEW function = FunctionFactory.getTargetFunction();
 		for (int i = box.getDimension()-1; i >= 0; --i) {
+			assert (box.getInterval(i).wid() != 0);
+			
 			RealInterval f1d = function.calculate1Derivative(box, i);
 			if (f1d == null)
 				break;
-			if (!f1d.contains(0)) {
-/*				
-				boolean isBorder = initialSearchArea.hasAtLeastOneCommonSide(box);
-				if (isBorder) {
-					deflate(box, initialSearchArea, function);
-					//return true; // we have to keep such box
-					  return checkByValue(box); // @deflate@ updates interval estimation, 
-					                            // so there still is a chance to get rid from this box.
-				} else
-					return false; // doesn't have edge point -- could be thrown away
-*/
-//				System.out.println("   - faild checkBy1Der: " + box);
+			if (!f1d.contains(0))
 				return false;
-			}
 		}
 		return true; // check passed
+	}
+	/*
+	 * A twice differentiable function is convex on an interval if and only if its 
+	 * second derivative is non-negative there; this gives a practical test for convexity.
+	 */
+	protected boolean check2Derivative(Box box) {
+		FunctionNEW function = FunctionFactory.getTargetFunction();
+		for (int i = box.getDimension()-1; i >= 0; --i) {
+			assert (box.getInterval(i).wid() != 0);
+			
+			RealInterval f2d = function.calculate2Derivative(box, i);
+			if (f2d == null)
+				break;
+			if (f2d.hi() < 0) 
+				return false;
+		}
+		return true;
 	}
 	boolean checkByValue(Box box) {
 		double lo = box.getFunctionValue().lo();

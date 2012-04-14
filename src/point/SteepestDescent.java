@@ -8,9 +8,9 @@ public class SteepestDescent extends PointAlgorithm {
 
 	double[] delta;  
 
-	public SteepestDescent(FunctionNEW f) {
+	public SteepestDescent(FunctionNEW f, Box area) {
 		super();
-		setFunction(f);
+		setProblem(f, area);
 	}
 	public SteepestDescent() {
 		super();
@@ -40,7 +40,8 @@ public class SteepestDescent extends PointAlgorithm {
 											// if it performs good we can decide to run its again
 											// but @step already contains reduced values.
 				
-//System.out.println("SteepestDescent : starting value " + startingVal);		
+		if (logging) 
+			System.out.println("SteepestDescent : starting value " + startingVal);		
 		
 		final int dim = point.length;
 		double delta[] = new double[dim];
@@ -79,12 +80,14 @@ public class SteepestDescent extends PointAlgorithm {
 			if (deltaSumAllDim < epsilonNd)
 				break;
 		}
-		//System.out.println("SteepestDescent :    final value " + curMinVal + "(" + c + " steps)" );
+		if (logging)
+			System.out.println("SteepestDescent :    final value " + optVal + "(" + c + " steps)" );
 		
 		// run its once more if it was so good
 		if (c == maxSteps && 
 				(startingVal - optVal) > (startingVal/2) ) { // better than 50% improvement
-//System.out.println("SteepestDescent :    ONE MORE CYCLE" );	
+			if (logging)
+				System.out.println("SteepestDescent :    ONE MORE CYCLE" );	
 			for (int i = 0; i < dim; i++) {
 				savedStep[i] /= 4;
 			}

@@ -57,7 +57,8 @@ public abstract class WorkList {
 	 * Consider the following case:
 	 * f(x) = x, min_{0<x<1}(f) = f(0), but f'(x) != 0.
 	 * BUT instead of checking if a box contains borders we just add all ages to the
-	 * working list from the very beginning! Much simple and less code: )  
+	 * working list from the very beginning! Much simple and less code: )
+	 * See Screener.checkPassed(), Screener.isBorder()  
 	 */
 	protected void addAreaAndAllEges(Box area) {
 		assert(collection.size() == 0); 
@@ -372,7 +373,7 @@ public abstract class WorkList {
 	public double getLowBoundMaxValue() {
 		return screener.getLowBoundMaxValue();
 	}
-	public void switchOff1DerivativeCheck() {
-		screener.switchOff1DerivativeCheck();
+	public void switchOffDerivativesCheck() {
+		screener.switchOffDerivativesCheck();
 	}
 }

@@ -10,6 +10,11 @@ public abstract class PointAlgorithm /*implements Runnable*/ {
 	protected FunctionNEW function;
 	protected final int maxSteps = 100;
 	protected final double stepFromSearchAreaSizeFactor = 0.25;
+	protected Box initialSearchArea; // point algorithm doesn't allowed to return extremes outside this area!
+										// |\_|
+	 									// |  |\ <-- f(x)
+										// ^  ^ \.
+										// area  ^-minimum OUTSIDE the search area -- this will be WRONG result
 	
 	protected final boolean logging = false;
 	
@@ -19,14 +24,22 @@ public abstract class PointAlgorithm /*implements Runnable*/ {
 	public PointAlgorithm() {
 //		optVal = Double.MAX_VALUE;
 	}
-	public void setFunction(FunctionNEW f) {
+	public void setProblem(FunctionNEW f, Box initialSearchArea) {
 		function = f;
+		this.initialSearchArea = initialSearchArea;
 	}
 	public double localMinimum(Box area) {
 		minimize(area);
-		if (!area.contains(optArg)) {
-			if (logging) System.out.println("Point algorithm found local optima that is outside the search area. Return middle point..");
-			optArg = middleAreaPoint(area);
+		if (!initialSearchArea.contains(optArg)) { // initialSearchArea, not area!
+			if (logging) { 
+				System.out.println("Point algorithm found local optima that is " +
+						"outside the search area. Return closest point..");
+			}
+			// we spent quite significant efforts on point optimization so we will spend a little bit more
+			// in order to keep the result at least some how useful. Returning a middle point in this case 
+			// proved to be a bad idea.  
+			//optArg = middleAreaPoint(area);
+			setToClosestAreaPoint(optArg);
 			optVal = function.calculatePoint(optArg);
 		}
 		return optVal;
@@ -51,5 +64,24 @@ public abstract class PointAlgorithm /*implements Runnable*/ {
 			point[i] = ii.lo() + ii.wid()/2;
 		}
 		return point;
+	}
+	/*
+	 * if the point is outside of @initialSearchArea@ it will change it to the nearest border point:
+	 *      ____      ____
+	 *     |    | => |    |
+	 *     |____|    |__._|
+	 * point->.         ^-point 
+	 */     
+	private void setToClosestAreaPoint(double[] point) {
+		int dim = initialSearchArea.getDimension();
+		assert(point.length == dim);
+		
+		for (int i = 0; i < dim; i++) {
+			RealInterval ii = initialSearchArea.getInterval(i);
+			if (ii.lo() > point[i])
+				point[i] = ii.lo();
+			else if (ii.hi() < point[i])
+				point[i] = ii.hi();
+		}
 	}
 }

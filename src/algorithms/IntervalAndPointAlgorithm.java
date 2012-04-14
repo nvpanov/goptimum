@@ -71,7 +71,7 @@ public class IntervalAndPointAlgorithm extends BaseAlgorithm {
 	@Override
 	public void setProblem(FunctionNEW f, Box area) {
 		intervalAlg.setProblem(f, area);
-		pointAlg.setFunction(f);
+		pointAlg.setProblem(f, area);
 	}
 /*
 	@Override
