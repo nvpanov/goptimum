@@ -5,47 +5,7 @@ import symboldiff.exceptions.IncorrectExpression;
 public class StringParser extends Expression {
   protected String orig_expr   = null;
   private String parsed_expr[] = null;
-/*  private String binary_operations[] = { "+", 
-                                         "-", 
-                                         "/", 
-                                         "*", 
-                                         "^" 
-                                       };
-  
-  private String unary_operations[] = { "arccos", 
-                                        "arcsin",
-                                        "arctg",
-                                        "arcctg",
-                                        "sin", 
-                                        "cos",                                        
-                                        "tg", 
-                                        "ctg", 
-                                        "ln", 
-                                        "exp",                                    
-                                        "sqrt"
-                                      };
-    
-    protected boolean isBinaryOperation(String op) {
-      int i;
-        for (i = 0; i < binary_operations.length; i++) {
-            if (op.equalsIgnoreCase(binary_operations[i])) {
-              return true;
-            }
-        }
-      return false;
-    }
-    
-    protected boolean isUnaryOperation(String op) {
-      int i;
-        for (i = 0; i < unary_operations.length; i++) {
-            if (op.equalsIgnoreCase(unary_operations[i])) {
-              return true;
-            }
-        }
-      return false;
-    }
-*/    
-    private int findAppopriateBracketPos(String expr) {
+  private int findAppopriateBracketPos(String expr) {
       int i = expr.indexOf("(");
       int cntr;
         if (i == -1) {

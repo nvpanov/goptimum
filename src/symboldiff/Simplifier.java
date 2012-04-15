@@ -27,7 +27,8 @@ public class Simplifier {
 		boolean wasExpChanged = false;
 		final int maxTurns = 100;
 		int turns = 0;
-		
+
+		convertSQRTtoPOW(simplified);
 		do {
 			String prevToString = simplified.toString();
 			/*wasExpChanged = false;*/
@@ -67,6 +68,18 @@ public class Simplifier {
 		assert(turns < maxTurns); // just to inform us about such case -- it could be a problem
 //		if (turns => maxTurns)
 //			throw new SimplificationStoped("Simplification was stoped after " + turns + " iterations.");
+	}
+
+	private static void convertSQRTtoPOW(Expression exp) {
+		if (exp == null)
+			return;
+		if ("sqrt".equals( exp.getOperation() )) {
+			exp.setOperation("^");
+			exp.setLeftExpression(exp.getRightExpression());
+			exp.setRightExpression(Expression.newConstant(0.5));
+		}
+		convertSQRTtoPOW( exp.getLeftExpression() );
+		convertSQRTtoPOW( exp.getRightExpression() );
 	}
 
 	/*
