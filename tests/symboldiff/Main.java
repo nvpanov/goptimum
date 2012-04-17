@@ -248,13 +248,27 @@ public class Main {
 		checkDerivatives("ln(x)*sin(x)", "cos(x)*ln(x)+sin(x)/x");
 		checkDerivatives("(1+x)*sin(x)*ln(x)", "(sin(x)+cos(x)+x*cos(x)*ln(x))*((1+x)*sin(x)/x)/x");
 		// ^^^ orig: (sin(x)+cos(x)+x*cos(x)*ln(x))*((1+x)*sin(x)/x)/x
-		// (1+x)*cos(x)
-		// ((1+x)*cos(x)+sin(x))*ln(x)+(1+x)*sin(x)/x
+		//   actual: ((1+x)*cos(x)+sin(x))*ln(x)+(1+x)*sin(x)/x   
+		// actual: (cos+x*cos+sin)*ln+sin/x+sin
+		// orig: (sin+cos+x*cos*ln)/x*(sin/x+sin)  
 	}
 	@Test
 	public void testDiff2_fails1() throws ExpressionException {
 		checkDerivatives("exp(x)/(x^(2))", "exp(x)*(x-2)/x^3"); 
 	}
+	@Test
+	public void test_Griewangk() throws ExpressionException {
+		String f = "1-cos(7*x2)*cos(x1)+2.5E-4*(x1^2+x2^2)";
+		f = "2.5E-4*(x1^2+x2^2)";
+		checkDerivatives(f, "5.0E-4*x1", "5.0E-4*x2");
+		f = "cos(7*x)";
+		checkDerivatives(f, "-7*sin(7*x)");
+		f = "cos(x2)*cos(x1)";
+		checkDerivatives(f, "-cos(x2)*sin(x1)", "-cos(x1)*sin(x2)");
+		f = "cos(7*x2)*cos(x1)";
+		checkDerivatives(f, "-cos(7*x2)*sin(x1)", "-7*cos(x1)*sin(7*x2)");
+	}
+	
 	
 	public static void checkDerivatives(String expression, String... diffs) throws ExpressionException {
 		Expression exp, df;
@@ -282,5 +296,4 @@ public class Main {
 			assertEquals(diffs[i+1], df.toString());			
 		}
 	}
-
 }

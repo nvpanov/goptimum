@@ -106,7 +106,15 @@ public class ExpressionTest {
 		assertEquals("a^b^c", exp.toString());
 		exp = new Expression("a^(b^c)");
 		assertEquals("a^(b^c)", exp.toString());
+	}
+	@Test
+	public void test_e() throws ExpressionException {
+		exp = new Expression("1.25E-4*x1^2");
+		assertEquals("1.25e-4*x1^2", exp.toString());
+		exp = new Expression("Z*1.25E-4*x1^2");
+		assertEquals("z*1.25e-4*x1^2", exp.toString());
 	}	
+	
 	@Test
 	public void test1() throws ExpressionException {
 		exp = new Expression("(a+b)/(c+d)");

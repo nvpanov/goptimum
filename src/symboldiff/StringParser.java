@@ -108,9 +108,15 @@ public class StringParser extends Expression {
                 			   && (expr.charAt(pos-1) == 'e') ) {
                 		try {
                 			Double.parseDouble(op1[op1.length-1].substring(0, op1[op1.length-1].length()-1)); //last element in op1[] w/o last char which is 'e'
-                    		op1[op1.length-1] += oper+op2[0]; 
-                    		op2[0] = "0"; // 1e-8 => 1e - 8 => 1e-8 - 0
-
+                    		// nvp 4/17/2012 {:
+                			//op1[op1.length-1] += oper+op2[0]; 
+                    		//op2[0] = "0"; 	// "1e-8"  => 1e  -  8    =>  1e-8 - 0
+                    						//  ^string   ^op1   ^op2     ^op1	 ^op2
+                			String number = op1[op1.length-1] + oper+op2[0];
+                    		op1[op1.length-1] = "(";
+                    		oper = number;
+                    		op2[0] = ")";
+                    		// }
                 		} catch (NumberFormatException e) {
 							// it is not our case. it just somevarfinisheswith_e+1
 						}

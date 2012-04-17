@@ -319,10 +319,12 @@ public class Simplifier {
 		optimized |= removeNegateForConsts(exp.getRightExpression());
 		if ( exp.isNegate() ) {
 			Expression op = exp.getRightExpression();
+/*// nvp 4/17/2012			
 			if (op.isConstant()) { // -2
 				exp.setTo(- op.getConstantValue() );
 				optimized = true;
 			}
+*/			
 			// for + and - we have to change sign for both operands
 			if ( (op.isAdd() || op.isSub())
 					&& canChangeSign(op) ) {
