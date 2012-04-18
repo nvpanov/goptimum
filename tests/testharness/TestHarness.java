@@ -77,6 +77,7 @@ public class TestHarness {
 		Box box = new Box(dim, area);
 		final double checkValue = 0;
 		final double checkArg = 1;
+		assert area.contains(checkArg) : "Global minima for this function is in point {1}. Test search area has to include it.";
 		return solveFunction(f, box, alg, checkValue, checkArg);
 	}
 	
@@ -98,18 +99,18 @@ public class TestHarness {
 	    
 		// check the value
     	if(!optValue.contains(checkValue)) {
-    		if ((int)checkValue - checkValue !=0) { // looks like xx.xxx => can be approximate
+    		if ((int)checkValue - checkValue !=0) { // check value looks like xx.xxx => can be approximate
     			final double delta = 1e-4;
     			if (Math.abs(optValue.hi() - checkValue) < delta ||
     					Math.abs(optValue.lo() - checkValue) < delta	) 
     			{
     				System.out.println(" > Found " + optValue + ", whiche check = " + checkValue + " (delta < " + delta + ")");
-    			} else {
-		    		System.out.println(" > Wrong optimum value was found!");
-		    		System.out.println(" > Found: " + optValue + ", it doesn't contain " + checkValue);
-		    		System.out.println(" > Dim: " + dim + ", area: " + area.getInterval(0));
-		    		fail("Wrong optimum VALUE was found by " + algorithm.toString() + " for " + f.toString() + " function!");
-    			}
+    			} 
+    		}else {
+	    		System.out.println(" > Wrong optimum value was found!");
+	    		System.out.println(" > Found: " + optValue + ", it doesn't contain " + checkValue);
+	    		System.out.println(" > Dim: " + dim + ", area: " + area.getInterval(0));
+	    		fail("Wrong optimum VALUE was found by " + algorithm.toString() + " for " + f.toString() + " function!");
     		}
     	}
 		
