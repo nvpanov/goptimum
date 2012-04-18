@@ -10,8 +10,12 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import symboldiff.exceptions.ExpressionException;
+
 import core.Box;
+import functions.FunctionFactory;
 import functions.FunctionNEW;
+import functions.Function_DeJong_nD;
 import functions.Function_Rastrigin10_2D;
 import functions.Function_RosenbrockG_nD;
 
@@ -63,18 +67,28 @@ public class ScreenerTest {
 	}
 
 	@Test
-	public final void check1Derivative() {
-		s = new Screener(0);
-		
+	public final void check1Derivative() throws Exception {
 		Box b;
-		b = new Box(2, new RealInterval(-5, 5));
-		assertTrue( s.check1Derivative(b) );
-		b = new Box(2, new RealInterval(0));
-		assertTrue( s.check1Derivative(b) );
-		b = new Box(2, new RealInterval(-101, -100));
-		assertFalse( s.check1Derivative(b) );
-		b = new Box(2, new RealInterval(100, 101));
-		assertFalse( s.check1Derivative(b) );
+		s = new Screener(0);
+		String functions[] = {"x^2+y^2+z^3", "x^2", "-x^20", "x^9"};
+		for (String f : functions) {
+			FunctionFactory.newFunction(f);
+			b = new Box(2, new RealInterval(-5, 5));
+			assertTrue( s.check1Derivative(b) );
+			b = new Box(2, new RealInterval(0));
+			assertTrue( s.check1Derivative(b) );
+			b = new Box(2, new RealInterval(-101, -100));
+			assertFalse( s.check1Derivative(b) );
+			b = new Box(2, new RealInterval(100, 101));
+			assertFalse( s.check1Derivative(b) );
+		}
+		String functions1[] = {"-0.001", "0", "-x^20"};
+		for (String f : functions1) {
+			FunctionFactory.newFunction(f);
+			b = new Box(2, new RealInterval(-50000, 50000));
+			assertFalse( s.check1Derivative(b) );
+		}
+		
 	}
 /*	
 	@Test
@@ -152,6 +166,11 @@ public class ScreenerTest {
 	@Test
 	public final void check2Derivative() {
 		fail("Not implemented");
+	}
+
+	public void testCheck1Derivative()
+	 throws Exception {
+	
 	}
 
 	
