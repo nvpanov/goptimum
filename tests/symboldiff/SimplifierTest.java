@@ -270,7 +270,7 @@ public class SimplifierTest {
 		exp = new Expression(formula);
 		Simplifier.removeZeros(exp);
 //		System.out.println(exp);
-		assertEquals("x", exp.toString());
+		assertEquals("1", exp.toString());
 		
 		formula = "0^(x+y+1)";
 		exp = new Expression(formula);
@@ -990,6 +990,21 @@ public class SimplifierTest {
 		assertEquals("0", exp.toString()); 
 		// TODO: CONVERT TO INTERVAL!!!
 	}		
-	
-	
+	@Test
+	public void test_minusFeature() throws ExpressionException {
+		exp = new Expression("a--7*b");
+		Simplifier.simplify(exp);
+		assertEquals("a+7*b", exp.toString()); 
+	}
+	@Test
+	public void test_Griewangk() throws ExpressionException {
+		String test = "x^(2-1-1)";
+		Expression exp = new Expression(test);
+		Simplifier.simplify(exp);
+		assertEquals("1", exp.toString());
+		String df = "2.5e-4*(0+(2-1)*1*x1^(2-1-1)*2*1+0)+0";
+		exp = new Expression(df);
+		Simplifier.simplify(exp);
+		assertEquals("5.0E-4", exp.toString());
+	}	
 }

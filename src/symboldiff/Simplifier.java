@@ -705,10 +705,11 @@ public class Simplifier {
 				exp.setTo(0);
 				return true; // new Expression(0);
 			}
-			if (exp.isDiv())
+			if (exp.isDiv()) {
 				throw new IllegalArgumentException("zero divizion");
+			}
 			if (exp.isPow()) {
-				exp.setTo(l);
+				exp.setTo(1);
 				return true;
 			}
 			

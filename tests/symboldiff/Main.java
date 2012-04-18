@@ -268,8 +268,7 @@ public class Main {
 		f = "cos(7*x2)*cos(x1)";
 		checkDerivatives(f, "-cos(7*x2)*sin(x1)", "-7*cos(x1)*sin(7*x2)");
 	}
-	
-	
+
 	public static void checkDerivatives(String expression, String... diffs) throws ExpressionException {
 		Expression exp, df;
 		Gradient g;
