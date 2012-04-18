@@ -1,7 +1,7 @@
 package solvers.performance;
 
+import net.sourceforge.interval.ia_math.RealInterval;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.MethodRule;
@@ -13,44 +13,47 @@ import solvers.*;
 import testharness.TestHarness;
 import algorithms.Algorithm;
 
-public class DeJongNotSimPerfTest {
+
+public class f2Dset_PerfTest {
 	@Rule
 	public MethodRule benchmarkRun = new BenchmarkRule();
 	  
 	protected TestHarness test = new TestHarness();
-	protected final int runs = 1;
+	protected final int runs = 3;
 	protected final int warmup = 1;
-	int dim = 16;
 
 	//(w=1,i=3) 4/9/12
-	// dim									1		2		4		8		16		32	
-	// Bisection_SrtL_CBtC_BigEqS			0		0.03	0.12	0.56	4.48	42.45	
-	// Bisection_SrtL_CBtC_AllEqS			0		0.17	8.7		55.45	--		--
-	// PointIntervalBis_SrtL_CBtC_BigEqS	0		0.02	0.02	0.06	0.15	0.3
-	
-	@Ignore
+	// dim									2	
+	// Bisection_SrtL_CBtC_AllEqS			1
+	// Bisection_SrtL_CBtC_BigEqS			1	
+	// PointIntervalBis_SrtL_CBtC_BigEqS	1
+
+
 	@BenchmarkOptions(benchmarkRounds = runs, warmupRounds = warmup)
 	@Test
-	public final void DeJongNotSimPerf_BisectionAll() {
+	public final void f2Dset_BisectionAll() {
 		Algorithm a = new Bisection_SrtL_CBtC_AllEqS();
-		run(a, dim);
+		run(a);
 	}
 	
 	@BenchmarkOptions(benchmarkRounds = runs, warmupRounds = warmup)
 	@Test
-	public final void DeJongNotSimPerf_BisectionBig() {
+	public final void f2Dset_BisectionBig() {
 		Algorithm a = new Bisection_SrtL_CBtC_BigEqS();
-		run(a, dim);
+		run(a);
 	}	
 	
 	@BenchmarkOptions(benchmarkRounds = runs, warmupRounds = warmup)
 	@Test
-	public final void DeJongNotSimPerf_PointInterval() {
+	public final void f2Dset_PointInterval() {
 		Algorithm a = new PointIntervalBis_SrtL_CBtC_BigEqS();
-		run(a, dim);
+		run(a);
 	}	
 
-	private final void run(Algorithm a, int dim) {
-		test.f_DeJong_NotSim(a, dim);
+	private final void run(Algorithm a) {
+		RealInterval side = new RealInterval(-150, 60);
+		test.f_Price5_Zero(a, side);
+		test.f_Rastrigin10(a, side);
+		test.f_SixHumpCamelBack(a, side);
 	}
 }

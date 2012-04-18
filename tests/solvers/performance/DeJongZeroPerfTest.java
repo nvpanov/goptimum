@@ -20,7 +20,7 @@ public class DeJongZeroPerfTest {
 	public MethodRule benchmarkRun = new BenchmarkRule();
 	  
 	protected TestHarness test = new TestHarness();
-	protected final int runs = 3;
+	protected final int runs = 2;
 	protected final int warmup = 1;
 	int dim = 32;
 
