@@ -23,8 +23,8 @@ class Screener {
 	private long time1Der = 0;
 	private long timeBorder = 0;
 	private long timeByValue = 0;
-	private static final boolean profiling = true;
-	
+	private static final boolean profiling = false;
+/*	
 	// if not interested in profiling -- comment this out for performance
 	// GC doesn't like classes with finalize
 	@Override
@@ -49,7 +49,7 @@ class Screener {
 		System.out.println("   borderTime:  " + timeBorder + "\t\t (" + (100*timeBorder/totalT) + "%)");
 		System.out.println("}} Screening stats ------\n");
 	}
-	
+//*/	
 	public Screener(double startLimit) {
 		resetStatistics();
 		lowBoundMaxValue = startLimit;		
