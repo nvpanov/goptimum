@@ -57,6 +57,7 @@ public class FunctionNEW {
 	public RealInterval calculate2Derivative(Box box, int argNum) {
 		if (d2f == null)
 			return null;
+//		System.out.println(d2f[argNum]);
 		return d2f[argNum].evaluate(box);
 	}	
 	public String toString() {
