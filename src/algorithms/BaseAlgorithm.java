@@ -104,12 +104,37 @@ public class BaseAlgorithm implements Algorithm {
 		} while (status == RUNNING);
 	}
 
+int _delme_dbg_iterationNum = 0;	
 	protected OptimizationStatus iterate() {
 		Box[] newBoxes;
 
 		if (logging)
 			System.out.println("WorkList size = " + workList.size());
 		workBox = workList.extractNext();
+/*
+// the following block is for debugging.
+// it allows to catch why last containing optimum box
+// was rejected.
+// checkVal -- optimum value, checkArg - optimum arguments		
+{
+	_delme_dbg_iterationNum++;
+	double checkVal = 0;
+	double[] checkArg = {1,1};
+	if( (workBox.getFunctionValue().contains(checkVal) && 
+		 !workList.getOptimumValue().contains(checkVal) ) ) {
+		System.out.println(">>>> Last box that contains optimum Val. " + _delme_dbg_iterationNum);
+	} 
+	if (workBox.contains(checkArg)) {
+		boolean contains = false;
+		for (Box b : workList.getOptimumArea()) {
+			if (b.contains(checkArg))
+				contains  = true;
+		}
+		if (!contains)
+			System.out.println(">>>> Last box that contains optimum Arg. " + _delme_dbg_iterationNum);
+	}
+}
+*/		
 		if (logging)
 			System.out.println(workBox + " => ");
 		if (workBox == null)
