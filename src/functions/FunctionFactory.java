@@ -38,7 +38,7 @@ public class FunctionFactory {
 				df1[i] = g1.getPartialDerivative(i);
 				Simplifier.simplify(df1[i]);
 				assert(df1[i]!=null);
-				df2[i] = new Gradient(g1.getPartialDerivative(i)).getPartialDerivative(0);
+				df2[i] = new Gradient(g1.getPartialDerivative(i), func.getVariables()).getPartialDerivative(i); // nvp 4/19/2012
 				Simplifier.simplify(df2[i]);
 				assert(df2[i]!=null);
 			}
