@@ -27,8 +27,8 @@ public class RosenbrockG_PerfTest {
 	//(w=2(1, dim=32),i=2) 4/20/12 [-150, 60]
 	// dim									2		4		8		16		32	
 	// Bisection_SrtL_CBtC_AllEqS			0.14	1.02	28		--		--
-	// Bisection_SrtL_CBtC_BigEqS			0.08	0.82	2.52	10		30.1	
-	// PointIntervalBis_SrtL_CBtC_BigEqS	0.19	0.73	2.1		11		38.2
+	// Bisection_SrtL_CBtC_BigEqS			0.08	0.82	2.52	10		43	
+	// PointIntervalBis_SrtL_CBtC_BigEqS	0.19	0.73	2.1		11		44
 
 	@Ignore
 	@BenchmarkOptions(benchmarkRounds = runs, warmupRounds = warmup)
