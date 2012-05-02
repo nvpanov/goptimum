@@ -1,5 +1,7 @@
 package functions;
 
+import java.util.ArrayList;
+
 import symboldiff.Expression;
 import symboldiff.exceptions.ExpressionException;
 import net.sourceforge.interval.ia_math.RealInterval;
@@ -65,5 +67,8 @@ public class FunctionNEW {
 	}	
 	public int getDimension() {
 		return dim;
+	}
+	public ArrayList<String> getVariables() {
+		return function.getVariables();
 	}
 }
