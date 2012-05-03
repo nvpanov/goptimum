@@ -42,9 +42,10 @@ public class Box implements Cloneable {
 	}
 
 	/*
-	 * protected internal constructor. used in clone()
+	 * when we don't know all the intervals 
+	 * also it is used used in clone()
 	 */
-	protected Box(int dimension) {
+	public Box(int dimension) {
 		//dim = dimension;
 		intervals = new RealInterval[dimension];
 	}
