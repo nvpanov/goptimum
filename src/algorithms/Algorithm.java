@@ -31,4 +31,8 @@ public interface Algorithm {
 	public void   setPrecision( double pres );
 	public double getPrecision();
 	
+	/*
+	 * Current upper estimation of the optimum 
+	 */
+	public double getLowBoundMaxValue();	
 }

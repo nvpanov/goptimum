@@ -171,7 +171,7 @@ int _delme_dbg_iterationNum = 0;
 	public void probeNewLowBoundMaxValue(double localMin) {
 		workList.probeNewLowBoundMaxValue(localMin);
 	}
-	
+	@Override
 	public double getLowBoundMaxValue() {
 		return workList.getLowBoundMaxValue();
 	}	
