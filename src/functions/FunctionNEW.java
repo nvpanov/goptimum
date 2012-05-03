@@ -71,4 +71,8 @@ public class FunctionNEW {
 	public ArrayList<String> getVariables() {
 		return function.getVariables();
 	}
+
+	public int getVariableNum(String arg) {
+		return function.getVariableNum(arg);
+	}
 }

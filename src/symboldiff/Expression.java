@@ -724,8 +724,12 @@ public class Expression implements Cloneable {
 	 * returns -1 if this is not a variable.
 	 */
 	public int getNumberOfThisVariable() {
-		return getVariables().indexOf(getOperation());
+		return getVariableNum(this.getOperation());
 	}
+	public int getVariableNum(String varName) {
+		return getVariables().indexOf(varName);
+	}
+	
 	public int getDimension() {
 		return numOfVars();
 	}
@@ -794,6 +798,4 @@ public class Expression implements Cloneable {
 	    }
 	    return true;
 	}
-	
-	
 }
