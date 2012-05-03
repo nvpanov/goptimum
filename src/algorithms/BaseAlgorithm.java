@@ -193,6 +193,10 @@ int _delme_dbg_iterationNum = 0;
 	    }
 	}
 
+	@Override
+	public void setStopCriterion(StopCriterion stopCriterion) {
+		this.stopCriterion = stopCriterion;
+	}
 	public double getPrecision(){
 		return stopCriterion.getFMaxPrecision();
 	}
@@ -200,9 +204,10 @@ int _delme_dbg_iterationNum = 0;
 		stopCriterion.setFMaxPrecision(pres);
 	}
 
-
 	public String toString() {
 		String fullName = this.getClass().getName();
 		return fullName.substring(fullName.lastIndexOf('.')+1); // removes packages
 	}
+
+
 }

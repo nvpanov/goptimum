@@ -21,6 +21,11 @@ public interface Algorithm {
 	 * sets the target function and search area
 	 */
 	public void setProblem(FunctionNEW f, Box area);
+
+	/*
+	 * sets stop criterion -- when the iteration should be stopped.
+	 */
+	public void setStopCriterion(StopCriterion stopCriterion);	
 	
 	/*
 	 * Width of interval extension is a stop criteria.
@@ -34,5 +39,5 @@ public interface Algorithm {
 	/*
 	 * Current upper estimation of the optimum 
 	 */
-	public double getLowBoundMaxValue();	
+	public double getLowBoundMaxValue();
 }
