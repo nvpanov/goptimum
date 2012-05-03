@@ -13,11 +13,11 @@ public class StopCriterion {
 //	protected int maxTimeS;
 //	protected int startTimeS;
 	
-	protected BaseAlgorithm algorithm;
+	protected Algorithm algorithm;
 	protected boolean logging;
 	
-	public StopCriterion(BaseAlgorithm alg) {
-		logging = alg.logging;
+	public StopCriterion(Algorithm alg) {
+		logging = false;//alg.logging;
 		algorithm = alg;
 		maxIterations = (int)1e6;
 		fPrecision = 1e-2;
