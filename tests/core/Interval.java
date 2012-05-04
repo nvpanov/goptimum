@@ -45,7 +45,7 @@ public class Interval {
     	RealInterval a = new RealInterval(-0.00, 6993.75);
     	RealInterval b = new RealInterval(4050.00, 4050.01);
     	
-		RealInterval c = intersect_(a, b);
+		RealInterval c = intersect(a, b);
 		assertTrue(c != null);
     	assertTrue(c.equals(new RealInterval(4050.00, 4050.01) ));
     }
@@ -80,4 +80,25 @@ public class Interval {
     }
 */
 	
+
+	@Test
+	public void testValueOf() throws Exception {
+		String badStrings[] = {"-[1.2,2.3]", "[1.2,2,3]", "[3]", "[0, 0,0]", "{0; 0}", "[0;0,0]", "s", "[1, q]", "[7,8; 9,1]", "[7,8, 9,1]"};
+		RealInterval result;
+		for (String value : badStrings)
+			try {
+				result = RealInterval.valueOf(value);
+				fail ("exception expected");
+			} catch (NumberFormatException e) {
+				// ok
+			}
+		String goodStrings[] = {"[1.2,2.3]", "[-1, 2.3]", "5.6", "[7.8; 9.1]"};
+		RealInterval checks[] = {new RealInterval(1.2,2.3), new RealInterval(-1, 2.3), 
+				new RealInterval(5.6), new RealInterval(7.8, 9.1)};
+		int i = 0;
+		for (String value : goodStrings) {
+			result = RealInterval.valueOf(value);
+			assertEquals(result, checks[i++]);
+		}		
+	}
 }
