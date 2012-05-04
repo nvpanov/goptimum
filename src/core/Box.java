@@ -47,6 +47,7 @@ public class Box implements Cloneable {
 	 */
 	public Box(int dimension) {
 		//dim = dimension;
+		functionValue = new RealInterval();
 		intervals = new RealInterval[dimension];
 	}
 	public int getDimension() {
