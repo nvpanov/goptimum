@@ -12,6 +12,7 @@ import splitters.BiggestSideEquallySplitter;
 import algorithms.Algorithm;
 import algorithms.BaseAlgorithm;
 import algorithms.ParallelAlgorithm;
+import algorithms.StopCriterion;
 
 
 
@@ -129,6 +130,15 @@ public class ParallelExecutor implements Algorithm {
 			areas.addLast(tmp[1]);
 		}
 		return areas;
+	}
+	@Override
+	public void setStopCriterion(StopCriterion stopCriterion) {
+		for (ParallelAlgorithm a : pAlgorithms)
+			a.setStopCriterion(stopCriterion);		
+	}
+	@Override
+	public double getLowBoundMaxValue() {
+		return communicator.globalScreeningValue;
 	}
 }
 
