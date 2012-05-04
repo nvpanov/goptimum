@@ -90,7 +90,7 @@ public class FileUserInterface {
 			
 			
 			if (!inFile.isFile())
-				throw new InputDataException("Can't read input file '" + inputFilePath + "': there is no such file.");
+				throw new InputDataException("Can't read input file '" + inputFilePath + "': there is no such file or not enough permissions.");
 			if (!inFile.canRead())
 				throw new InputDataException("Can't read input file '" + inputFilePath + "': not enough permissions.");
 			if (!outFile.createNewFile()) {
