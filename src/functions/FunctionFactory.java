@@ -34,14 +34,24 @@ public class FunctionFactory {
 		Expression[] df1 = new Expression[func.numOfVars()];
 		Expression[] df2 = new Expression[df1.length];
 		try {
-			for (int i = 0; i < df1.length; i++) {
+			for (int i = 0; i < df1.length; i++) { 
 				df1[i] = g1.getPartialDerivative(i);
 				Simplifier.simplify(df1[i]);
-				assert(df1[i]!=null);
-				df2[i] = new Gradient(g1.getPartialDerivative(i), func.getVariables()).getPartialDerivative(i); // nvp 4/19/2012
-				Simplifier.simplify(df2[i]);
-				assert(df2[i]!=null);
+				if (df1[i] == null) {  // nvp 5/4/2012
+					df1 = null;
+					df2 = null;
+					break;
+				}
 			}
+			if (df1 != null)
+				for (int i = 0; i < df1.length; i++) {
+					df2[i] = new Gradient(g1.getPartialDerivative(i), func.getVariables()).getPartialDerivative(i); // nvp 4/19/2012
+					Simplifier.simplify(df2[i]);
+					if (df2[i] == null) {
+						df2 = null;
+						break;
+					}
+				}
 		} catch (Exception e) {
 			assert(false); // no exceptions can be thrown during differentiation of test functions
 		}		
