@@ -242,13 +242,10 @@ public abstract class WorkList {
 		removeRejectedBoxes();
 		assert(collection.size() > 0);
 		
-		//ArrayList<Box> opt = (ArrayList<Box>)list.clone();
 		Box[] opt = collection.toArray(new Box[collection.size()]);
 		
-		
-		// TODO: combine near intervals into one if possible!
-//		IntervalMerger merger = new IntervalMerger(opt);
-//		opt = merger.merge();
+		IntervalMerger merger = new IntervalMerger(opt);
+		opt = merger.merge();
 		return opt;
 	}
 
