@@ -22,8 +22,9 @@ class IntervalMerger {
 		do {
 			size = boxes.size();
 			assert (size != 0);
-			mergeOnce();			
+			mergeOnce();
 		} while (boxes.size() != size);
+		Collections.sort(boxes, new AllSidesSorter()); // just for more nice output
 		return boxes.toArray(new Box[0]);
 	}
 
@@ -60,11 +61,8 @@ class IntervalMerger {
 	}
 	boolean allTouchingSidesAreEqual(Box b1, Box b2, int side) {
 		final int dim = b1.getDimension();
-		for (int i = 1; i <= dim/2; i++) {
+		for (int i = 1; i <= dim; i++) {
 			int touchingSideNum = (side+i)%dim;
-			if ( !b1.getInterval(touchingSideNum).equals( b2.getInterval(touchingSideNum) ) )
-				return false;
-			touchingSideNum = (side-i)%dim;
 			if ( !b1.getInterval(touchingSideNum).equals( b2.getInterval(touchingSideNum) ) )
 				return false;
 		}
