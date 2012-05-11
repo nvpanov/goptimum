@@ -51,7 +51,7 @@ public class IntervalMergerTest {
 		}
 	}
 
-	public void testMergeOnce() {
+	public void testMergeBoxes() {
 		Box b = new Box(40, new RealInterval(-101, 11));
 		final int side = 0;
 		Box boxes[] = b.splitSide(side, 0.5);
@@ -59,5 +59,4 @@ public class IntervalMergerTest {
 		Box b1 = merger.mergeBoxes(boxes[0], boxes[1], side);
 		assertEquals(b, b1);
 	}
-
 }
