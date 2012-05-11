@@ -603,7 +603,8 @@ public class Expression implements Cloneable {
 			l = left.evaluate(area);
 		r = right.evaluate(area);
 		RealInterval res = evaluate(op, l, r);
-		assert( !Double.isInfinite(res.lo()) && !Double.isInfinite(res.hi()) );
+//		if( !Double.isInfinite(res.lo()) && !Double.isInfinite(res.hi()) )
+//			System.out.println("Infinity as a bound!");
 		assert( !Double.isNaN(res.lo()) && !Double.isNaN(res.hi()) );
 		return res;
 	}
