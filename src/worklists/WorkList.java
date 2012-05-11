@@ -231,8 +231,7 @@ public abstract class WorkList {
 	}
 	
 	public final RealInterval getOptimumValue() {
-		if (collection.size() == 0)
-			return null;
+		assert (collection.size() != 0);
 		double hiBorder = screener.getLowBoundMaxValue();
 		double loBorder = getLeadingBox().getFunctionValue().lo();
 		return new RealInterval(loBorder, hiBorder);
