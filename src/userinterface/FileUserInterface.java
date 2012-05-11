@@ -6,8 +6,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Scanner;
 
+import net.sourceforge.interval.ia_math.IAMath;
 import net.sourceforge.interval.ia_math.RealInterval;
 import solvers.PointIntervalBis_SrtL_CBtC_BigEqS;
 import algorithms.Algorithm;
@@ -28,12 +30,16 @@ public class FileUserInterface {
 	private File inFile;
 	private File outFile;
 	private int lineCounter;
+	private boolean optimumTypeIsSet;
+	private String optimumType;
 
-	public static void main(String args[]) {
+	public static void main(String args[]) throws Throwable {
 		FileUserInterface ui = new FileUserInterface();
 		ui.mainFunction(args);
 	}
 	public FileUserInterface() {
+		optimumTypeIsSet = false;
+		optimumType = "min"; // search for min by default
 		lineCounter = 0;
 		algo = new PointIntervalBis_SrtL_CBtC_BigEqS();
 		stopCriterion = new StopCriterion(algo);
@@ -41,8 +47,8 @@ public class FileUserInterface {
 		reportOptVal = true;
 		reportOptArea = true;
 	}
-	public void mainFunction(String args[]) {
-		try{
+	public void mainFunction(String args[]) throws Throwable {
+//		try{
 			getAllArgs(args);
 			parseArgs();
 			
@@ -58,9 +64,11 @@ public class FileUserInterface {
 			algo.solve();
 			
 			showResults(algo);
-		} catch (Throwable e) {
+/*		} catch (Throwable e) {
+			throw e;
 			reportError(e);
 		}
+*/				
 	}
 	private void reportError(Throwable e) {
 		showToUser("!!! Error. ", e.getMessage());
@@ -144,7 +152,8 @@ public class FileUserInterface {
 		lineCounter++;
 		if (aLine == null)
 			  return;
-		aLine = aLine.trim().toLowerCase();
+		aLine = aLine.replace(" ", "");
+		aLine = aLine.toLowerCase();
 	    Scanner scanner = new Scanner(aLine);
 	    scanner.useDelimiter("=");
 	    String name, value;
@@ -183,12 +192,32 @@ public class FileUserInterface {
 			break;
 		case "epsilon":
 			setEpsilon(value);
+			break;
+		case "optimum":
+			setOptimumType(value);
+			break;
+		case "usesimplerounding":
+			setSimpleRounding(value);
+			break;			
 		default:
 			Object wasValue = hashMapArgs.put(name, value);
 			if (wasValue != null) {
 				throw new InputDataException("Invalid line #" + lineCounter + ". Redifinition of variable '" + name + "'. Previous value: " + wasValue + ".");
 			}
 		}		
+	}
+	private void setOptimumType(String value) throws InputDataException {
+		if (optimumTypeIsSet)
+			throw new InputDataException("Invalid line #" + lineCounter + ". Type of optimum has been already set. Treating this as a potential error and exit"); 
+		if ("max".equals(value)) {
+			fStr = "-(" + fStr + ")";
+			optimumType = "max";
+		} else if (!"min".equals(value)) {
+			throw new InputDataException("Invalid line #" + lineCounter + ". 'Optimum' can be set to 'min' or 'max' only. " +
+					"This field specifies what we are interested in -- min or max of the target function. " +
+					"By default the solver searches minimum.");
+		}
+		optimumTypeIsSet = true;
 	}
 	private void setEpsilon(String value) throws InputDataException {
 		double epsilon;
@@ -274,7 +303,10 @@ public class FileUserInterface {
 		}
 	}
 */
-
+	private void setSimpleRounding(String value) throws InputDataException {
+		boolean useSimpleRounding = getBinaryValue(value);
+		IAMath.useSimpleRounding(useSimpleRounding);
+	}
 	private void setReportArea(String value) throws InputDataException {
 		reportOptArea = getBinaryValue(value);		
 	}
@@ -292,22 +324,35 @@ public class FileUserInterface {
 	private void showResults(Algorithm algo) {
 		if (reportOptVal) {
 			RealInterval optVal = algo.getOptimumValue();
+			if ("max".equals(optimumType))
+				optVal = IAMath.sub(0, optVal);
 			showToUser("Optimum value:", optVal);
 		}
 		if (reportOptArea) {			
 			Box[] optArea = algo.getOptimumArea();
-			showToUser("Optimum area:", optArea);		
+			StringBuilder sb = new StringBuilder("Optimum area (arguments are in the following order:");
+			Iterator<String> argsI = f.getVariables().iterator();
+			while ( argsI.hasNext() )
+				sb.append(" ").append(argsI.next()) ;
+			sb.append("):");
+			showToUser(sb.toString(), null);
+			for (Box b : optArea)
+				showToUser(null, b.toStringArea());
 		}
 	}
 	private void showToUser(String label, Object... values) {
-		StringBuilder sb = new StringBuilder(label).append("\n");
-		for (Object obj : values)
-			sb.append("   ").append(obj).append("\n");
+		StringBuilder sb = new StringBuilder();
+		if (label != null && !label.isEmpty())
+			sb.append(label).append("\n");
+		if (values != null) {
+			for (Object obj : values)
+				sb.append("   ").append(obj).append("\n");
+		}
 		String msg = sb.toString();
-		System.out.println(msg);
+		System.out.print(msg);
 		if (outFile != null) {
 			try {
-				FileWriter out = new FileWriter(outFile, true); // append
+				FileWriter out = new FileWriter(outFile, true); // true = append
 				out.append(msg);
 				out.close();
 			} catch (Exception e) {
