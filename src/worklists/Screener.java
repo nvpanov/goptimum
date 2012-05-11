@@ -23,6 +23,7 @@ class Screener {
 	private long time1Der = 0;
 	private long timeBorder = 0;
 	private long timeByValue = 0;
+	private double epsilon = 1e-6; // epsilon for comparing doubles: d1 == d2 if abs(d1-d2) < epsilon
 	private static final boolean profiling = false;
 /*	
 	// if not interested in profiling -- comment this out for performance
@@ -189,7 +190,7 @@ class Screener {
 	}
 	boolean checkByValue(Box box) {
 		double lo = box.getFunctionValue().lo();
-		if (lo > lowBoundMaxValue) {
+		if (Math.abs(lo - lowBoundMaxValue) < epsilon ) {
 //			System.out.println("   - faild checkByValue: " + box);
 			return false;
 		}	
