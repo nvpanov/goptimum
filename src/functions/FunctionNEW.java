@@ -51,33 +51,28 @@ public class FunctionNEW {
 	public double calculatePoint(double... point) {
 		return function.evaluate(point);
 	}
-	public RealInterval calculate1Derivative(Box box, int argNum) {
-		if (d1f == null)
+	protected static RealInterval calculateDerivative(Expression[] derivativesSet, Box box, int argNum) {
+		if (derivativesSet == null)
 			return null;
 		//return d1f[argNum].evaluate(box); // nvp 5/11/12
 		RealInterval ii = null; //new RealInterval();
 		try {
-			ii = d1f[argNum].evaluate(box);
+			ii = derivativesSet[argNum].evaluate(box);
 		} catch (Exception e) {
 			// something has happened.
 			//F.e. division by zero
+			return null;
 		}
-		return ii;
+		if ( Double.isInfinite(ii.lo()) || Double.isInfinite(ii.hi()) )
+			return null; // there is no use of such derivative. just time wasting. 
+		return ii;		
+	}
+	public RealInterval calculate1Derivative(Box box, int argNum) {
+		return calculateDerivative(d1f, box, argNum);
 	}
 	public RealInterval calculate2Derivative(Box box, int argNum) {
-		if (d2f == null)
-			return null;
-		// nvp 5/11/12
-		//return d2f[argNum].evaluate(box);
-		RealInterval ii = null; //new RealInterval();
-		try {
-			ii = d2f[argNum].evaluate(box);
-		} catch (Exception e) {
-			// something has happened.
-			//F.e. division by zero
-		}
-		return ii;		
-	}	
+		return calculateDerivative(d2f, box, argNum);
+	}
 	public String toString() {
 		return function.toString();
 	}	
