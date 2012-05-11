@@ -54,13 +54,29 @@ public class FunctionNEW {
 	public RealInterval calculate1Derivative(Box box, int argNum) {
 		if (d1f == null)
 			return null;
-		return d1f[argNum].evaluate(box);
+		//return d1f[argNum].evaluate(box); // nvp 5/11/12
+		RealInterval ii = null; //new RealInterval();
+		try {
+			ii = d1f[argNum].evaluate(box);
+		} catch (Exception e) {
+			// something has happened.
+			//F.e. division by zero
+		}
+		return ii;
 	}
 	public RealInterval calculate2Derivative(Box box, int argNum) {
 		if (d2f == null)
 			return null;
-//		System.out.println(d2f[argNum]);
-		return d2f[argNum].evaluate(box);
+		// nvp 5/11/12
+		//return d2f[argNum].evaluate(box);
+		RealInterval ii = null; //new RealInterval();
+		try {
+			ii = d2f[argNum].evaluate(box);
+		} catch (Exception e) {
+			// something has happened.
+			//F.e. division by zero
+		}
+		return ii;		
 	}	
 	public String toString() {
 		return function.toString();
