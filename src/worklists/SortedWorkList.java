@@ -33,7 +33,7 @@ public class SortedWorkList extends WorkList {
 	}
 
 	@Override
-	public Box getLeadingBox() {
+	protected Box getLeadingBoxInternal() {
 		if (collection.size() == 0)
 			return null;
 		Box b = collection.iterator().next(); // first element in a sorted list

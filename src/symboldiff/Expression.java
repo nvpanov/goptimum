@@ -12,10 +12,12 @@ import java.util.Vector;
 
 import org.junit.runner.Computer;
 
+import com.sun.corba.se.spi.extension.ZeroPortPolicy;
 import com.sun.org.apache.bcel.internal.generic.ISUB;
 
 import net.sourceforge.interval.ia_math.IAMath;
 import net.sourceforge.interval.ia_math.RealInterval;
+import net.sourceforge.interval.ia_math.exceptions.IAComputationalException;
 import static net.sourceforge.interval.ia_math.IAMath.*;
 import static java.lang.Double.*;
 
@@ -621,7 +623,7 @@ public class Expression implements Cloneable {
 			l = left.evaluate(point);
 		r = right.evaluate(point);
 		double res = evaluate(op, l, r);
-		assert( !Double.isInfinite(res) && !Double.isNaN(res) );
+		assert( /*!Double.isInfinite(res) &&*/ !Double.isNaN(res) ); // 5/12/12 -- infinity is possible: divizion by zero
 		return res;
 	}
 	private static RealInterval evaluate(String op, RealInterval l, RealInterval r) {
@@ -668,6 +670,11 @@ public class Expression implements Cloneable {
 			default:
 				throw new UnsupportedOperationException("Unsupported operation for intervals: " + op);
 			}
+		} catch (IAComputationalException e) {
+			if ("Division by Zero".equals(e.getMessage()) ) 
+				return new RealInterval();
+			else
+				throw new RuntimeException("Issue during interval evaluation of '" + op + "' :" + e.getMessage() );				
 		} catch (Exception e) {
 			throw new RuntimeException("Issue during interval evaluation of '" + op + "' :" + e.getMessage() );
 		}

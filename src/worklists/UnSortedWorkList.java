@@ -26,7 +26,7 @@ public class UnSortedWorkList extends WorkList {
 		return ((ArrayList<Box>)collection).remove(n);
 	}
 	@Override
-	public Box getLeadingBox() {
+	protected Box getLeadingBoxInternal() {
 		double lowest = Double.MAX_VALUE;
 		Box leader = null;
 		for (Box b : collection) {

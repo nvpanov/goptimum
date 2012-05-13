@@ -116,4 +116,62 @@ public class BoxTest {
 		b.setInterval(1, new RealInterval(-10, -1));
 		assertTrue(a.hasAtLeastOneCommonSide(b));		
 	}
+
+	@Test
+	public void testCutOutBoxAroundThisPoint() {
+		int dim = 6;
+		dim = rnd.nextInt(10);
+		if (dim == 0) 
+			dim = 1;
+		Box b = new Box(dim, new RealInterval(0));
+		double[] point = new double[dim];
+		for (int i = 0; i < dim; i++)
+			point[i] = i;
+		try {
+			b.cutOutBoxAroundThisPoint(point);
+			fail("Assertion expected");
+		} catch (AssertionError e) {
+			// ok
+		}
+		///////////////////////////////
+		for (int i = 0; i < dim; i++)
+			point[i] = 0.01;
+		Box[] boxes = b.cutOutBoxAroundThisPoint(point);
+		assertEquals(1, boxes.length);
+		assertEquals(b, boxes[0]);
+		///////////////////////////////
+		b = new Box(dim, new RealInterval(0));
+		boxes = b.cutOutBoxAroundThisPoint(point);
+		assertEquals(1, boxes.length);
+		assertEquals(b, boxes[0]);
+		///////////////////////////////
+		b = new Box(dim, new RealInterval(-100, 100));
+		boxes = b.cutOutBoxAroundThisPoint(point);
+		assertEquals(dim*2+1, boxes.length);
+		int contains = 0;
+		for (int i = 0; i < boxes.length; i++)
+			if ( boxes[i].contains(point) )
+				contains++;
+		assertEquals(1, contains);
+		///////////////////////////////
+		for (int i = 0; i < dim; i++)
+			point[i] = 100;
+		boxes = b.cutOutBoxAroundThisPoint(point);
+		assertEquals(dim+1, boxes.length);
+		contains = 0;
+		for (int i = 0; i < boxes.length; i++)
+			if ( boxes[i].contains(point) )
+				contains++;
+		assertEquals(1, contains);
+		///////////////////////////////
+		point[0] = 0;
+		boxes = b.cutOutBoxAroundThisPoint(point);
+		assertEquals(dim+1+1, boxes.length);
+		contains = 0;
+		for (int i = 0; i < boxes.length; i++)
+			if ( boxes[i].contains(point) )
+				contains++;
+		assertEquals(1, contains);
+		///////////////////////////////
+	}	
 }

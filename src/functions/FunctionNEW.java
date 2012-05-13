@@ -45,7 +45,7 @@ public class FunctionNEW {
 	
 	public void calculate(Box area) {
 		RealInterval f = function.evaluate(area);
-		assert(f != null && f.lo() > Double.NEGATIVE_INFINITY && f.hi() < Double.POSITIVE_INFINITY);
+		assert(f != null)/* && f.lo() > Double.NEGATIVE_INFINITY && f.hi() < Double.POSITIVE_INFINITY)*/;
 		area.setFunctionValue(f);
 	}
 	public double calculatePoint(double... point) {

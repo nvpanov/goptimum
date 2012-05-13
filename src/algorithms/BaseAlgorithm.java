@@ -150,10 +150,38 @@ int _delme_dbg_iterationNum = 0;
 
 		workList.add(newBoxes);
 
-		if ( isDone(workBox) )
+		/*
+		 * calculated function extensions can contain infinity. what to do in such case?
+		 */
+		boolean shouldTerminate = processInfinityInExtensions(newBoxes);
+		
+		if ( shouldTerminate || isDone(workBox) )
 			return STOP_CRITERION_SATISFIED;
 		return RUNNING;
 	}	
+	
+	private boolean processInfinityInExtensions(Box[] newBoxes) {
+	    for (int i = 0; i < newBoxes.length; i++) {
+	    	if (extensionContainsInfinity( newBoxes[i] ) ) {
+	    		boolean terminationRequired = processBoxWithInfinityInFunctionEstimation(newBoxes[i]);
+	    		if (terminationRequired)
+	    			return true;
+	    	}
+	    }
+	    return false; // Immediate abort of the iteration is not requested
+	}
+	private boolean processBoxWithInfinityInFunctionEstimation(Box box) {
+		System.out.println("Got INFINITY while evaluating target function (" + targetFunction 
+				+ ") on the following area:\n\t" + box.toStringArea() 
+				+ "\nCurrent policy means stop computation after this.");
+		return true; // true means stop iteration on this.
+	}
+	private boolean extensionContainsInfinity(Box box) {
+		RealInterval extension = box.getFunctionValue();
+		if (Double.isInfinite(extension.lo()) || Double.isInfinite(extension.hi()))
+			return true;
+		return false;
+	}
 	
 	public RealInterval getOptimumValue() {
 		return workList.getOptimumValue();
@@ -192,7 +220,6 @@ int _delme_dbg_iterationNum = 0;
 	    	targetFunction.calculate( newBoxes[i] );
 	    }
 	}
-
 	@Override
 	public void setStopCriterion(StopCriterion stopCriterion) {
 		this.stopCriterion = stopCriterion;
@@ -207,6 +234,55 @@ int _delme_dbg_iterationNum = 0;
 	public String toString() {
 		String fullName = this.getClass().getName();
 		return fullName.substring(fullName.lastIndexOf('.')+1); // removes packages
+	}
+
+
+	/*
+	 * for @IntervalAndPointAlgorithm@ 
+	 * returns current leading box but do not remove it from the work list
+	 */
+	Box getCurrentLeadingBox() {
+		return workList.getLeadingBox();
+	}
+
+	/*
+	 * If a user suspects something or (more common use case)
+	 * if a point algorithm found a local minimum
+	 * this method can be used to draw attention to that point
+	 * the found local optimum is unreliable due to rounding errors
+	 * so we will calculate interval estimation around this point.
+	 * Or just ignore this info:)
+	 */
+	public void giveHint(double[] potentialOptPoint, Box boxFromTheList) {
+		final double epsilon = 0.005;
+		final int dim = boxFromTheList.getDimension();
+		assert (potentialOptPoint.length == dim);
+
+		//	1. check if the point is inside the box.
+		if (!boxFromTheList.contains(potentialOptPoint)) {
+			// probably it is due to rounding error and it is close
+			// save original point for diagnostic
+			double[] origPoint = potentialOptPoint.clone();
+			if (boxFromTheList.setToClosestAreaPoint(potentialOptPoint) < epsilon * dim) {
+				// let it be "close enough"
+				// continue
+			} else {
+				// possible bug. Lets fail in debug. See origPoint[].
+				assert (false); 
+				return;
+			}
+		}
+		//	2.	extract this box from the list
+		boolean success = workList.remove(boxFromTheList);
+		if (!success) {
+			assert(success);
+			return;
+		}
+		//	3.	split this box on a small box around this point and everything else
+		Box boxes[] = boxFromTheList.cutOutBoxAroundThisPoint(potentialOptPoint);
+		assert (boxes.length > 0);
+		//	4.	add the sub-boxes to the list
+		workList.add(boxes);
 	}
 
 

@@ -27,7 +27,7 @@ public class AlgorithmsCommunicator extends Thread {
 	ParallelAlgorithm algorithms[];
 	// executor itself
 	ParallelExecutor executor;
-	double globalScreeningValue = Double.MAX_VALUE;
+	double globalScreeningValue = Double.POSITIVE_INFINITY;
 
 	private RealInterval optTmp = new RealInterval(); // -inf, + inf
 	private volatile Box[] optArea;

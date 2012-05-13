@@ -22,7 +22,6 @@ public abstract class PointAlgorithm /*implements Runnable*/ {
 	protected double optArg[];
 	
 	public PointAlgorithm() {
-//		optVal = Double.MAX_VALUE;
 	}
 	public void setProblem(FunctionNEW f, Box initialSearchArea) {
 		function = f;
@@ -39,11 +38,15 @@ public abstract class PointAlgorithm /*implements Runnable*/ {
 			// in order to keep the result at least some how useful. Returning a middle point in this case 
 			// proved to be a bad idea.  
 			//optArg = middleAreaPoint(area);
-			setToClosestAreaPoint(optArg);
+			initialSearchArea.setToClosestAreaPoint(optArg);
 			optVal = function.calculatePoint(optArg);
 		}
 		return optVal;
 	}
+	public double[] getLocalOptPoint() {
+		return optArg;
+	}
+
 	protected abstract void minimize(Box area); 
 	
 	@Override
@@ -64,24 +67,5 @@ public abstract class PointAlgorithm /*implements Runnable*/ {
 			point[i] = ii.lo() + ii.wid()/2;
 		}
 		return point;
-	}
-	/*
-	 * if the point is outside of @initialSearchArea@ it will change it to the nearest border point:
-	 *      ____      ____
-	 *     |    | => |    |
-	 *     |____|    |__._|
-	 * point->.         ^-point 
-	 */     
-	private void setToClosestAreaPoint(double[] point) {
-		int dim = initialSearchArea.getDimension();
-		assert(point.length == dim);
-		
-		for (int i = 0; i < dim; i++) {
-			RealInterval ii = initialSearchArea.getInterval(i);
-			if (ii.lo() > point[i])
-				point[i] = ii.lo();
-			else if (ii.hi() < point[i])
-				point[i] = ii.hi();
-		}
 	}
 }

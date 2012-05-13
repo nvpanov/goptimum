@@ -63,7 +63,8 @@ class IntervalMerger {
 		final int dim = b1.getDimension();
 		for (int i = 1; i <= dim; i++) {
 			int touchingSideNum = (side+i)%dim;
-			if ( !b1.getInterval(touchingSideNum).equals( b2.getInterval(touchingSideNum) ) )
+			if ( touchingSideNum != side && !b1.getInterval(touchingSideNum).equals( b2.getInterval(touchingSideNum) ) )
+				// ^^^ f.e. when dim == 1.. Other cases?
 				return false;
 		}
 		return true;

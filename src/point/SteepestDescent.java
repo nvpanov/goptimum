@@ -55,7 +55,6 @@ public class SteepestDescent extends PointAlgorithm {
 			for (int i = 0; i < dim; i++) {
 				RealInterval iGradient = function.calculate1Derivative(tmp, i);
 				if (iGradient == null) {
-					optVal = Double.MAX_VALUE;
 					return; 
 				}
 				double gradient = iGradient.hi();

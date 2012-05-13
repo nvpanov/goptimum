@@ -46,7 +46,7 @@ public abstract class WorkList {
 								// now it is forbidden because we treats initial search area
 								// in a different way than the rest of the boxes (see @addSearchArea@).
 		// IT WAS really inconvenient and now we do allow this again*/ 
-		double limit = Double.MAX_VALUE; 
+		double limit = Double.POSITIVE_INFINITY; 
 		screener = new Screener(limit);
 		addSearchArea(area);
 	}
@@ -126,14 +126,23 @@ public abstract class WorkList {
 	/*
 	 * this method returns a box with the lowest
 	 * low border - so called the leading box.
-	 * The method is used in getOptimumValue()
+	 * The method is used in 
+	 * getOptimumValue() and in BaseAlgorithm.getCurrentLeadingBox()
 	 * Also can be used in some strategies to 
 	 * split the most suspicious box.
 	 * We do not know anything about box order
 	 * so we have to ask a child
-	 * that implements the actual behavior 
+	 * that implements the actual behavior
+	 * the main idea that it
+	 * DOES NOT REMOVE THE BOX FROM THE LIST 
 	 */
-	public abstract Box getLeadingBox();
+	public final Box getLeadingBox() {
+		int size = collection.size();
+		Box lead = getLeadingBoxInternal();
+		assert (size == collection.size());
+		return lead;
+	}
+	protected abstract Box getLeadingBoxInternal();
 	
 	/*
 	 * extracts next box. which box will be extracted depends on
@@ -273,9 +282,8 @@ public abstract class WorkList {
 		screener = new Screener(threshold);
 	}
 	public int removeRejectedBoxes() {
-		double threshold = screener.getLowBoundMaxValue();
 		int was = collection.size();
-		int removed = removeRejected2(threshold);
+		int removed = removeRejected2();
 		screener.resetStatistics();
 		
 		if (logging) System.out.println("WorkList:  -- Cleaned. Was: " + was + ", removed: " + removed + 
@@ -285,29 +293,28 @@ public abstract class WorkList {
 	// first variant of list cleaning.
 	// Do not call this function manually! Use @removeRejectedBoxes()@ instead
 	@SuppressWarnings("unused")
-	private int removeRejected1(double valueLimit) {	
+	private int removeRejected1() {	
 		int removedCount = 0;
 
 		Iterator<Box> it = collection.iterator(); Box b;
 		while(it.hasNext()) {
 	    	b = it.next();
-			if (b.getFunctionValue().lo() > valueLimit) {
+	    	if (!screener.checkByValue(b)) {
 	    		it.remove();
 	    		removedCount++;
 	    	}
-	    }
-		
+	    }		
 		return removedCount;
 	}
 	// second variant of list cleaning implementation
 	// Do not call this function manually! Use @removeRejectedBoxes()@ instead
 	@SuppressWarnings("unused")
-	private int removeRejected2(double valueLimit) {	
+	private int removeRejected2() {	
 		int removedCount = 0;
 
 		HashSet<Box> toRemove = new HashSet<Box>();
 		for(Box b : collection) {
-	    	if (b.getFunctionValue().lo() > valueLimit) {
+			if (!screener.checkByValue(b)) {
 	    		toRemove.add(b);
 				removedCount++;
 	    	}
@@ -318,12 +325,12 @@ public abstract class WorkList {
 	// third variant of list cleaning
 	// Do not call this function manually! Use @removeRejectedBoxes()@ instead
 	@SuppressWarnings("unused")
-	private int removeRejected3(double valueLimit) {
+	private int removeRejected3() {
 		int removedCount = 0;
 		// WorkList will use the old collection!
 		ArrayList<Box> newCollection = new ArrayList<Box>();
 		for(Box b : collection) {
-	    	if (b.getFunctionValue().lo() < valueLimit) {
+			if (!screener.checkByValue(b)) {
 	    		newCollection.add(b);
 	    	}
 	    }

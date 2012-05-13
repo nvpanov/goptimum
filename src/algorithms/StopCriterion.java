@@ -38,7 +38,6 @@ public class StopCriterion {
 		// 2. F precision (this is better than "F width")
 		assert(b.getFunctionValue().lo() <= algorithm.getLowBoundMaxValue());
 		if (algorithm.getLowBoundMaxValue() - b.getFunctionValue().lo() < getFMaxPrecision()) {
-			// we use patched IAMath! bug in exponenta is solved and wid added
 			if(logging) System.out.println(" = Iterations is done: getFMaxPrecision = " + getFMaxPrecision());
 			return true;
 		}

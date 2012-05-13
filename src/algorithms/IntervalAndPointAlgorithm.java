@@ -28,7 +28,6 @@ public class IntervalAndPointAlgorithm extends BaseAlgorithm {
 	public void solve() {
 		OptimizationStatus status;
 		do {
-			status = intervalAlg.iterate();
 			if (worthToRunPoint()) {
 				/*
 				 * point alg. consumes some time but it doesn't always give benefits 
@@ -37,9 +36,15 @@ public class IntervalAndPointAlgorithm extends BaseAlgorithm {
 				 */
 				Box searchAreaForPointAlg = getAreaForPoint();
 				double localMin = pointAlg.localMinimum(searchAreaForPointAlg);
-				intervalAlg.probeNewLowBoundMaxValue(localMin);
-				//intervalAlg.probeNewLowBoundMaxValueAndClean(localMin);
+				if (localMin < intervalAlg.getLowBoundMaxValue()) {
+					// found value can't be used as a a screening by-value criterion
+					// because of rounding errors it can be wrong.
+					// use it just like hint where to search
+					double localOptPoint[] = pointAlg.getLocalOptPoint();
+					intervalAlg.giveHint(localOptPoint, searchAreaForPointAlg);
+				}
 			}
+			status = intervalAlg.iterate();
 			iterationCount++;
 		} while (status == RUNNING);		
 	}
@@ -61,7 +66,8 @@ public class IntervalAndPointAlgorithm extends BaseAlgorithm {
 	}
 
 	private Box getAreaForPoint() {
-		return intervalAlg.workBox;//intervalAlg.workList.getLeadingBox();
+		//return intervalAlg.workBox;//intervalAlg.workList.getLeadingBox();
+		return intervalAlg.getCurrentLeadingBox();
 	}
 
 	
