@@ -32,12 +32,12 @@ public class WorkListTest {
 
 		wl = new WorkList(new ArrayList<Box>(), area) {
 			@Override
-			public Box getLeadingBox() {
-				throw new RuntimeException("NOT IMPLEMENTED!");
-			}
-			@Override
 			protected void addChecked(Box box) {
 				collection.add(box);
+			}
+			@Override
+			protected Box getLeadingBoxInternal() {
+				return null;
 			}
 		};
 	}
@@ -85,12 +85,12 @@ public class WorkListTest {
 		//5
 		WorkList wl = new WorkList(new ArrayList<Box>(), null) {
 			@Override
-			public Box getLeadingBox() {
-				throw new RuntimeException("NOT IMPLEMENTED!");
-			}
-			@Override
 			protected void addChecked(Box box) {
 				collection.add(box);
+			}
+			@Override
+			protected Box getLeadingBoxInternal() {
+				return null;
 			}
 		};
 		try {
