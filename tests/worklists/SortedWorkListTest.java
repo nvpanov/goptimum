@@ -89,4 +89,40 @@ public class SortedWorkListTest {
 		wl.remove(b1);
 		assertTrue(wl.size() == s0);
 	}
+
+	@Test
+	public void testRemoveRejectedBoxes() {
+		wl = new SortedWorkList();
+		Box b = null;
+		RealInterval it = null;
+		for (int i = 0; i < 10; i++) {
+			it = new RealInterval( -i, i );
+			b = new Box(dim, it); 
+			b.setFunctionValue(it);
+			wl.addChecked(b);
+		}
+		wl.screener.checkByValue(b);
+		assertEquals(10, wl.size());
+		wl.removeRejectedBoxes();
+		assertEquals(10, wl.size());
+		
+		b = new Box(dim, it);
+		it = new RealInterval(-100, -0.5);
+		b.setFunctionValue(it);
+		wl.screener.checkByValue(b);
+		wl.removeRejectedBoxes();
+		assertEquals(9, wl.size());
+		
+		it = new RealInterval(-100, -5);
+		b.setFunctionValue(it);
+		wl.screener.checkByValue(b);
+		wl.removeRejectedBoxes();
+		assertEquals(5, wl.size());
+		
+		it = new RealInterval(-100);
+		b.setFunctionValue(it);
+		wl.screener.checkByValue(b);
+		wl.removeRejectedBoxes();
+		assertEquals(0, wl.size());
+	}
 }
