@@ -2,7 +2,7 @@ package worklists;
 
 import java.util.Comparator;
 import java.util.TreeSet;
-
+import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
 
 public class SortedWorkList extends WorkList {
@@ -48,5 +48,31 @@ public class SortedWorkList extends WorkList {
 		// implemented for some collections in more effective way.
 		// but not for Set. So, default implementation
 		return super.extractInternal(n);
+	}
+	@Override
+	public int removeRejectedBoxes() {
+		int size = size();
+		if (size == 0)
+			return 0;
+		double threshold = screener.getLowBoundMaxValue();
+		Box leader = getLeadingBoxInternal(); // it can't be null, we already checked the size
+		
+		// 'remove all' case
+		if (!screener.checkByValue(leader) ) {
+			clearAll(threshold);
+			return size;
+		}
+		// otherwise...
+		// find where to cut
+		Box mark = new Box(leader.getDimension(), new RealInterval(0)); // boxes with wider sides goes first in the order. this box sizes are 0
+		mark.setFunctionValue(new RealInterval(threshold)); // width = 0;
+		
+		assert (collection instanceof TreeSet<?>);
+		((TreeSet<Box>)collection).tailSet(mark).clear();
+		
+		int newSize = collection.size();
+		//17:30,18-15,19-00,19-45
+		
+		return newSize - size;
 	}
 }
