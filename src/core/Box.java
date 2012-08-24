@@ -217,7 +217,7 @@ public class Box implements Cloneable {
 	 * around this point and everything else
 	 */
 	public Box[] cutOutBoxAroundThisPoint(double[] potentialOptPoint) {
-		final double epsilon = 5e-2;
+		final double epsilon = 5e-4;
 		
 		final int dim = getDimension();
 		assert(potentialOptPoint.length == dim);
