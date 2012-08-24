@@ -1,9 +1,5 @@
 package algorithms;
 
-import net.sourceforge.interval.ia_math.RealInterval;
-import splitters.Splitter;
-import choosers.Chooser;
-import core.Box;
 import worklists.WorkList;
 
 import static algorithms.OptimizationStatus.*;
@@ -15,11 +11,12 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 	private OptimizationStatus status = RUNNING;
 	private boolean isPaused = false;
 	private Object lock = new Object();
+	private final int id;
 //	private Object stateLock = new Object();
 //   private ReentrantLock pauseLock = new ReentrantLock();
 //   private Condition unpaused = pauseLock.newCondition();
 
-	public ParallelAlgorithm(BaseAlgorithm baseAlgorithm) {
+	public ParallelAlgorithm(BaseAlgorithm baseAlgorithm, int id) {
 		this.chooser = baseAlgorithm.chooser;
 		this.generation = 0;
 		this.logging = baseAlgorithm.logging;
@@ -27,9 +24,7 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 		this.stopCriterion = baseAlgorithm.stopCriterion;
 		this.targetFunction = baseAlgorithm.targetFunction;
 		this.workList = baseAlgorithm.workList;
-	}
-	// for ParallelPointStub
-	protected ParallelAlgorithm() {
+		this.id = id;
 	}
 	@Override
 	public final void run() {
@@ -40,7 +35,7 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 	public void solve() {
 		OptimizationStatus tStat;
 		do {
-//			System.out.println("ParallelAlgorithm::solve() -- iterating : " + t);
+//			if (logging) System.out.println("ParallelAlgorithm::solve() -- iterating : " + t);
 			sleepIfPaused();
 			tStat = iterate();
 			//synchronized (stateLock) {
@@ -51,7 +46,7 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 		} while (status == RUNNING);
 	}
 	private void sleepIfPaused() {
-//		System.out.println("ParallelAlgorithm::sleepIfPaused() {{{");
+//		if (logging) System.out.println("ParallelAlgorithm::sleepIfPaused() {{{");
 		
 		/*
 		 * when we use nested synchronized blocks 
@@ -62,19 +57,19 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 		synchronized (lock) {
 			if (!isPaused)
 				return;
-			System.out.println(Thread.currentThread().getId() + 
+			if (logging) System.out.println(getId() + 
 				" ParallelAlgorithm::sleepIfPaused() -- PAUSED. " +
 				"Iteration count = " + t);
 				
 //			synchronized (stateLock) {
 				status = EXTERNAL_INTERRUPTED;
-				System.out.println(Thread.currentThread().getId() + 
+				if (logging) System.out.println(getId() + 
 					" ParallelAlgorithm::sleepIfPaused() -- notifying pauseIterations()");
 //				stateLock.notify(); // awake pauseIterations()
 				lock.notify(); // awake pauseIterations()
 //			}
 
-			System.out.println(Thread.currentThread().getId() + " ParallelAlgorithm::sleepIfPaused() -- waiting...");
+			if (logging) System.out.println(getId() + " ParallelAlgorithm::sleepIfPaused() -- waiting...");
 			try {
 				while(isPaused) {
 					//pauseLock.wait();
@@ -84,7 +79,7 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 				e.printStackTrace();
 				// TODO: what to do?
 			}
-			System.out.println(Thread.currentThread().getId() + " ParallelAlgorithm::sleepIfPaused() -- wakedup!");
+			if (logging) System.out.println(getId() + " ParallelAlgorithm::sleepIfPaused() -- wakedup!");
 		}
 	}
 	public boolean pauseIterations() {
@@ -97,12 +92,12 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 //			synchronized (stateLock) {
 		synchronized (lock) {		
 				if (status != RUNNING) {
-					System.out.println(Thread.currentThread().getId() + 
+					if (logging) System.out.println(getId() + 
 							" ParallelAlgorithm::pauseIterations() returning FALSE because status is " + status);		
 					return false;
 				}
 				isPaused = true;
-				System.out.println(Thread.currentThread().getId() + " ParallelAlgorithm::pauseIterations() -- waiting till iteration will be finished...");		
+				if (logging) System.out.println(getId() + " ParallelAlgorithm::pauseIterations() -- waiting till iteration will be finished...");		
 				try {
 					while (status == RUNNING) {
 						//stateLock.wait(); // waiting for sleepIfPaused
@@ -111,7 +106,7 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				System.out.println(Thread.currentThread().getId() + " ParallelAlgorithm::pauseIterations() -- iteration is finished.");		
+				if (logging) System.out.println(getId() + " ParallelAlgorithm::pauseIterations() -- iteration is finished.");		
 //				}
 //			}
 		}
@@ -127,21 +122,21 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 //		synchronized (pauseLock) {
 		synchronized (lock) {		
 			if (isPaused != true) {
-				System.out.println(Thread.currentThread().getId() + 
+				if (logging) System.out.println(getId() + 
 						" ParallelAlgorithm::resumeIterations() returning FALSE because thread was not paused");		
 				return false;
 			}
 			isPaused = false;
-			System.out.println(Thread.currentThread().getId() +
-					"ParallelAlgorithm::resumeIterations() -- isPaused = false");		
+			if (logging) System.out.println(getId() +
+					" ParallelAlgorithm::resumeIterations() -- isPaused = false");		
 			//synchronized (stateLock) {
 			synchronized (lock) {
 				status = RUNNING;
 			}
 			//pauseLock.notify(); // awake sleepIfPaused()
 			lock.notify(); // awake sleepIfPaused()
-			System.out.println(Thread.currentThread().getId() +
-					"ParallelAlgorithm::resumeIterations() -- notify");		
+			if (logging) System.out.println(getId() +
+					" ParallelAlgorithm::resumeIterations() -- notify");		
 		}
 		return true;
 	}	
@@ -149,9 +144,21 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 	public int getGeneration() {
 		return generation;		
 	}
+	public int getId() {
+		return id;		
+	}
+	public long getThreadId() {
+		return Thread.currentThread().getId();
+	}
 
-	public synchronized void getWorkFromStopped(ParallelAlgorithm neighbour) {
-		System.out.println("ParallelAlgorithm::getWorkFromStopped() {{{");
+	public void dropWorkList() {
+		workList.clearAll();
+		status = EMPTY_WORKLIST;
+	}
+	public synchronized void getWorkFromStopped(ParallelAlgorithm neighbour, double globalThreshold) {
+		if (logging) System.out.println(getId() + " ParallelAlgorithm::getWorkFromStopped(" + neighbour.getId() + ") {{{");
+		assert (workList.size() == 0); //we use getWorkFromStoped to fill EMPTY worklists ONLY
+										// otherwise some areas can be lost
 		if (neighbour.getState() != EXTERNAL_INTERRUPTED) { // stopped not because interrupt
 															// but due to empty worklist or
 															// because completed the job
@@ -159,13 +166,15 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 					"neighbour.getState() != EXTERNAL_INTERRUPTED. It is in " +
 					neighbour.getState() + " state");
 		}			
-		setWorkList(neighbour);
+		getSomeBoxesFromThisAlg(neighbour, globalThreshold);
 		generation++;
-		System.out.println("ParallelAlgorithm::getWorkFromStopped() }}}");
+		if (logging) System.out.println(getId() + " ParallelAlgorithm::getWorkFromStopped() }}}");
 	}
-	private void setWorkList(ParallelAlgorithm neighbour) {
+	private void getSomeBoxesFromThisAlg(ParallelAlgorithm neighbour, double globalThreshold) {
 		WorkList otherWL = neighbour.workList;
-		workList.getWorkFrom(otherWL);		
+		assert (neighbour.getState() == EXTERNAL_INTERRUPTED && otherWL.size() > 0);
+		assert (workList.size() == 0);
+		workList.getWorkFrom(otherWL, globalThreshold);		
 	}
 	public OptimizationStatus getState() {
 		//synchronized (stateLock) {
@@ -175,6 +184,12 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 	}
 	public FunctionNEW getProblem() {
 		return targetFunction;
+	}
+	public void removeRejectedBoxes() {
+		workList.removeRejectedBoxes();
+	}
+	public int getWorkListSize() {
+		return workList.size();
 	}
 
 }
