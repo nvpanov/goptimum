@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import rejecting.RejectorByValueAndDerivatives;
+
 import net.sourceforge.interval.ia_math.RealInterval;
 
 import choosers.Chooser;
@@ -14,7 +16,7 @@ import core.Box;
 
 public abstract class WorkList {
 	protected Collection<Box> collection;
-	protected Screener screener;
+	protected RejectorByValueAndDerivatives screener;
 	protected Chooser chooser;
 	private int maxSize = -1;
 	private int avgSize = -1;
@@ -47,7 +49,7 @@ public abstract class WorkList {
 								// in a different way than the rest of the boxes (see @addSearchArea@).
 		// IT WAS really inconvenient and now we do allow this again*/ 
 		double limit = Double.POSITIVE_INFINITY; 
-		screener = new Screener(limit);
+		screener = new RejectorByValueAndDerivatives(limit);
 		addSearchArea(area);
 	}
 	/*
@@ -243,6 +245,10 @@ public abstract class WorkList {
 		assert (collection.size() != 0);
 		double hiBorder = screener.getLowBoundMaxValue();
 		double loBorder = getLeadingBox().getFunctionValue().lo();
+		if (hiBorder < loBorder) { // actual for parallel algorithms -- value 
+									// of rejection-by-value criterion can be improved in parallel algorithms
+			loBorder = hiBorder;			
+		}
 		return new RealInterval(loBorder, hiBorder);
 	}
 	public final Box[] getOptimumArea() {
@@ -277,13 +283,13 @@ public abstract class WorkList {
 	public void clearAll() {
 		clearAll(Double.MAX_VALUE);
 	}
-	private void clearAll(double threshold) {
+	protected void clearAll(double threshold) {
 		collection.clear();
-		screener = new Screener(threshold);
+		screener = new RejectorByValueAndDerivatives(threshold);
 	}
 	public int removeRejectedBoxes() {
 		int was = collection.size();
-		int removed = removeRejected2();
+		int removed = removeRejected3();
 		screener.resetStatistics();
 		
 		if (logging) System.out.println("WorkList:  -- Cleaned. Was: " + was + ", removed: " + removed + 
@@ -330,7 +336,7 @@ public abstract class WorkList {
 		// WorkList will use the old collection!
 		ArrayList<Box> newCollection = new ArrayList<Box>();
 		for(Box b : collection) {
-			if (!screener.checkByValue(b)) {
+			if (screener.checkByValue(b)) {
 	    		newCollection.add(b);
 	    	}
 	    }
@@ -353,11 +359,15 @@ public abstract class WorkList {
 	}
 	
 	
-	public final void getWorkFrom(WorkList otherWL) {
-		System.out.println("WorkList::getWorkFrom() {{{");
-		double threshold = Math.min(this.getLowBoundMaxValue(), otherWL.getLowBoundMaxValue() );
-		assert(threshold <= this.getLowBoundMaxValue());
-		clearAll(threshold);
+	public final void getWorkFrom(WorkList otherWL, double globalThreshold) {
+System.out.println("	WorkList::getWorkFrom() {{{");
+
+		assert(size() == 0); // for empty worklists only
+		assert(otherWL.size() != 0);
+
+System.out.print("	WorkList::getWorkFrom() otherWL size " + otherWL.size());
+		otherWL.probeNewLowBoundMaxValueAndClean(globalThreshold);
+System.out.println(" => " + otherWL.size());
 		
 		Collection<Box> oCol = otherWL.collection;
 		Box b;
@@ -368,15 +378,23 @@ public abstract class WorkList {
 			oI.remove();
 			collection.add(b);
 		}
-	
-		System.out.println("WorkList::getWorkFrom() otherWL has size " + 
+		assert (otherSize == otherWL.size() + this.size());
+//*	
+		System.out.println("	WorkList::getWorkFrom() otherWL has size " + 
 				otherSize + ", now this WL has size " + collection.size());
-		System.out.println("WorkList::getWorkFrom() }}}");
+		System.out.println("	WorkList::getWorkFrom() }}}");
+//*/		
 	}
 	public double getLowBoundMaxValue() {
 		return screener.getLowBoundMaxValue();
 	}
 	public void switchOffDerivativesCheck() {
 		screener.switchOffDerivativesCheck();
+	}
+	public Box getBoxContains(double[] point) {
+		for (Box b : collection)
+			if (b.contains(point))
+				return b;
+		return null;
 	}
 }
