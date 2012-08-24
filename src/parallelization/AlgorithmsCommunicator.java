@@ -1,77 +1,65 @@
 package parallelization;
 
 import static algorithms.OptimizationStatus.*;
-import static java.lang.Math.min;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import solvers.Bisection_SrtL_CBtC_AllEqS;
-
 import worklists.SortedWorkList;
-import worklists.UnSortedWorkList;
-import worklists.WorkList;
-
 import core.Box;
 import net.sourceforge.interval.ia_math.RealInterval;
-//import net.sourceforge.interval.ia_math.exceptions.IAIntersectionException;
-import algorithms.Algorithm;
-import algorithms.BaseAlgorithm;
 import algorithms.OptimizationStatus;
 import algorithms.ParallelAlgorithm;
 
 
 public class AlgorithmsCommunicator extends Thread {
-	// just a shortcuts to executor fields
-	Thread threadsToWatch[];
 	ParallelAlgorithm algorithms[];
 	// executor itself
 	ParallelExecutor executor;
 	double globalScreeningValue = Double.POSITIVE_INFINITY;
 
-	private RealInterval optTmp = new RealInterval(); // -inf, + inf
-	private volatile Box[] optArea;
-	private volatile RealInterval optVal;
-	
-	private SortedWorkList sortedWorkList;
+	private SortedWorkList optimumShortList;
+	private boolean logging = true;
+	private boolean logging2 = false;
 
 	public AlgorithmsCommunicator(ParallelExecutor executor) {
 		this.executor = executor;
-		threadsToWatch = executor.getThreads();
 		algorithms = executor.getAlgorithms();
 		
 		setPriority(NORM_PRIORITY-2);
 		setName("AlgorithmsCommunicator");
 		
-		sortedWorkList = new SortedWorkList();
+		optimumShortList = new SortedWorkList();
 	}
 	
 	public void run() {
-		double r;
+		communicateAlgorithms();
+		if (logging) System.out.println("Communicator: -- Alomost DONE --");
+		collectResults();
+		for (int i = 0; i < algorithms.length; i++) {
+			assert (algorithms[i].getState() == EMPTY_WORKLIST);
+		}
+		assert (executor.dbg_noLiveThreads());
+		prepareFinalResult();
+		if (logging) System.out.println("Communicator: -- DONE --");
+	}
+	
+	private void communicateAlgorithms() {
 		int failCounter = 0;
-		while (failCounter < threadsToWatch.length) {
-			try {
-				sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				interrupt();
-			}
-			for (int i = 0; i < threadsToWatch.length; i++) {
-				// check if thread finished his work
+		while (failCounter < algorithms.length+1) {
+			sleep();
+			for (int i = 0; i < algorithms.length; i++) {
+				// check if algorithm has finished his work
 				OptimizationStatus state = algorithms[i].getState();
-				System.out.println("Communicator: Checking thread #" + i);
+				if (logging2) System.out.println("Communicator: Checking alg " + algorithms[i].getId() + ", alg#" + i);
 				if (state != RUNNING ) {
-					System.out.println("Communicator: It's NOT runing. " +
+					if (logging2) System.out.println("  ->Communicator: It's NOT runing. " +
 							"It's in " + state + " state");
 					switch (state) {
 						case EXTERNAL_INTERRUPTED:
 					 		continue;
 						case STOP_CRITERION_SATISFIED:
 							saveFoundOptimumAndArea(algorithms[i]);
-							// no break here: continue as with empty worklist
-						case EMPTY_WORKLIST: 
-							if (!loadThreadFromNeighbor(i)) {
+							algorithms[i].dropWorkList();
+							// no break here: continue as with EMPTY worklist
+						case EMPTY_WORKLIST:
+							if (!getWorkFromNeighborForThisAlgorithm(i)) {
 								failCounter++;
 							}
 							break;
@@ -80,130 +68,179 @@ public class AlgorithmsCommunicator extends Thread {
 					}
 				}
 				else { // RUNNING
-					r = getScreeningValue(i);
-					System.out.println("Communicator: It's runing. It's ScreeningValue=" +
-							r + ", global ScreeningValue=" + globalScreeningValue);
-					updateScreeningValue(i, r);
+					updateScreeningValueForAlgorithm(i);
 					failCounter = 0;
 				}
 			}
 		}
-		prepareFinalResult();
-		System.out.println("Communicator: -- DONE --");
-		assert(false); // JUNit parallel execution and asserts
 	}
-	
+	private void sleep() {
+		try {
+			sleep(200);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			interrupt();
+		}
+	}
+	private void collectResults() {
+		boolean restartDispatching = false;
+		for (int i = 0; i < algorithms.length; i++) {
+			OptimizationStatus state = algorithms[i].getState();
+			switch (state) {
+				case EXTERNAL_INTERRUPTED:
+					algorithms[i].resumeIterations(); // some algorithm was paused.. it is really strange. resume it and continue computation
+					assert (false);
+					// no break here!
+				case RUNNING:			// there are running algorithms!
+					restartDispatching = true;
+					break;
+				case STOP_CRITERION_SATISFIED:
+					saveFoundOptimumAndArea(algorithms[i]);
+					break;
+				case EMPTY_WORKLIST:
+					// do nothing
+					break;
+				default:
+					throw new RuntimeException("Unknown OptimizationStatus " + state);
+			}
+		}
+		if (restartDispatching) {
+			assert(false);
+			communicateAlgorithms();	// unstopped algorithms has been found: we have to dispatch them 
+			collectResults();	// and get its results back			
+		}
+	}
+
 	private void prepareFinalResult() {
 		if (shouldResultBeRefined())
 			refineResult();
-		optArea = sortedWorkList.getOptimumArea();
-		optVal = sortedWorkList.getOptimumValue();
 	}
 	private boolean shouldResultBeRefined() {
-		// TODO Auto-generated method stub
+		RealInterval optVal = getOptimumValue();
+		if (optVal.wid() > executor.getPrecision())
+			return true;
+//		if (getOptimumArea().length > MAX_ACCEPTABLE_OPTIMUM_AREA_LENGTH)
+//			return true;
 		return false;
 	}
 	private void refineResult() {
-/*		BaseAlgorithm a = new Bisection_SrtL_CBtC_AllEqS();
-		a.setProblem(f, sortedWorkList);
-		
-		a.setProblem(algorithms[0].getProblem());
-		optArea = a.getOptimumArea();
-		optVal  = a.getOptimumValue();
-		System.out.println("composeResult() optValue=" + optVal + ", area size=" + optArea.length);
-		if (optVal.wid() > a.getPrecision()) {
-			a.solve();		
-		}
-		optArea = a.getOptimumArea();
-		optVal  = a.getOptimumValue();
-		System.out.println("   \\=> optValue=" + optVal + ", area size=" + optArea.length);
-*/		
+		//restart algorithms
 	}
 
 	private void saveFoundOptimumAndArea(ParallelAlgorithm parallelAlgorithm) {
 		//throw new RuntimeException("FIX ME for IAMath2JInterval");
-		
-		RealInterval newOpt = parallelAlgorithm.getOptimumValue();
-		if (newOpt == null)
-			return; // list was cleared before getOptimum call 
-		System.out.println("{{{ Communicator: saveFoundOptimumAndArea() : potential new optimum: " + newOpt);
-
-		if (newOpt.lo() > optTmp.hi()) {
-			// throw out new result...
-			System.out.println("->  Communicator: saveFoundOptimumAndArea() opt DISCARDED");
+		assert (parallelAlgorithm.getState() == STOP_CRITERION_SATISFIED);
+		// rejecting by-value bound could has been updated 
+		parallelAlgorithm.removeRejectedBoxes();
+		if (parallelAlgorithm.getWorkListSize() == 0) {
+			/*if (logging)*/ System.out.println("{{{ Communicator: saveFoundOptimumAndArea(alg=" + parallelAlgorithm.getId() + 
+					") : worklist is empty");
 			return;
 		}
-		sortedWorkList.add( parallelAlgorithm.getOptimumArea(), newOpt.lo(), newOpt.hi() );
-			
-		if (optTmp.isIntersects(newOpt))
-			System.out.println("->  Communicator: saveFoundOptimumAndArea() opt COMBINED. area size is " + sortedWorkList.size());
-		else
-			System.out.println("->  Communicator: saveFoundOptimumAndArea() opt RENEWED. area size is " + sortedWorkList.size());
+		RealInterval newOpt = parallelAlgorithm.getOptimumValue();
+		/*if (logging)*/ System.out.println("{{{ Communicator: saveFoundOptimumAndArea(alg=" + parallelAlgorithm.getId() + 
+				") : potential new optimum: " + newOpt);
+
+		RealInterval storedOpt = this.getOptimumValue(); 
+		if (newOpt.lo() > storedOpt.hi()) {
+			// throw out new result...
+			/*if (logging)*/ System.out.println(" ->  Communicator: saveFoundOptimumAndArea() opt DISCARDED");
+			return;
+		}
+		optimumShortList.add( parallelAlgorithm.getOptimumArea(), newOpt.lo(), newOpt.hi() );
+
+		if (logging) {			
+			if (storedOpt.isIntersects(newOpt))
+				System.out.println(" ->  Communicator: saveFoundOptimumAndArea() opt COMBINED. area size is " + optimumShortList.size());
+			else
+				System.out.println(" ->  Communicator: saveFoundOptimumAndArea() opt RENEWED. area size is " + optimumShortList.size());
+		}
+		updateGlobalScreeningValue(optimumShortList.getLowBoundMaxValue());
+	}
+
+	private double getAlgorithmScreeningValue(int algNum) {
+		return algorithms[algNum].getLowBoundMaxValue();
+	}
+	private void updateScreeningValueForAlgorithm(int algNum) {
+		double r = getAlgorithmScreeningValue(algNum);
 		
-		globalScreeningValue = sortedWorkList.getLowBoundMaxValue();
-	}
-
-	private double getScreeningValue(int threadNum) {
-		return algorithms[threadNum].getLowBoundMaxValue();
-	}
-	private void updateScreeningValue(int threadNum, double r) {
 		if (r > globalScreeningValue) {
-			algorithms[threadNum].probeNewLowBoundMaxValue(globalScreeningValue);
-		} else
-			globalScreeningValue = r;
+			algorithms[algNum].probeNewLowBoundMaxValueAndDoNotClean(globalScreeningValue); 
+														// !!! DO NOT CLEAN -- otherwise it can crash iterations
+														// they are asynchronous
+			if (logging) System.out.println("   " + globalScreeningValue + " => screeningValue for alg " + algNum);
+		} else {
+			updateGlobalScreeningValue(r, algNum);
+		}
 	}
 
-	private boolean loadThreadFromNeighbor(int threadNum) {
-		System.out.println("Communicator: loadThreadFromNeighbor for thread# " + threadNum + " {{{");
+	private void updateGlobalScreeningValue(double r) {
+		updateGlobalScreeningValue(r, null);
+	}
+	private void updateGlobalScreeningValue(double r, Integer algNum) {
+		if (r < globalScreeningValue) {
+			if (logging) {
+				String str = "    globalScreening <= " + r;
+				if (algNum != null)
+					str += " (from alg " + algNum + ")";
+				System.out.println(str);
+			}
+			globalScreeningValue = r;
+		}		
+	}
+
+	private boolean getWorkFromNeighborForThisAlgorithm(int algNum) {
+		if (logging) System.out.println("Communicator: getWorkFromNeighborForThisAlgorithm for alg# " + algNum + " {{{");
 
 		// find a working neighbor to get work for
-		int neighborNum = findWorkingNeighbourAndPauseIt(threadNum);
+		int neighborNum = findWorkingNeighbourAndPauseIt(algNum);
 		if (neighborNum < 0) {
-			System.out.println("Communicator: loadThreadFromNeighbor for thread# " 
-					+ threadNum + " FAILED: no working algs }}}");
+			if (logging) System.out.println("Communicator: getWorkFromNeighborForThisAlgorithm for alg# " 
+					+ algNum + " FAILED: no working algs }}}");
 			return false; 
 		}
 		ParallelAlgorithm neighbor = algorithms[neighborNum];
-		ParallelAlgorithm finished = algorithms[threadNum];
+		ParallelAlgorithm drained = algorithms[algNum];
 
-		finished.getWorkFromStopped(neighbor);
+		drained.getWorkFromStopped(neighbor, globalScreeningValue);
 
-		resumeAlgorithms(threadNum, neighborNum);
+		resumeAlgorithms(algNum, neighborNum);
 
-		System.out.println("Communicator: loadThreadFromNeighbor for thread# " + threadNum + " }}}");
+		if (logging) System.out.println("Communicator: getWorkFromNeighborForThisAlgorithm for alg# " + algNum + " }}}");
 		return true;
 	}
 
-	private void resumeAlgorithms(int threadNum, int neighborNum) {
+	private void resumeAlgorithms(int algNum, int neighborNum) {
 		ParallelAlgorithm neighbor = algorithms[neighborNum];
 
 		neighbor.resumeIterations();
-		restartThread(threadNum);
+		restartThread(algNum);
 	}
 
 	/*
 	 * checks all algorithms in a round till find working one
 	 * than returns it number. returns -1 if nobody running  
 	 */
-	private int findWorkingNeighbourAndPauseIt(int threadNum) {
-		int neighborNum = threadNum;
+	private int findWorkingNeighbourAndPauseIt(int algNum) {
+		int neighbourNum = algNum;
 		int count = 0;
-		System.out.println("Communicator: findWorkingNeighbour for thread# " 
-				+ threadNum + " {{{");
+		if (logging) System.out.println("Communicator: findWorkingNeighbour for alg# " 
+				+ algNum + " {{{");
 		
 		do {
-			neighborNum = (neighborNum + 1) % threadsToWatch.length;
+			neighbourNum = (neighbourNum + 1) % algorithms.length;
 			if (/*algorithms[neighborNum].getState() == RUNNING &&*/ 
-				algorithms[neighborNum].pauseIterations() // pause() checks that state == RUNNING 
+				algorithms[neighbourNum].pauseIterations() // pause() checks that state == RUNNING 
 				) {
-				System.out.println("Communicator: findWorkingNeighbour for thread# " 
-						+ threadNum + ". neighbor found and stopped: thread #" + neighborNum + " }}}");
-				return neighborNum;
+				if (logging) System.out.println("Communicator: findWorkingNeighbour for alg# " 
+						+ algNum + ". neighbor found and stopped: alg #" + neighbourNum + " }}}");
+				return neighbourNum;
 			}
-		} while (threadsToWatch.length < count++);
+		} while (algorithms.length < count++);
 
-		// if we here it means there are no more alive threads
-		System.out.println("Communicator: findWorkingNeighbour for thread# " + threadNum +
+		// if we here it means there are no more working algorithms
+		if (logging) System.out.println("Communicator: findWorkingNeighbour for alg# " + algNum +
 					" failed. }}}");
 		return -1;
 	}
@@ -213,11 +250,13 @@ public class AlgorithmsCommunicator extends Thread {
 	}
 	
 	public RealInterval getOptimumValue() {
-		return sortedWorkList.getOptimumValue();
+		if (optimumShortList.size() != 0) // there is an assertion in getOptimumValue()... 
+			return optimumShortList.getOptimumValue();
+		return new RealInterval(); //-inf, +inf
 	}
 
 	public Box[] getOptimumArea() {
-		return sortedWorkList.getOptimumArea();
+		return optimumShortList.getOptimumArea();
 	}
 	
 }
