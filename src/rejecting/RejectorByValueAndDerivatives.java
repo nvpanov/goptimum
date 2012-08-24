@@ -1,4 +1,4 @@
-package worklists;
+package rejecting;
 
 import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
@@ -6,7 +6,7 @@ import functions.FunctionFactory;
 import functions.FunctionNEW;
 
 @SuppressWarnings("unused") // for profiling variables
-class Screener {
+public class RejectorByValueAndDerivatives {
 	private volatile double lowBoundMaxValue = Double.POSITIVE_INFINITY;
 	private double lowBoundMaxValueDelta;
 	private int updatesCount;
@@ -51,7 +51,7 @@ class Screener {
 		System.out.println("}} Screening stats ------\n");
 	}
 //*/	
-	public Screener(double startLimit) {
+	public RejectorByValueAndDerivatives(double startLimit) {
 		resetStatistics();
 		lowBoundMaxValue = startLimit;		
 	}
@@ -136,7 +136,7 @@ class Screener {
 			return true;
 		if (isBorder(box)) // we can't screen out any border point of original search area
 			return true;   // because of derivatives. 
-		return check1Derivative(box) & check2Derivative(box);
+		return check1Derivative(box) && check2Derivative(box);
 	}
 	private boolean isBorder(Box box) {
 		for (int i = box.getDimension()-1; i >= 0; --i) {
@@ -188,7 +188,7 @@ class Screener {
 		}
 		return true;
 	}
-	boolean checkByValue(Box box) {
+	public boolean checkByValue(Box box) {
 		double lo = box.getFunctionValue().lo();
 		//if (Math.abs(lo - lowBoundMaxValue) < epsilon ) {
 		if (lo > lowBoundMaxValue) {
@@ -227,7 +227,7 @@ class Screener {
 		return updatesCount;
 	}
 
-	void resetStatistics() {
+	public void resetStatistics() {
 		lowBoundMaxValueDelta = 0;
 		updatesCount = 0;
 	}
