@@ -21,8 +21,9 @@ public class FunctionNEW {
 		this.d1f = d1f;
 		this.d2f = d2f;
 		this.dim =function.getVariables().size();
-		assert( (d1f == null && d2f == null)|| 
+/*		assert( (d1f == null && d2f == null)|| 
 				(this.dim == d1f.length && this.dim == d2f.length) );
+*/				
 	}
 	// init for legacy functions from functions package
 	protected void init(int dim, String equation) {
