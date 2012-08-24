@@ -104,41 +104,21 @@ public class BaseAlgorithm implements Algorithm {
 		} while (status == RUNNING);
 	}
 
-int _delme_dbg_iterationNum = 0;	
 	protected OptimizationStatus iterate() {
 		Box[] newBoxes;
 
 		if (logging)
 			System.out.println("WorkList size = " + workList.size());
 		workBox = workList.extractNext();
-/*
-// the following block is for debugging.
-// it allows to catch why last containing optimum box
-// was rejected.
-// checkVal -- optimum value, checkArg - optimum arguments		
-{
-	_delme_dbg_iterationNum++;
-	double checkVal = 0;
-	double[] checkArg = {1,1};
-	if( (workBox.getFunctionValue().contains(checkVal) && 
-		 !workList.getOptimumValue().contains(checkVal) ) ) {
-		System.out.println(">>>> Last box that contains optimum Val. " + _delme_dbg_iterationNum);
-	} 
-	if (workBox.contains(checkArg)) {
-		boolean contains = false;
-		for (Box b : workList.getOptimumArea()) {
-			if (b.contains(checkArg))
-				contains  = true;
-		}
-		if (!contains)
-			System.out.println(">>>> Last box that contains optimum Arg. " + _delme_dbg_iterationNum);
-	}
-}
-*/		
+
+//		boolean last = debug_catchLastOptimaBox();
+		
 		if (logging)
 			System.out.println(workBox + " => ");
-		if (workBox == null)
+		if (workBox == null) {
+			assert (workList.size() == 0);
 			return EMPTY_WORKLIST;
+		}
 		
 		newBoxes = splitter.splitIt(workBox);
 		assert(newBoxes.length > 1);
@@ -147,9 +127,13 @@ int _delme_dbg_iterationNum = 0;
 		if (logging)
 			for (Box b : newBoxes)
 				System.out.println("  => " + b);
-
+	
 		workList.add(newBoxes);
-
+/*		if (last)
+			if (debug_catchLastOptimaBox()) {
+				System.out.println("LAST BOX contains optima was lost!");
+			}
+*/
 		/*
 		 * calculated function extensions can contain infinity. what to do in such case?
 		 */
@@ -262,7 +246,8 @@ int _delme_dbg_iterationNum = 0;
 		if (!boxFromTheList.contains(potentialOptPoint)) {
 			// probably it is due to rounding error and it is close
 			// save original point for diagnostic
-			double[] origPoint = potentialOptPoint.clone();
+			//double[] _debug_origPoint = potentialOptPoint.clone();
+			
 			if (boxFromTheList.setToClosestAreaPoint(potentialOptPoint) < epsilon * dim) {
 				// let it be "close enough"
 				// continue
@@ -285,5 +270,34 @@ int _delme_dbg_iterationNum = 0;
 		workList.add(boxes);
 	}
 
+	@SuppressWarnings("unused")
+	private int _dbg_iterationNum = 0;	
+	@SuppressWarnings("unused")
+	private boolean debug_catchLastOptimaBox() {
+	// the following block is for debugging.
+	// it allows to catch why last containing optimum box
+	// was rejected.
+	// checkVal -- optimum value, checkArg - optimum arguments		
+		_dbg_iterationNum++;
+		boolean last = false;
+		double checkVal = 0;
+		if (workBox == null)
+			return false;
+		double[] checkArg = new double[workBox.getDimension()]; // {0, ..., 0}
+		if( (workBox.getFunctionValue().contains(checkVal) && 
+			 !workList.getOptimumValue().contains(checkVal) ) ) {
+			if (workBox.contains(checkArg)) {
+//				System.out.println(">>>> Last box that contains optimum Val. " + _delme_dbg_iterationNum);
+				last = true;
+			}
+		} 
+		if (workBox.contains(checkArg)) {
+			if (workList.getBoxContains(checkArg) == null) {
+//				System.out.println(">>>> Last box that contains optimum Arg. " + _delme_dbg_iterationNum);
+				last = true;
+			}		
+		}
+		return last;
+	}
 
 }
