@@ -36,7 +36,6 @@ public class StopCriterion {
 		}
 		
 		// 2. F precision (this is better than "F width")
-		assert(b.getFunctionValue().lo() <= algorithm.getLowBoundMaxValue());
 		if (algorithm.getLowBoundMaxValue() - b.getFunctionValue().lo() < getFMaxPrecision()) {
 			if(logging) System.out.println(" = Iterations is done: getFMaxPrecision = " + getFMaxPrecision());
 			return true;
