@@ -18,9 +18,20 @@ public class IntervalAndPointAlgorithm extends BaseAlgorithm {
 	protected PointAlgorithm pointAlg;
 	private int iterationCount = 0;
 	public IntervalAndPointAlgorithm(IntervalSolver intervalAlg, PointAlgorithm pointAlg) {
+		init(intervalAlg, pointAlg);
+	}
+	protected void init(IntervalSolver intervalAlg, PointAlgorithm pointAlg) {
 		assert(intervalAlg != null && pointAlg != null);
 		this.intervalAlg = (BaseAlgorithm)intervalAlg;
-		this.pointAlg = pointAlg;		
+		this.pointAlg = pointAlg;
+
+		// for ParallelAlgorithm
+		this.workList = this.intervalAlg.workList;
+		this.chooser  = this.intervalAlg.chooser;
+		this.splitter = this.intervalAlg.splitter;
+		this.stopCriterion = this.intervalAlg.stopCriterion;
+		this.workBox = this.intervalAlg.workBox;
+		
 	}
 	protected IntervalAndPointAlgorithm() {} // for Solver
 	
