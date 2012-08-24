@@ -238,25 +238,31 @@ public class BaseAlgorithm implements Algorithm {
 	 * Or just ignore this info:)
 	 */
 	public void giveHint(double[] potentialOptPoint, Box boxFromTheList) {
-		final double epsilon = 0.005;
+		final double epsilon = 5e-4;
 		final int dim = boxFromTheList.getDimension();
 		assert (potentialOptPoint.length == dim);
 
 		//	1. check if the point is inside the box.
 		if (!boxFromTheList.contains(potentialOptPoint)) {
-			// probably it is due to rounding error and it is close
-			// save original point for diagnostic
-			//double[] _debug_origPoint = potentialOptPoint.clone();
-			
-			if (boxFromTheList.setToClosestAreaPoint(potentialOptPoint) < epsilon * dim) {
-				// let it be "close enough"
-				// continue
-			} else {
-				// possible bug. Lets fail in debug. See origPoint[].
-				assert (false); 
-				return;
-			}
+			// try to search the list
+			Box anotherBoxFromTheList = workList.getBoxContains(potentialOptPoint);
+			if (anotherBoxFromTheList == null) {
+				// probably it is due to rounding error and it is close
+				// save original point for diagnostic
+				// double[] _debug_origPoint = potentialOptPoint.clone();
+				
+				if (boxFromTheList.setToClosestAreaPoint(potentialOptPoint) < epsilon * dim) {
+					// let it be "close enough"
+					// continue
+				} else {
+					// possible bug. Lets fail in debug. See origPoint[].
+					assert (false); 
+					return;
+				}
+			} else 
+				boxFromTheList = anotherBoxFromTheList;
 		}
+		assert (boxFromTheList.getFunctionValue().contains(getLowBoundMaxValue()));
 		//	2.	extract this box from the list
 		boolean success = workList.remove(boxFromTheList);
 		if (!success) {
@@ -266,6 +272,9 @@ public class BaseAlgorithm implements Algorithm {
 		//	3.	split this box on a small box around this point and everything else
 		Box boxes[] = boxFromTheList.cutOutBoxAroundThisPoint(potentialOptPoint);
 		assert (boxes.length > 0);
+		//  4.0 calc function values -- otherwise, if the algorithm will be stopped before the
+		//		function estimation will be calculated in regular order the low bound will be -inf.
+		calculateIntervalExtensions(boxes);
 		//	4.	add the sub-boxes to the list
 		workList.add(boxes);
 	}
