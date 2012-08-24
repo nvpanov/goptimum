@@ -21,7 +21,7 @@ import functions.FunctionNEW;
 public class FileUserInterface {
 	private HashMap<String, String> hashMapArgs;
 	private String fStr;
-	private FunctionNEW f; 
+	private FunctionNEW f;
 	private StopCriterion stopCriterion;
 	private Algorithm algo;
 	private boolean reportOptVal;
@@ -37,6 +37,7 @@ public class FileUserInterface {
 		FileUserInterface ui = new FileUserInterface();
 		ui.mainFunction(args);
 	}
+
 	public FileUserInterface() {
 		optimumTypeIsSet = false;
 		optimumType = "min"; // search for min by default
@@ -47,138 +48,163 @@ public class FileUserInterface {
 		reportOptVal = true;
 		reportOptArea = true;
 	}
+
 	public void mainFunction(String args[]) throws Throwable {
-//		try{
+		try {
 			getAllArgs(args);
 			parseArgs();
-			
+
 			if (fStr == null) {
-				showToUser("!!! Error. ", "Target function hasn't been specified.");
+				showToUser("!!! Error. ",
+						"Target function hasn't been specified.");
 				return;
-			}				
+			}
 			f = FunctionFactory.newFunction(fStr);
 			Box area = getArea();
-			
+
 			algo.setProblem(f, area);
 			algo.setStopCriterion(stopCriterion);
 			algo.solve();
-			
+
 			showResults(algo);
-/*		} catch (Throwable e) {
-			throw e;
+		} catch (Throwable e) {
 			reportError(e);
 		}
-*/				
+
 	}
+
 	private void reportError(Throwable e) {
 		showToUser("!!! Error. ", e.getMessage());
 	}
+
 	private void getAllArgs(String[] args) {
-		this.args = args;		
+		this.args = args;
 	}
+
 	private static String addCurDirectoryToFileName(String name) {
 		String nameWithPath;
-		if ( name.contains(File.separator) ) { 
-			//full path specified
+		if (name.contains(File.separator)) {
+			// full path specified
 			nameWithPath = name;
 		} else { // try to look in current folder
-			nameWithPath= "." + File.separator + name;
+			nameWithPath = "." + File.separator + name;
 		}
 		return nameWithPath;
 	}
+
 	private void openFiles() throws InputDataException {
 		String inputFilePath = args[0];
 		String outputFilePath = args[1];
 		inputFilePath = addCurDirectoryToFileName(inputFilePath);
 		outputFilePath = addCurDirectoryToFileName(outputFilePath);
-		
+
 		try {
 			inFile = new File(inputFilePath);
 			outFile = new File(outputFilePath);
-			
-			
+
 			if (!inFile.isFile())
-				throw new InputDataException("Can't read input file '" + inputFilePath + "': there is no such file or not enough permissions.");
+				throw new InputDataException("Can't read input file '"
+						+ inputFilePath
+						+ "': there is no such file or not enough permissions.");
 			if (!inFile.canRead())
-				throw new InputDataException("Can't read input file '" + inputFilePath + "': not enough permissions.");
+				throw new InputDataException("Can't read input file '"
+						+ inputFilePath + "': not enough permissions.");
 			if (!outFile.createNewFile()) {
 				// probably it exists
 				if (outFile.delete())
 					outFile.createNewFile();
 				else
-					throw new InputDataException("Can't create output file '" + outputFilePath + "'");
+					throw new InputDataException("Can't create output file '"
+							+ outputFilePath + "'");
 			}
 		} catch (Exception e) {
-			throw new InputDataException("File operation error: '" + e.getMessage() + "'");
-		}		
+			throw new InputDataException("File operation error: '"
+					+ e.getMessage() + "'");
+		}
 	}
+
 	private void parseArgs() throws InputDataException, FileNotFoundException {
-		if (args.length != 2) 
-			throw new InputDataException("Please specify two arguments: input and output file names.");
+		if (args.length != 2)
+			throw new InputDataException(
+					"Please specify two arguments: input and output file names.");
 		openFiles();
 		parseInputFile();
 
 	}
-	private void parseInputFile() throws InputDataException, FileNotFoundException {
+
+	private void parseInputFile() throws InputDataException,
+			FileNotFoundException {
 		Scanner scanner = new Scanner(new FileReader(inFile));
 		try {
-			//first use a Scanner to get each line
-		    while ( scanner.hasNextLine() ){
-		    	String line = scanner.nextLine();
-		    	if (line != null && !line.startsWith("#"))
-		    		processLine(line);
-		    }
+			// first use a Scanner to get each line
+			while (scanner.hasNextLine()) {
+				String line = scanner.nextLine();
+				if (line != null && !line.startsWith("#"))
+					processLine(line);
+			}
+		} finally {
+			// ensure the underlying stream is always closed
+			// this only has any effect if the item passed to the Scanner
+			// constructor implements Closeable (which it does in this case).
+			scanner.close();
 		}
-		finally {
-			//ensure the underlying stream is always closed
-		    //this only has any effect if the item passed to the Scanner
-			//constructor implements Closeable (which it does in this case).
-		    scanner.close();
-		}		
 	}
 
-	/** 
-	   Overridable method for processing lines in different ways.
-	    
-	   <P>This simple default implementation expects simple name-value pairs, separated by an 
-	   '=' sign. Examples of valid input : 
-	   <tt>height = 167cm</tt>
-	   <tt>mass =  65kg</tt>
-	   <tt>disposition =  "grumpy"</tt>
-	   <tt>this is the name = this is the value</tt>
-	 * @throws InputDataException 
-	  */
-	  protected void processLine(String aLine) throws InputDataException {
+	/**
+	 * Overridable method for processing lines in different ways.
+	 * 
+	 * <P>
+	 * This simple default implementation expects simple name-value pairs,
+	 * separated by an '=' sign. Examples of valid input :
+	 * <tt>height = 167cm</tt> <tt>mass =  65kg</tt>
+	 * <tt>disposition =  "grumpy"</tt>
+	 * <tt>this is the name = this is the value</tt>
+	 * 
+	 * @throws InputDataException
+	 */
+	protected void processLine(String aLine) throws InputDataException {
 		lineCounter++;
 		if (aLine == null)
-			  return;
+			return;
 		aLine = aLine.replace(" ", "");
 		aLine = aLine.toLowerCase();
-	    Scanner scanner = new Scanner(aLine);
-	    scanner.useDelimiter("=");
-	    String name, value;
-	    if ( scanner.hasNext() ){
-	    	try {
-	    		name = scanner.next();
-	    		value = scanner.next();
-	    	} catch (Exception e) {
-	    		throw new InputDataException("Invalid line #" + lineCounter + " '" + aLine + "'. Each line has to look like 'name = value'.");
-	    	}
-    		parseInput(name, value);
-	    }
-	    if ( scanner.hasNext() ) // second '='
-    		throw new InputDataException("Invalid line #" + lineCounter + " '" + aLine + "'. Each line has to look like 'name = value'.");
-	  }
+		Scanner scanner = new Scanner(aLine);
+		scanner.useDelimiter("=");
+		String name, value;
+		if (scanner.hasNext()) {
+			try {
+				name = scanner.next();
+				value = scanner.next();
+			} catch (Exception e) {
+				scanner.close();
+				throw new InputDataException("Invalid line #" + lineCounter
+						+ " '" + aLine
+						+ "'. Each line has to look like 'name = value'.");
+			}
+			parseInput(name, value);
+		}
+		if (scanner.hasNext()) {// second '='
+			scanner.close();
+			throw new InputDataException("Invalid line #" + lineCounter + " '"
+					+ aLine + "'. Each line has to look like 'name = value'.");
+		}
+		scanner.close();
+	}
 
-	private void parseInput(String name, String value) throws InputDataException {
-		if (name == null || value == null ||
-				name.isEmpty() || value.isEmpty())
-			throw new InputDataException("Invalid line #" + lineCounter + ". Each line has to look like 'name = value'.");
-//System.out.println("name=" + name + "; value="+value+ ".");		
+	private void parseInput(String name, String value)
+			throws InputDataException {
+		if (name == null || value == null || name.isEmpty() || value.isEmpty())
+			throw new InputDataException("Invalid line #" + lineCounter
+					+ ". Each line has to look like 'name = value'.");
+		// System.out.println("name=" + name + "; value="+value+ ".");
 		switch (name) {
 		case "f":
 			if (fStr != null)
-				throw new InputDataException("Invalid line #" + lineCounter + ". Redifinition of the function. Previous expression: " + fStr + ".");
+				throw new InputDataException(
+						"Invalid line #"
+								+ lineCounter
+								+ ". Redifinition of the function. Previous expression: "
+								+ fStr + ".");
 			fStr = value;
 			break;
 		case "reportarea":
@@ -198,54 +224,68 @@ public class FileUserInterface {
 			break;
 		case "usesimplerounding":
 			setSimpleRounding(value);
-			break;			
+			break;
 		default:
 			Object wasValue = hashMapArgs.put(name, value);
 			if (wasValue != null) {
-				throw new InputDataException("Invalid line #" + lineCounter + ". Redifinition of variable '" + name + "'. Previous value: " + wasValue + ".");
+				throw new InputDataException("Invalid line #" + lineCounter
+						+ ". Redifinition of variable '" + name
+						+ "'. Previous value: " + wasValue + ".");
 			}
-		}		
+		}
 	}
+
 	private void setOptimumType(String value) throws InputDataException {
 		if (optimumTypeIsSet)
-			throw new InputDataException("Invalid line #" + lineCounter + ". Type of optimum has been already set. Treating this as a potential error and exit"); 
+			throw new InputDataException(
+					"Invalid line #"
+							+ lineCounter
+							+ ". Type of optimum has been already set. Treating this as a potential error and exit");
 		if ("max".equals(value)) {
 			fStr = "-(" + fStr + ")";
 			optimumType = "max";
 		} else if (!"min".equals(value)) {
-			throw new InputDataException("Invalid line #" + lineCounter + ". 'Optimum' can be set to 'min' or 'max' only. " +
-					"This field specifies what we are interested in -- min or max of the target function. " +
-					"By default the solver searches minimum.");
+			throw new InputDataException(
+					"Invalid line #"
+							+ lineCounter
+							+ ". 'Optimum' can be set to 'min' or 'max' only. "
+							+ "This field specifies what we are interested in -- min or max of the target function. "
+							+ "By default the solver searches minimum.");
 		}
 		optimumTypeIsSet = true;
 	}
+
 	private void setEpsilon(String value) throws InputDataException {
 		double epsilon;
 		try {
 			epsilon = Double.valueOf(value);
 		} catch (NumberFormatException e) {
-			throw new InputDataException("Invalid line #" + lineCounter + ". Epsilon can only be a double value.");
+			throw new InputDataException("Invalid line #" + lineCounter
+					+ ". Epsilon can only be a double value.");
 		}
 		stopCriterion.setFMaxPrecision(epsilon);
 	}
+
 	private void setMaxSteps(String value) throws InputDataException {
 		int steps;
 		try {
 			steps = Integer.valueOf(value);
 		} catch (NumberFormatException e) {
-			throw new InputDataException("Invalid line #" + lineCounter + ". Maximum steps can only be an integer value.");
+			throw new InputDataException("Invalid line #" + lineCounter
+					+ ". Maximum steps can only be an integer value.");
 		}
-		stopCriterion.setMaxIterations(steps);		
+		stopCriterion.setMaxIterations(steps);
 	}
+
 	private Box getArea() throws InputDataException {
 		ArrayList<String> fArgs = f.getVariables();
 		int dim = f.getDimension();
 		Box area = new Box(dim);
-//		checkDimensionsAreEqual();
-		for(String arg : hashMapArgs.keySet()) {
+		// checkDimensionsAreEqual();
+		for (String arg : hashMapArgs.keySet()) {
 			if (fArgs.contains(arg)) {
 				setVariableRange(arg, area);
-			} 
+			}
 		}
 		if (dim == 1 && f.getVariables().get(0).equals("0xDEADBEEF")) {
 			if (hashMapArgs.size() == 0) {
@@ -256,71 +296,72 @@ public class FileUserInterface {
 		}
 		for (int i = 0; i < dim; i++)
 			if (area.getInterval(i) == null)
-				throw new InputDataException("Range for variable '" + fArgs.get(i) + "' hasn't been set. Specify something like '" + fArgs.get(i) + " = [-1, 0.1]'.");
+				throw new InputDataException("Range for variable '"
+						+ fArgs.get(i)
+						+ "' hasn't been set. Specify something like '"
+						+ fArgs.get(i) + " = [-1, 0.1]'.");
 		hashMapArgs.keySet().removeAll(fArgs);
 		if (hashMapArgs.keySet().size() > 0)
-			throw new InputDataException("Extra variable (" + hashMapArgs.keySet().iterator().next() + ") which is not used in the target function is set. Treating this as a potential error and exiting.");
+			throw new InputDataException(
+					"Extra variable ("
+							+ hashMapArgs.keySet().iterator().next()
+							+ ") which is not used in the target function is set. Treating this as a potential error and exiting.");
 		return area;
 	}
-	private void setVariableRange(String variable, Box area) throws InputDataException {
+
+	private void setVariableRange(String variable, Box area)
+			throws InputDataException {
 		String value = hashMapArgs.get(variable);
 		RealInterval interval;
 		try {
 			interval = RealInterval.valueOf(value);
 		} catch (NumberFormatException e) {
-			throw new InputDataException("Wrong value (" + value + ") for variable '" 
-							+ variable + "' caused the following error: " + e.getMessage());
+			throw new InputDataException("Wrong value (" + value
+					+ ") for variable '" + variable
+					+ "' caused the following error: " + e.getMessage());
 		}
 		int argNum = f.getVariableNum(variable);
 		area.setInterval(argNum, interval);
 	}
-/*	
-	private void checkDimensionsAreEqual() throws InputDataException {
-		int dim = f.getDimension();
-		final int argSize = hashMapArgs.size();
-		if (dim != argSize) {
-			if (dim == 1 && f.getVariables().get(0).equals("0xDEADBEEF"))
-				if (argSize == 0)
-					return;
-				else
-					dim = 0;
-			ArrayList<String> fArgs = f.getVariables();
-			String msg = "The target function has " + dim + " variable";
-			if ( dim != 1) 
-				msg += "s";
-			msg += " ( ";
-			for (int i = 0; i < dim; i++) { 
-				String s = fArgs.get(i);
-				msg += s + " ";
-			}
-			msg += ") while " + argSize + " variable";
-			if ( argSize != 1) 
-				msg += "s";
-			msg += " were provided: ";
-			for(String arg : hashMapArgs.keySet())
-				msg += arg + " ";			
-			throw new InputDataException(msg);
-		}
-	}
-*/
+
+	/*
+	 * private void checkDimensionsAreEqual() throws InputDataException { int
+	 * dim = f.getDimension(); final int argSize = hashMapArgs.size(); if (dim
+	 * != argSize) { if (dim == 1 &&
+	 * f.getVariables().get(0).equals("0xDEADBEEF")) if (argSize == 0) return;
+	 * else dim = 0; ArrayList<String> fArgs = f.getVariables(); String msg =
+	 * "The target function has " + dim + " variable"; if ( dim != 1) msg +=
+	 * "s"; msg += " ( "; for (int i = 0; i < dim; i++) { String s =
+	 * fArgs.get(i); msg += s + " "; } msg += ") while " + argSize +
+	 * " variable"; if ( argSize != 1) msg += "s"; msg += " were provided: ";
+	 * for(String arg : hashMapArgs.keySet()) msg += arg + " "; throw new
+	 * InputDataException(msg); } }
+	 */
 	private void setSimpleRounding(String value) throws InputDataException {
 		boolean useSimpleRounding = getBinaryValue(value);
 		IAMath.useSimpleRounding(useSimpleRounding);
 	}
+
 	private void setReportArea(String value) throws InputDataException {
-		reportOptArea = getBinaryValue(value);		
+		reportOptArea = getBinaryValue(value);
 	}
+
 	private void setReportValue(String value) throws InputDataException {
-		reportOptVal = getBinaryValue(value);		
+		reportOptVal = getBinaryValue(value);
 	}
+
 	private boolean getBinaryValue(String value) throws InputDataException {
 		if (value.equals("false") || value.equals("0"))
 			return false;
 		else if (value.equals("true") || value.equals("1"))
 			return true;
 		else
-			throw new InputDataException("Invalid line #" + lineCounter + ". Binary variable can only accept the following values: '0, 1, false, true'");
+			throw new InputDataException(
+					"Invalid line #"
+							+ lineCounter
+							+ ". Binary variable can only accept the following values: '0, 1, false, true'");
 	}
+
 	private void showResults(Algorithm algo) {
 		if (reportOptVal) {
 			RealInterval optVal = algo.getOptimumValue();
@@ -328,18 +369,20 @@ public class FileUserInterface {
 				optVal = IAMath.sub(0, optVal);
 			showToUser("Optimum value:", optVal);
 		}
-		if (reportOptArea) {			
+		if (reportOptArea) {
 			Box[] optArea = algo.getOptimumArea();
-			StringBuilder sb = new StringBuilder("Optimum area (arguments are in the following order:");
+			StringBuilder sb = new StringBuilder(
+					"Optimum area (arguments are in the following order:");
 			Iterator<String> argsI = f.getVariables().iterator();
-			while ( argsI.hasNext() )
-				sb.append(" ").append(argsI.next()) ;
+			while (argsI.hasNext())
+				sb.append(" ").append(argsI.next());
 			sb.append("):");
-			showToUser(sb.toString(), null);
+			showToUser(sb.toString(), (Object[])null); // cast for Object[] is to suppress warning
 			for (Box b : optArea)
 				showToUser(null, b.toStringArea());
 		}
 	}
+
 	private void showToUser(String label, Object... values) {
 		StringBuilder sb = new StringBuilder();
 		if (label != null && !label.isEmpty())
@@ -356,7 +399,8 @@ public class FileUserInterface {
 				out.append(msg);
 				out.close();
 			} catch (Exception e) {
-				System.out.println("CAN'T WRITE TO OUTPUT FILE: " + e.getMessage());
+				System.out.println("CAN'T WRITE TO OUTPUT FILE: "
+						+ e.getMessage());
 			}
 		}
 	}
