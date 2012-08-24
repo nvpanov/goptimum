@@ -2,8 +2,6 @@ package solvers;
 
 import point.PointAlgorithm;
 import point.SteepestDescent;
-
-import algorithms.BaseAlgorithm;
 import algorithms.IntervalAndPointAlgorithm;
 
 /*
@@ -18,9 +16,8 @@ import algorithms.IntervalAndPointAlgorithm;
 public class PointIntervalBis_SrtL_CBtC_BigEqS extends IntervalAndPointAlgorithm implements IntervalSolver {
 
 	public PointIntervalBis_SrtL_CBtC_BigEqS() {
-		BaseAlgorithm intervalAlg = new Bisection_SrtL_CBtC_BigEqS();
+		IntervalSolver intervalAlg = new Bisection_SrtL_CBtC_BigEqS();
 		PointAlgorithm pointAlg = new SteepestDescent();
-		this.intervalAlg = intervalAlg;
-		this.pointAlg = pointAlg;		
+		init(intervalAlg, pointAlg);		
 	}
 }
