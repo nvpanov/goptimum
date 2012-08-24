@@ -1,21 +1,14 @@
 package functions;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Random;
-
-import org.junit.Ignore;
 import org.junit.Test;
-
 import symboldiff.Expression;
 import symboldiff.Gradient;
 import symboldiff.Simplifier;
 import symboldiff.exceptions.ExpressionException;
-
 import static net.sourceforge.interval.ia_math.IAMath.*;
 import net.sourceforge.interval.ia_math.RealInterval;
-
 import core.Box;
 
 
@@ -31,6 +24,7 @@ public class Function_RosenbrockG_nDTest {
 		try {
 			f = new Function_RosenbrockG_nD(1);
 			fail("exception expected");
+			assert(f == null); // for FindBugs
 		} catch (IllegalArgumentException e) {
 			// OK.
 		}
