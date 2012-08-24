@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="11.5.1">
+  <zoom_level>7</zoom_level>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>259</x>
+      <y>91</y>
+      <w>147</w>
+      <h>168</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Interface&gt;&gt;
+IUserInterface
+--
++getLogFileName()
++moveForward()
++moveBackward()
++configure()
+-createModel(logFileName: String)
+-showAll()
+-showBoxes(projection: int)
+-showTargetFunctionPlot(projection: int)
+-showTargetFunctionEquation()
+-showStatistic()
+-showWhatHappend()
+-error(exception: Throwable)
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>91</x>
+      <y>511</y>
+      <w>147</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>ConsoleUserInterface
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>147</x>
+      <y>420</y>
+      <w>202</w>
+      <h>104</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>189;21;189;77;21;91</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>91</x>
+      <y>455</y>
+      <w>147</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>GraphicUserInterface
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>147</x>
+      <y>420</y>
+      <w>202</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>189;21;21;35</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>700</x>
+      <y>280</y>
+      <w>147</w>
+      <h>84</h>
+    </coordinates>
+    <panel_attributes>FileReader
+--
++FileReader(name: String)
++openFile()
++closeFile()
++readNextLine(): String
+--
+-fileName: String
+-curLine: int</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>469</x>
+      <y>280</y>
+      <w>196</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>Model
+--
++Model(fileName: String)
++getTargetFunction(): TargetFunction
++getBoxes(step: int): ArrayList&lt;Box&gt;
++getBoxesRemoved(stepWhenExisted: int, stepWhenDisappeared: int): ArrayList&lt;Box&gt;
++getBoxesNew(step0: int, step1: int): ArrayList&lt;Box&gt;
++whatHappend(step: int): Action
+--
+-function: TargetFunction
+-workLists: ArrayList&lt;ArrayList&lt;Box&gt;&gt;
+-fileReader: FileReader</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>245</x>
+      <y>280</y>
+      <w>175</w>
+      <h>161</h>
+    </coordinates>
+    <panel_attributes>/AbstractUserInterface/
+--
+-openLogFile(fileName: String)
+-moveForward()
+-moveBackward()
+-configure()
+-showAll()
+/-showBoxes(projection: int)/
+/-showTargetFunctionPlot(projection: int)/
+/-showTargetFunctionEquation()/
+/-showStatistic()/
+--
+-model: Model
+-step: int</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>308</x>
+      <y>238</y>
+      <w>34</w>
+      <h>55</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>21;21;21;42</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>399</x>
+      <y>266</y>
+      <w>83</w>
+      <h>34</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>21;21;70;21</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>644</x>
+      <y>266</y>
+      <w>69</w>
+      <h>34</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>21;21;56;21</additional_attributes>
+  </element>
+</diagram>
