@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import sun.org.mozilla.javascript.internal.ast.NewExpression;
-
 public class Simplifier {
 //	protected static enum ExpType {constant, interval, operation};
 /*	protected boolean wasExpChanged;
@@ -798,7 +796,7 @@ public class Simplifier {
 			getOperandsFromAllChildrenWithThisOrComplimentOp(exp, thisNodeOp, thisNodeOp, 0, operands);
 			int size = operands.size();
 			if (size > 1) {
-				operands = foldSimilarOperations(operands, optimized); // try to collapse operands of the same types
+				operands = foldSimilarOperations(operands); // try to collapse operands of the same types
 				operands = foldMul_AddSub(operands, optimized); // 2x+x=3x
 				//if (!optimized) 
 				size = operands.size(); // size could change during calculations
@@ -1108,7 +1106,7 @@ public class Simplifier {
 		return Expression.newConstant(getNeutralElemant(op));
 	}
 	// x+x=2x, x*x=x^2... Can't optimize 2x+x
-	private static LinkedList<ExpAndOp> foldSimilarOperations(LinkedList<ExpAndOp> operands, boolean optimized) {
+	private static LinkedList<ExpAndOp> foldSimilarOperations(LinkedList<ExpAndOp> operands) {
 		LinkedList<ExpAndOp> folded = new LinkedList<>();
 		if (operands.size() == 0)
 			return folded;
@@ -1130,7 +1128,6 @@ public class Simplifier {
 			//    \___ BUT if there were _only_ constants that give Neutral in result (f.e. 0+0)
 			//	           we have to return at least this neutral
 			folded.add(new ExpAndOp(Expression.newConstant(constant), typeOfChainOp)); // add folded constant
-			optimized = true;
 		}
 		
 		if (operands.size() == 0) // in initial expression were no variables, only constants and expressions
@@ -1159,7 +1156,7 @@ public class Simplifier {
 					cnt = -cnt;
 					newEO.op = "/";
 				}
-				Expression newExp = foldExpression(prevVar, cnt, newEO.op, optimized);
+				Expression newExp = foldExpression(prevVar, cnt, newEO.op);
 				newEO.e = newExp;
 				folded.add(newEO);
 				
@@ -1178,7 +1175,7 @@ public class Simplifier {
 			prevVar = e_o.e.getOperation();
 		}
 		if (processedButNotAdded) { // do not forget to use computed counter 
-			Expression newExp = foldExpression(prevVar, cnt, typeOfChainOp, optimized);
+			Expression newExp = foldExpression(prevVar, cnt, typeOfChainOp);
 			folded.add(new ExpAndOp(newExp, typeOfChainOp));		
 		} else { // cnt == 0 at the end of this cycle only if (e.getOperation() != prevVar) => prevVar was 
 					// added to folded but we have to add this new "e" too
@@ -1192,7 +1189,7 @@ public class Simplifier {
 	 * f.e.: {x0, 3, "*"} means x0 is multiplied 3 times and becomes "x0^3";   
 	 * {x1, 4, "+"} => x1*4, ...  
 	 */
-	private static Expression foldExpression(String var, int cnt, String opType, boolean optimized) {
+	private static Expression foldExpression(String var, int cnt, String opType) {
 		if (cnt == 0)
 			return Expression.newConstant(getNeutralElemant(opType));
 		//optimized = false; // DO NOT change initial value!
@@ -1207,11 +1204,9 @@ public class Simplifier {
 		switch (opType) {
 		case "+":
 			folded.setOperation("*");
-			optimized = true;
 			break;
 		case "*":
 			folded.setOperation("^");
-			optimized = true;
 			break;
 		default:
 			throw new IllegalArgumentException("Unsupported operation: " + opType);
