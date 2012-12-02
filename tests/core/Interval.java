@@ -3,7 +3,10 @@ package core;
 import static org.junit.Assert.*;
 
 import static net.sourceforge.interval.ia_math.IAMath.*;
+import net.sourceforge.interval.ia_math.IAMath;
+import net.sourceforge.interval.ia_math.IANarrow;
 import net.sourceforge.interval.ia_math.RealInterval;
+import net.sourceforge.interval.ia_math.exceptions.IANarrowingFaildException;
 
 import org.junit.Test;
 
@@ -100,5 +103,79 @@ public class Interval {
 			result = RealInterval.valueOf(value);
 			assertEquals(result, checks[i++]);
 		}		
+	}
+	
+	@Test
+	public void narrowEquals() throws Exception {
+		RealInterval i1 = new RealInterval(-1, 2);
+		RealInterval i2 = new RealInterval( 1, 3);
+		RealInterval ii[] = new RealInterval[] {i1, i2};
+		assertTrue( IANarrow.narrowEquals(ii) );
+		assertEquals(ii[1], ii[0]);
+		assertEquals(new RealInterval(1,2), ii[0]);
+		
+		try {
+			ii[0] = new RealInterval(-10);
+			IANarrow.narrowEquals(ii);
+			fail("Exception exptected");
+		} catch (IANarrowingFaildException e) {
+			// ok
+		}
+		
+		ii[1] = new RealInterval();
+		assertTrue( IANarrow.narrowEquals(ii) );
+		assertEquals(ii[1], ii[0]);
+		assertEquals(new RealInterval(-10), ii[0]);
+	}
+	
+	@Test
+	public void narrowAdd() throws IANarrowingFaildException {
+		RealInterval rr = new RealInterval(0);
+		RealInterval i1 = new RealInterval(-1, 1);
+		RealInterval i2 = new RealInterval(-1, 1);
+		RealInterval ii[] = new RealInterval[] {rr, i1, i2};
+		assertFalse( IANarrow.narrowAdd(ii) );
+		assertEquals(rr, ii[0]);
+		assertEquals(i1, ii[1]);
+		assertEquals(i2, ii[2]);
+
+		ii[2] = new RealInterval(-100, 100);
+		assertTrue( IANarrow.narrowAdd(ii) );
+		assertEquals(rr, ii[0]);
+		assertEquals(i1, ii[1]);
+		assertTrue(i2.almostEquals(ii[2]) );
+
+		try {
+			ii[0] = new RealInterval(-10);
+			IANarrow.narrowAdd(ii);
+			fail("Exception exptected");
+		} catch (IANarrowingFaildException e) {
+			// ok
+		}
+	}
+	@Test
+	public void narrowLog() throws IANarrowingFaildException {
+		double l = 2, h = 10;
+		RealInterval i1 = new RealInterval(l, h);
+		RealInterval rr = IAMath.log(i1);
+		RealInterval ii[] = new RealInterval[] {rr, i1};
+		assertFalse( IANarrow.narrowLog(ii) );
+		assertEquals(rr, ii[0]);
+		assertEquals(i1, ii[1]);
+
+		double t = ii[0].wid()/2;
+		ii[0] = new RealInterval(Math.log(l)-t, Math.log(h)-t);
+		assertTrue( IANarrow.narrowLog(ii) );
+		assertEquals(t, ii[0].wid(), 1e-3);
+		assertTrue(new RealInterval(Math.log(l), Math.log(h)-t).almostEquals(ii[0]));
+		assertTrue(new RealInterval(l, Math.exp(Math.log(h)-t)).almostEquals(ii[1]));
+
+		try {
+			ii[0] = new RealInterval(-10);
+			IANarrow.narrowLog(ii);
+			fail("Exception exptected");
+		} catch (IANarrowingFaildException e) {
+			// ok
+		}
 	}
 }
