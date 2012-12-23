@@ -2,20 +2,30 @@ package symboldiff;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.Vector;
+
+import org.junit.runner.Computer;
+
+import com.sun.corba.se.spi.extension.ZeroPortPolicy;
+import com.sun.org.apache.bcel.internal.generic.ISUB;
+
+import net.sourceforge.interval.ia_math.IAMath;
 import net.sourceforge.interval.ia_math.RealInterval;
 import net.sourceforge.interval.ia_math.exceptions.IAComputationalException;
 import static net.sourceforge.interval.ia_math.IAMath.*;
+import static java.lang.Double.*;
+
 import core.Box;
 
 import symboldiff.exceptions.ExpressionException;
 import symboldiff.exceptions.IncorrectExpression;
 import symboldiff.exceptions.UnsupportedFunction;
-import symboldiff.ThreeStateLogic;
 
 public class Expression implements Cloneable {
 	private Expression left = null;
@@ -38,12 +48,8 @@ public class Expression implements Cloneable {
 	protected static final String ambiguous[] = {"%", "&", "~", "|", "`", "\"", "\\", "<", ">", "=", ",", ".", "?", "!"};
 
 	private ArrayList<String> coords;
-	
-	private static enum ExpType {unset, constant, notAconstant, variable, binaryOperation, notAbinaryOperation, unaryOperation, notAnUnaryOperation};
-	private ExpType expType = ExpType.unset;
-	private ThreeStateLogic isConstant;
-		
-	
+	//private static enum ExpType{unset, constant, notAconstant, variable, binaryOperation, notAbinaryOperation, unaryOperation, notAnUnaryOperation};
+
 	// List supports random access: get(i)
 	// while Set -- doesn't
 	public ArrayList<String> getVariables() {
@@ -124,20 +130,18 @@ public class Expression implements Cloneable {
 	 * determining type of expression
 	 */
 	public boolean isConstant() {
-		if (isConstant == ThreeStateLogic.unknown) {
-			try {
-				if (getOperation().equals("pi") ||
-						Double.valueOf(getOperation()) == 0) {
-					isConstant = ThreeStateLogic.yes;
-				}
-				// this construction means that either the value is PI or
-				// it is ANY number 
-				// all other cases will cause exception
-			} catch (Exception e) {
-				isConstant = ThreeStateLogic.no;
-			}			
+		try {
+			if (getOperation().equals("pi") ||
+					Double.valueOf(getOperation()) == 0) {
+				; // do nothing
+			}
+			// this construction means that either the value is PI or
+			// it is ANY number 
+			// all other cases will cause exception
+		} catch (Exception e) {
+			return false;
 		}
-		return isConstant == ThreeStateLogic.yes;
+		return true;
 	}
 	public boolean isVariable() {
 		if (isOperation() || isConstant() )
@@ -156,8 +160,6 @@ public class Expression implements Cloneable {
 	public boolean isBinaryOperation() {
 		return isOperationInternal(getOperation(), binary_operations);
 	}
-	
-	// binary_operations
 	public boolean isAdd() {
 		return op.equals("+");
 	}
@@ -172,37 +174,6 @@ public class Expression implements Cloneable {
 	}
 	public boolean isPow() {
 		return op.equals("^");
-	}
-	// unary_operations
-	public boolean isArccos() {
-		return op.equals("arccos");
-	}
-	public boolean isArcsin() {
-		return op.equals("arcsin");
-	}
-	public boolean isArctg() {
-		return op.equals("arctg");
-	}
-	public boolean isArcctg() {
-		return op.equals("arcctg");
-	}
-	public boolean isSin() {
-		return op.equals("sin");
-	}
-	public boolean isCos() {
-		return op.equals("cos");
-	}
-	public boolean isTg() {
-		return op.equals("tg");
-	}
-	public boolean isCtg() {
-		return op.equals("ctg");
-	}
-	public boolean isLn() {
-		return op.equals("ln");
-	}
-	public boolean isExp() {
-		return op.equals("exp");
 	}
 	public boolean isNegate() {
 		return op.equals("negate");
@@ -265,7 +236,7 @@ public class Expression implements Cloneable {
 			rightNeedsBrackets = true;
 			thisPriority = -1;
 			// ^^ nvp 3/23/2012: get rid of double brackets in case of complex arguments in unary functions: ln((x+y));
-			if ( e.isNegate() ) {
+			if ("negate".equals(strOperation) ) {
 				strOperation = "-";
 				rightNeedsBrackets = (right.isAdd() || right.isSub()); // nvp 3/23/2012 : -(a+b); while -(a*b) is OK
 			}
@@ -525,7 +496,6 @@ public class Expression implements Cloneable {
 		else
 			clone.right = null;
 		clone.setVariablesList(this.getVariables());
-		clone.expType = this.expType;
 		assert(this.equals(clone));
 		return clone;
 		
@@ -598,22 +568,6 @@ public class Expression implements Cloneable {
 		return this.method;
 	}
 	
-	// evaluate for points
-	public double evaluate(double... point) {
-		assert(point.length == getVariables().size());
-		if (isConstant())
-			return getConstantValue();
-		if (isVariable())
-			return point[getNumberOfThisVariable()];
-		// it is an expression
-		double l = Double.NaN, r;
-		if (left != null) // left could be null for unary expressions
-			l = left.evaluate(point);
-		r = right.evaluate(point);
-		double res = evaluate(op, l, r);
-		assert( /*!Double.isInfinite(res) &&*/ !Double.isNaN(res) ); // 5/12/12 -- infinity is possible: divizion by zero
-		return res;
-	}
 	public double getConstantValue() {
 		if (!isConstant())
 			throw new IllegalStateException("Not a constant");
@@ -654,6 +608,22 @@ public class Expression implements Cloneable {
 //		if( !Double.isInfinite(res.lo()) && !Double.isInfinite(res.hi()) )
 //			System.out.println("Infinity as a bound!");
 		assert( !Double.isNaN(res.lo()) && !Double.isNaN(res.hi()) );
+		return res;
+	}
+	// evaluate for points
+	public double evaluate(double... point) {
+		assert(point.length == getVariables().size());
+		if (isConstant())
+			return getConstantValue();
+		if (isVariable())
+			return point[getNumberOfThisVariable()];
+		// it is an expression
+		double l = Double.NaN, r;
+		if (left != null) // left could be null for unary expressions
+			l = left.evaluate(point);
+		r = right.evaluate(point);
+		double res = evaluate(op, l, r);
+		assert( /*!Double.isInfinite(res) &&*/ !Double.isNaN(res) ); // 5/12/12 -- infinity is possible: divizion by zero
 		return res;
 	}
 	private static RealInterval evaluate(String op, RealInterval l, RealInterval r) {
@@ -818,8 +788,6 @@ public class Expression implements Cloneable {
 	}
 	public boolean equals(Expression that) {
 	    //now a proper field-by-field evaluation can be made
-		if (this.expType != that.expType)
-			return false;
 	    if (!this.op.equals(that.op))
 	    	return false;
 	    if (this.left == null && that.left != null ||
@@ -838,5 +806,4 @@ public class Expression implements Cloneable {
 	    }
 	    return true;
 	}
-
 }
