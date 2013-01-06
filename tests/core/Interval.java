@@ -61,7 +61,7 @@ public class Interval {
     	RealInterval t1 = cos( sub(0,y) );
     	assertTrue(t1.almostEquals(new RealInterval(-0.416146837, 0.540302306)));
     	RealInterval t2_0 = mul(x,t1);
-    	System.out.println(t2_0);
+//		System.out.println(t2_0);
     	assertTrue(t2_0.almostEquals(t1));
     	RealInterval t2 = add(t2_0, 2);
 //    	assertTrue(t2.almostEquals(new RealInterval(1.583853163, 2)));
@@ -153,6 +153,20 @@ public class Interval {
 			// ok
 		}
 	}
+
+	@Test
+	public void narrowAdd2() throws IANarrowingFaildException {
+		RealInterval rr = new RealInterval(1);
+		RealInterval i1 = new RealInterval(-1, 1);
+		RealInterval i2 = new RealInterval(-1, 1);
+		RealInterval ii[] = new RealInterval[] {rr, i1, i2};
+		assertTrue( IANarrow.narrowAdd(ii) );
+		RealInterval narrowedVal = new RealInterval(0, 1);
+		assertEquals(rr, ii[0]);
+		assertTrue(narrowedVal.almostEquals(ii[1]));
+		assertTrue(narrowedVal.almostEquals(ii[2]));
+	}	
+	
 	@Test
 	public void narrowLog() throws IANarrowingFaildException {
 		double l = 2, h = 10;
@@ -178,4 +192,5 @@ public class Interval {
 			// ok
 		}
 	}
+	
 }
