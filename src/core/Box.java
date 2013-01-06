@@ -1,6 +1,7 @@
 package core;
 import java.util.ArrayList;
 
+import net.sourceforge.interval.ia_math.IAMath;
 import net.sourceforge.interval.ia_math.RealInterval;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -261,7 +262,7 @@ public class Box implements Cloneable {
 	}
 	
 	/*
-	 * if the point is outside of tha AREA (not function!)
+	 * if the point is outside of the AREA (not function!)
 	 * of the box it will change it to the nearest border point:
 	 *      ____      ____
 	 *     |    | => |    |
@@ -288,6 +289,33 @@ public class Box implements Cloneable {
 		}
 		return distance;
 	}
-	
 
+	public static Box intersect(Box b1, Box b2) {
+		assert ( b1.getDimension() == b2.getDimension() );
+		Box intersectResult = b1.clone();
+		RealInterval functionValue1 = b1.getFunctionValue();
+		RealInterval functionValue2 = b2.getFunctionValue();
+		if (functionValue1 != null && functionValue2 != null) {
+			RealInterval newFunctionVal = IAMath.intersect( functionValue1, functionValue2 );
+			intersectResult.setFunctionValue(newFunctionVal);
+		}
+		for (int i = b1.getDimension()-1; i >= 0; i--) {
+			RealInterval newSide = IAMath.intersect(b1.getInterval(i), b2.getInterval(i));
+			intersectResult.setInterval(i, newSide);
+		}
+		return intersectResult;
+	}
+
+	public boolean almostEquals(Box box) {
+		if (box == null)
+			return false;
+		assert ( this.getDimension() == box.getDimension() );
+		for (int n = this.getDimension()-1; n >= 0; n--) {
+			RealInterval i1 = this.getInterval(n);
+			RealInterval i2 =  box.getInterval(n);
+			if (!i1.almostEquals(i2))
+				return false;
+		}
+		return this.getFunctionValue().almostEquals(box.getFunctionValue());
+	}
 }
