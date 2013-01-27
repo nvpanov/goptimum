@@ -101,7 +101,7 @@ public class SortedWorkListTest {
 			b.setFunctionValue(it);
 			wl.addChecked(b);
 		}
-		wl.screener.checkByValue(b);
+		wl.rejector.checkByValue(b);
 		assertEquals(10, wl.size());
 		wl.removeRejectedBoxes();
 		assertEquals(10, wl.size());
@@ -109,19 +109,19 @@ public class SortedWorkListTest {
 		b = new Box(dim, it);
 		it = new RealInterval(-100, -0.5);
 		b.setFunctionValue(it);
-		wl.screener.checkByValue(b);
+		wl.rejector.checkByValue(b);
 		wl.removeRejectedBoxes();
 		assertEquals(9, wl.size());
 		
 		it = new RealInterval(-100, -5);
 		b.setFunctionValue(it);
-		wl.screener.checkByValue(b);
+		wl.rejector.checkByValue(b);
 		wl.removeRejectedBoxes();
 		assertEquals(5, wl.size());
 		
 		it = new RealInterval(-100);
 		b.setFunctionValue(it);
-		wl.screener.checkByValue(b);
+		wl.rejector.checkByValue(b);
 		wl.removeRejectedBoxes();
 		assertEquals(0, wl.size());
 	}

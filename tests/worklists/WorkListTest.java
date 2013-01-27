@@ -65,7 +65,7 @@ public class WorkListTest {
 		
 		//2
 		try {
-			wl.addSearchArea(area);
+			wl.init(area);
 			fail("assertion expected!");
 		} catch (AssertionError e) {
 			// OK.
@@ -73,7 +73,7 @@ public class WorkListTest {
 		
 		//3
 		wl.clearAll();
-		wl.addSearchArea(area);
+		wl.init(area);
 		assertTrue(wl.size() == 1 + dim*2);
 		
 		//4

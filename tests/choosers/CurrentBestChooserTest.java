@@ -4,7 +4,6 @@ import java.util.Random;
 import org.junit.Test;
 
 import core.*;
-import choosers.*;
 import worklists.*;
 
 import net.sourceforge.interval.ia_math.RealInterval;
