@@ -70,7 +70,7 @@ public class BaseAlgorithm implements Algorithm {
 			workList.clearAll(); 
 			stopCriterion.reset();
 		}
-		workList.addSearchArea(area);
+		workList.init(area, f);
 		targetFunction = f;
 	}
 /*	
@@ -245,7 +245,7 @@ public class BaseAlgorithm implements Algorithm {
 		//	1. check if the point is inside the box.
 		if (!boxFromTheList.contains(potentialOptPoint)) {
 			// try to search the list
-			Box anotherBoxFromTheList = workList.getBoxContains(potentialOptPoint);
+			Box anotherBoxFromTheList = workList.getBoxContainsThisPoint(potentialOptPoint);
 			if (anotherBoxFromTheList == null) {
 				// probably it is due to rounding error and it is close
 				// save original point for diagnostic
@@ -301,7 +301,7 @@ public class BaseAlgorithm implements Algorithm {
 			}
 		} 
 		if (workBox.contains(checkArg)) {
-			if (workList.getBoxContains(checkArg) == null) {
+			if (workList.getBoxContainsThisPoint(checkArg) == null) {
 //				System.out.println(">>>> Last box that contains optimum Arg. " + _delme_dbg_iterationNum);
 				last = true;
 			}		

@@ -54,11 +54,11 @@ public class SortedWorkList extends WorkList {
 		int size = size();
 		if (size == 0)
 			return 0;
-		double threshold = screener.getLowBoundMaxValue();
+		double threshold = rejector.getLowBoundMaxValue();
 		Box leader = getLeadingBoxInternal(); // it can't be null, we already checked the size
 		
 		// 'remove all' case
-		if (!screener.checkByValue(leader) ) {
+		if (!rejector.checkByValue(leader) ) {
 			clearAll(threshold);
 			return size;
 		}
