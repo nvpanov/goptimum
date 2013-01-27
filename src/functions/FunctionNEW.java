@@ -8,9 +8,25 @@ import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
 
 public class FunctionNEW {
-	protected int dim;
+	/**
+	 * dimension = getVariables().Length
+	 */
+	protected int dim; 
+	
+	/**
+	 * function itself
+	 */
 	protected Expression function;
+	
+	/**
+	 * an array of first partial derivatives. d1f[0] is a derivative by first variable (function.getVariables[0]) and so on..
+	 * d1f.length = dim
+	 */
 	protected Expression[] d1f;
+	
+	/**
+	 * array of second partial derivatives.
+	 */
 	protected Expression[] d2f;
 	
 	protected FunctionNEW() {	}
@@ -21,9 +37,8 @@ public class FunctionNEW {
 		this.d1f = d1f;
 		this.d2f = d2f;
 		this.dim =function.getVariables().size();
-/*		assert( (d1f == null && d2f == null)|| 
-				(this.dim == d1f.length && this.dim == d2f.length) );
-*/				
+		assert( (d1f != null && d1f.length == dim) || d1f == null); 
+				
 	}
 	// init for legacy functions from functions package
 	protected void init(int dim, String equation) {
@@ -86,5 +101,16 @@ public class FunctionNEW {
 
 	public int getVariableNum(String arg) {
 		return function.getVariableNum(arg);
+	}
+	
+	public Expression get1Derivative(int argNum) {
+		if (d1f == null)
+			return null;
+		return d1f[argNum];
+	}
+	public Expression get2Derivative(int argNum) {
+		if (d2f == null)
+			return null;
+		return d2f[argNum];
 	}
 }
