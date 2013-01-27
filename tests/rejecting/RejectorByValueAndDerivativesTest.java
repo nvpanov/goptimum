@@ -9,14 +9,11 @@ import net.sourceforge.interval.ia_math.RealInterval;
 import org.junit.Before;
 import org.junit.Test;
 
-import rejecting.RejectorByValueAndDerivatives;
-
-
 import core.Box;
 import functions.FunctionFactory;
 
 public class RejectorByValueAndDerivativesTest {
-	RejectorByValueAndDerivatives s;
+	RejectorByValue s;
 	Box b;
 	Random rnd = new Random();
 
@@ -26,7 +23,7 @@ public class RejectorByValueAndDerivativesTest {
 
 	@Test
 	public final void testCheckByValue() {
-		s = new RejectorByValueAndDerivatives(1);
+		s = new RejectorByValue(1);
 		b = new Box(rnd.nextInt(1000), new RealInterval(0));
 		b.setFunctionValue(new RealInterval(-rnd.nextInt(10)-0.1, 0.99));
 		assertTrue(s.checkByValue(b));
@@ -50,7 +47,7 @@ public class RejectorByValueAndDerivativesTest {
 	@Test
 	public final void testProbeNewLimit() {
 		double v0 = 1e100, v = v0;
-		s = new RejectorByValueAndDerivatives(v);
+		s = new RejectorByValue(v);
 		assertFalse( s.probeNewLimit(v+1) );
 		assertFalse( s.probeNewLimit(v) );
 		assertTrue( s.getLowBoundMaxValue() == v );
@@ -65,7 +62,7 @@ public class RejectorByValueAndDerivativesTest {
 	@Test
 	public final void check1Derivative() throws Exception {
 		Box b;
-		s = new RejectorByValueAndDerivatives(0);
+		RejectorByFirstDerivative s = new RejectorByFirstDerivative();
 		String functions[] = {"x^2+y^2+z^3", "x^2", "-x^20", "x^9"};
 		for (String f : functions) {
 			FunctionFactory.newFunction(f);
@@ -163,11 +160,4 @@ public class RejectorByValueAndDerivativesTest {
 	public final void check2Derivative() {
 		fail("Not implemented");
 	}
-
-	public void testCheck1Derivative()
-	 throws Exception {
-	
-	}
-
-	
 }
