@@ -46,6 +46,7 @@ public abstract class WorkList {
 		rejector = new Rejector();
 
 		init(area);
+		new ListCleaner(this);
 	}
 	/*
 	 * Screening by derivative will throw away any box on which the derivative 
