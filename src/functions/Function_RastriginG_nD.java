@@ -5,7 +5,7 @@ package functions;
 // also http://www.geatbx.com/docu/fcnindex-01.html
 // f6(x)=10·n+sum(x(i)^2-10·cos(2·pi·x(i))), i=1:n; -5.12<=x(i)<=5.12.
 // f(x)=0; x(i)=0, i=1:n.
-public class Function_RastriginG_nD extends FunctionNEW {
+public class Function_RastriginG_nD extends Function {
 
 	public Function_RastriginG_nD(int dim) {
 		StringBuilder sb = new StringBuilder("10*");

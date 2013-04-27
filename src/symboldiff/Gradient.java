@@ -2,7 +2,6 @@ package symboldiff;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import symboldiff.exceptions.DifferentiateExpression;
 import symboldiff.exceptions.ExpressionException;
@@ -196,7 +195,7 @@ public class Gradient {
 		if (exp.isBinaryOperation()) {
 			// for some kind of operations we have to copy left and right
 			// branches.
-			if (this.needCopy.contains(exp.getOperation())) {
+			if (Gradient.needCopy.contains(exp.getOperation())) {
 				exp = derivativeOfOperation(exp, coord);
 			} else {
 				left = calculatePartialDerivative(left, coord);

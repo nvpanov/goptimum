@@ -532,13 +532,6 @@ public class Simplifier {
 				String thisOperation = node.getOperation();
 				String rOperation = r.getOperation();
 
-				if (r.getMethod() != null) { 
-					// _sometimes_ we will change the operation
-					// but if corresponding method already was generated
-					throw new IllegalStateException("Expression is already " +
-							"prepeared for reflection. Immposible to change methods");
-				}
-				
 				// see the diagram above
 				if(isDirectlyCommutative(thisOperation, rOperation) ||
 				   isReversableCommutative(thisOperation, rOperation)) {

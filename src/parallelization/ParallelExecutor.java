@@ -7,7 +7,7 @@ import java.util.Queue;
 
 import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
-import functions.FunctionNEW;
+import functions.Function;
 import solvers.Bisection_SrtL_CBtC_BigEqS;
 import splitters.BiggestSideEquallySplitter;
 import algorithms.Algorithm;
@@ -115,7 +115,7 @@ public class ParallelExecutor implements Algorithm {
 			a.setPrecision(pres);
 	}
 	@Override
-	public void setProblem(FunctionNEW f, Box area) {
+	public void setProblem(Function f, Box area) {
 		Queue<Box> areas = splitAreaAmongAlgorithms(area, threads.length);
 		for (ParallelAlgorithm a : pAlgorithms) {
 			Box box = areas.remove();

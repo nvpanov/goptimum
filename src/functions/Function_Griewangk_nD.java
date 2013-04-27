@@ -5,7 +5,7 @@ package functions;
 // p.11
 // g.min: f(x) = 0, x = 0.
 // [-600, 600]
-public class Function_Griewangk_nD extends FunctionNEW {
+public class Function_Griewangk_nD extends Function {
 	public Function_Griewangk_nD(int dim) {
 		StringBuilder sb = new StringBuilder("1/4000*(0");
 		for (int i = 1; i <= dim; i++) {

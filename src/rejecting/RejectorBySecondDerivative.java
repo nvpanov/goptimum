@@ -3,7 +3,7 @@ package rejecting;
 import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
 import functions.FunctionFactory;
-import functions.FunctionNEW;
+import functions.Function;
 
 /**  
  * SECOND derivative
@@ -30,7 +30,7 @@ class RejectorBySecondDerivative extends BaseRejector {
 		if (doNotCheckAnythingAndAlwaysReturnTrue) {
 			return true;
 		}
-		FunctionNEW function = FunctionFactory.getTargetFunction();
+		Function function = FunctionFactory.getTargetFunction();
 		for (int i = box.getDimension()-1; i >= 0; --i) {
 			assert (box.getInterval(i).wid() != 0);
 			

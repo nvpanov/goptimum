@@ -7,6 +7,7 @@ import net.sourceforge.interval.ia_math.RealInterval;
 import org.junit.Test;
 
 import core.Box;
+import functions.Function_DeJong_nD;
 
 import symboldiff.exceptions.ExpressionException;
 
@@ -106,5 +107,17 @@ public class ExpressionPropagatableTest {
 		assertTrue(new RealInterval(0).almostEquals(area.getInterval(0)) );
 		assertTrue(new RealInterval(5, 100).almostEquals(area.getInterval(1)) );
 		assertTrue(new RealInterval(0.1, 100).almostEquals(area.getInterval(2)) );
+	}
+	@Test
+	public void testPropagateF() throws Exception {
+		int dim = 10;
+		Function_DeJong_nD f = new Function_DeJong_nD(dim);
+		exp = new ExpressionPropagatable(f.toString());
+		area = new Box(dim, new RealInterval(-100, 100));
+		constrainingValue = new RealInterval(-10,10);
+		propagated = exp.propagate(area, constrainingValue);
+		assertTrue(propagated);
+		assertTrue(new RealInterval(0, 10).almostEquals(area.getFunctionValue() ));
+
 	}
 }

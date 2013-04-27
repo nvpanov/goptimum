@@ -12,7 +12,7 @@ import symboldiff.exceptions.ExpressionException;
 import symboldiff.exceptions.IncorrectExpression;
 
 public class FunctionFactoryTest {
-	FunctionNEW f;
+	Function f;
 	RealInterval ONE = new RealInterval(1);
 	RealInterval ZERO= new RealInterval(0);
 	

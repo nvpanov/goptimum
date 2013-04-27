@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import core.Box;
-import functions.FunctionNEW;
+import functions.Function;
 
 /*
  * Main class in Rejecting package. Actually the only one which is public.
@@ -46,7 +46,7 @@ public class Rejector {
 		add(rejectorConstraintPropogation);
 	}
 	
-	public void init(FunctionNEW f) {
+	public void init(Function f) {
 		rejectorConstraintPropogation.init(f);
 	}
 

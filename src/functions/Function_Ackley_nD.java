@@ -4,7 +4,7 @@ package functions;
 // p.15
 // g.min: f(0) = 0
 // [-32,768, 32,768]
-public class Function_Ackley_nD extends FunctionNEW {
+public class Function_Ackley_nD extends Function {
 	
 	protected double a = 20, b = 0.2, c = 2*Math.PI;
 	

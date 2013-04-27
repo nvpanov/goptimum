@@ -5,14 +5,14 @@ import choosers.Chooser;
 import splitters.Splitter;
 import worklists.WorkList;
 import core.Box;
-import functions.FunctionNEW;
+import functions.Function;
 import static algorithms.OptimizationStatus.*;
 
 public class BaseAlgorithm implements Algorithm {
 
 	protected Chooser chooser;    // will somehow select next victim to be cut
 	protected Splitter splitter;  // will somehow cut the box selected by the Chooser 
-	protected FunctionNEW targetFunction; // the function which optimum we are searching for 
+	protected Function targetFunction; // the function which optimum we are searching for 
 	protected WorkList workList;  // will somehow maintains the list of subboxes  
 	protected StopCriterion stopCriterion; // decides when it is enough.
 
@@ -65,7 +65,7 @@ public class BaseAlgorithm implements Algorithm {
 	}
 */	
 	@Override
-	public void setProblem(FunctionNEW f, Box area) {
+	public void setProblem(Function f, Box area) {
 		if (workList.size() != 0) { // we were solving other problem and got this one.
 			workList.clearAll(); 
 			stopCriterion.reset();

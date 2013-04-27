@@ -16,12 +16,12 @@ import algorithms.Algorithm;
 import algorithms.StopCriterion;
 import core.Box;
 import functions.FunctionFactory;
-import functions.FunctionNEW;
+import functions.Function;
 
 public class FileUserInterface {
 	private HashMap<String, String> hashMapArgs;
 	private String fStr;
-	private FunctionNEW f;
+	private Function f;
 	private StopCriterion stopCriterion;
 	private Algorithm algo;
 	private boolean reportOptVal;

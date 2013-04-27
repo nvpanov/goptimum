@@ -7,7 +7,7 @@ package functions;
  * on one variable. 
  * Created to play with Splitting strategy
  */
-public class Function_RavineSurface extends FunctionNEW {
+public class Function_RavineSurface extends Function {
 	private final int exp = 4;
 	private String equation;
 

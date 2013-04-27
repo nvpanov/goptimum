@@ -5,8 +5,6 @@ package constraint;
 
 import java.util.HashMap;
 
-import com.sun.media.sound.RealTimeSequencerProvider;
-
 import core.Box;
 import net.sourceforge.interval.ia_math.IAMath;
 import net.sourceforge.interval.ia_math.IANarrow;
@@ -75,7 +73,7 @@ public class ExpressionPropagatable extends Expression {
 			cachedValue = evaluate(exp.getOperation(), l, r);
 		}
 		assert( !Double.isNaN(cachedValue.lo()) && !Double.isNaN(cachedValue.hi()) );
-		RealInterval previousValue = cachedValues.get(exp);
+//		RealInterval previousValue = cachedValues.get(exp); //dbg
 
 		cachedValues.put(exp, cachedValue);
 		return cachedValue;

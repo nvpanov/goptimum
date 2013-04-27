@@ -20,12 +20,12 @@ public class Function_Griewangk_nDTest {
 
 	@Test
 	public void testFunction() {
-		FunctionNEW f = new Function_Griewangk_nD(2);
+		Function f = new Function_Griewangk_nD(2);
 		assertEquals("1-cos(0.7071067811865475*x2)*cos(x1)+2.5E-4*(x1^2+x2^2)", f.toString());	
 	}
 	@Test
 	public void test1Derivative() throws ExpressionException {
-		FunctionNEW f = new Function_Griewangk_nD(2);
+		Function f = new Function_Griewangk_nD(2);
 		Expression equation = new Expression(f.toString());
 		Gradient g = new Gradient(equation);
 		assertTrue(g != null);
@@ -107,7 +107,7 @@ public class Function_Griewangk_nDTest {
 	}
 	@Test
 	public void test2Derivative() throws ExpressionException {
-		FunctionNEW f = new Function_Griewangk_nD(2);
+		Function f = new Function_Griewangk_nD(2);
 		Expression equation = new Expression(f.toString());
 		Gradient g1 = new Gradient(equation);
 		assertTrue(g1 != null);

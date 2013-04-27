@@ -4,7 +4,7 @@ package functions;
 // p.4
 // G.min: 	f(0) = 0
 // [-5.12, 5,12]
-public class Function_HyperEllipsoid_nD extends FunctionNEW {
+public class Function_HyperEllipsoid_nD extends Function {
 
 	public Function_HyperEllipsoid_nD(int dim) {
 		StringBuilder sb = new StringBuilder("x1^2");

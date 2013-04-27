@@ -17,7 +17,7 @@ public class Function_RosenbrockG_nDTest {
 
 	@Test
     public void testFunc() {
-		FunctionNEW f = new Function_RosenbrockG_nD(2);
+		Function f = new Function_RosenbrockG_nD(2);
 		assertEquals("100*(x1-x0^2)^2+(x0-1)^2", f.toString());
 		f = new Function_RosenbrockG_nD(3);
 		assertEquals("100*((x1-x0^2)^2+(x2-x1^2)^2)+(x0-1)^2+(x1-1)^2", f.toString());
@@ -33,7 +33,7 @@ public class Function_RosenbrockG_nDTest {
     public void testPoints() {
     	rnd.setSeed(System.currentTimeMillis());    	
     	int dim = rnd.nextInt(4) + 2;
-    	FunctionNEW f = new Function_RosenbrockG_nD(dim); 
+    	Function f = new Function_RosenbrockG_nD(dim); 
     	double point[] = new double[dim];
     	Box b = new Box(dim, new RealInterval());
         for (int i = 0; i < 100; i++) { // 100 tests
@@ -85,7 +85,7 @@ public class Function_RosenbrockG_nDTest {
     	
     	rnd.setSeed(seed);
     	int dim = 2;
-    	FunctionNEW f = new Function_RosenbrockG_nD(dim);
+    	Function f = new Function_RosenbrockG_nD(dim);
     	Box box = new Box(dim, new RealInterval(1));
     	for (int i = 0; i < dim; i++)
     		box.setInterval(rnd.nextInt(dim), new RealInterval(rnd.nextInt(6) - rnd.nextInt(3)));
@@ -151,7 +151,7 @@ public class Function_RosenbrockG_nDTest {
     public void testDerivatives() throws ExpressionException {
     	String strExp = "100*((x1-x0^2)^2+(x2-x1^2)^2)+(x0-1)^2+(x1-1)^2";
     	Expression exp = new Expression(strExp);
-    	FunctionNEW f = new Function_RosenbrockG_nD(3);
+    	Function f = new Function_RosenbrockG_nD(3);
     	assertEquals(strExp, f.toString());
     	assertEquals(exp.toString(), f.toString());
     	Gradient df = new Gradient(exp); 

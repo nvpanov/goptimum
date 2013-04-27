@@ -5,7 +5,7 @@ package functions;
 // f(x) = 0, x = 0
 // [-5.12, 5.12]
 
-public class Function_DeJong_nD extends FunctionNEW {
+public class Function_DeJong_nD extends Function {
 
 	public Function_DeJong_nD(int dim) {
 		StringBuilder sb = new StringBuilder("x0^2");

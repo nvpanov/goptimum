@@ -9,7 +9,7 @@ import symboldiff.exceptions.ExpressionException;
 import constraint.ExpressionPropagatable;
 import constraint.RepugnantConditionException;
 import core.Box;
-import functions.FunctionNEW;
+import functions.Function;
 
 /**
  * @author nvpanov
@@ -29,11 +29,11 @@ public class RejectorConstraintPropogation extends BaseRejector {
 	public RejectorConstraintPropogation() {
 	}
 	
-	public RejectorConstraintPropogation(FunctionNEW f) {
+	public RejectorConstraintPropogation(Function f) {
 		init(f);
 	}
 	
-	public void init(FunctionNEW f) {
+	public void init(Function f) {
 		try {
 			function = new ExpressionPropagatable(f.toString());
 			for (int i = 0; i < f.getDimension(); i++) {

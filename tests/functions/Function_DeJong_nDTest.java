@@ -1,10 +1,10 @@
 package functions;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import net.sourceforge.interval.ia_math.IAMath;
@@ -62,7 +62,7 @@ public class Function_DeJong_nDTest {
     @Test
     public void test1Der() {
     	long seed = System.currentTimeMillis();
-//    	seed = 1295619079035L;
+    	seed = 1376716991054L;
     	rnd.setSeed(seed);
     	int dim = rnd.nextInt(10) + 1;
     	Function_DeJong_nD f = new Function_DeJong_nD(dim);
@@ -73,11 +73,19 @@ public class Function_DeJong_nDTest {
     	RealInterval d1;
     	int argNum = rnd.nextInt(dim);
     	d1 = f.calculate1Derivative(box, argNum);
-    	System.out.println(d1);
+    	System.out.println(argNum + ": " + d1);
     	assertTrue("" + seed, d1 != null);
     	RealInterval checkVal = IAMath.mul(2, box.getInterval(argNum));
     	
     	assertTrue("" + seed, Math.abs(d1.lo() - checkVal.lo()) < 1e-4);
     	assertTrue("" + seed, Math.abs(d1.hi() - checkVal.hi()) < 1e-4);
+    }
+    
+    @Test
+    public void testVariables() {
+    	int dim = 20;
+    	Function_DeJong_nD f = new Function_DeJong_nD(dim);
+    	ArrayList<String> vars = f.getVariables();
+    	assertEquals(dim, vars.size());    	
     }
 }

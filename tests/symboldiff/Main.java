@@ -11,7 +11,7 @@ import symboldiff.exceptions.ExpressionException;
 import symboldiff.exceptions.IncorrectExpression;
 
 import core.Box;
-import functions.FunctionNEW;
+import functions.Function;
 import functions.Function_DeJong_nD;
 import functions.Function_SixHumpCamelBack_2D;
 import net.sourceforge.interval.ia_math.IAMath;
@@ -122,7 +122,7 @@ public class Main {
 	
 	@Test
 	public void testSixHumpDiff() throws Exception {
-		FunctionNEW f_ = new Function_SixHumpCamelBack_2D(); // 4*x^2 - 2.1*x^4 + 1/3*x^6 + x*y -4*y^2 + 4*y^4
+		Function f_ = new Function_SixHumpCamelBack_2D(); // 4*x^2 - 2.1*x^4 + 1/3*x^6 + x*y -4*y^2 + 4*y^4
 		Expression df_dx = (new Gradient(f_.toString())).getPartialDerivative(0);
 		Simplifier.simplify(df_dx);
 

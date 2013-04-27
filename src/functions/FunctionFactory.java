@@ -16,12 +16,12 @@ import symboldiff.exceptions.ExpressionException;
  * second derivatives as Expressions as well  
  */
 public class FunctionFactory {
-	private static FunctionNEW function = null;
-	public static FunctionNEW getTargetFunction() {
+	private static Function function = null;
+	public static Function getTargetFunction() {
 		assert(function != null);
 		return function;
 	}
-	public static FunctionNEW newFunction(String formula) throws ExpressionException {
+	public static Function newFunction(String formula) throws ExpressionException {
 		Expression func = null;
 		try {
 			func = new Expression(formula);
@@ -55,7 +55,7 @@ public class FunctionFactory {
 		} catch (Exception e) {
 			assert(false); // no exceptions can be thrown during differentiation of test functions
 		}		
-		FunctionNEW f = new FunctionNEW();
+		Function f = new Function();
 		f.init(func, df1, df2);
 		function=f;
 		return f;

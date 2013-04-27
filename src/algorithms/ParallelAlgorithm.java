@@ -3,7 +3,7 @@ package algorithms;
 import worklists.WorkList;
 
 import static algorithms.OptimizationStatus.*;
-import functions.FunctionNEW;
+import functions.Function;
 
 public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 	private int generation;
@@ -182,7 +182,7 @@ public class ParallelAlgorithm extends BaseAlgorithm implements Runnable {
 			return status;
 		}
 	}
-	public FunctionNEW getProblem() {
+	public Function getProblem() {
 		return targetFunction;
 	}
 	public void removeRejectedBoxes() {

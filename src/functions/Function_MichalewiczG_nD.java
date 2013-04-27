@@ -4,7 +4,7 @@ package functions;
 // p.7
 // g.min: f(0) = 0
 // [-5.12, 5.12]
-public class Function_MichalewiczG_nD extends FunctionNEW {
+public class Function_MichalewiczG_nD extends Function {
 	public Function_MichalewiczG_nD(int dim) {
 		StringBuilder sb = new StringBuilder("10*");
 		sb.append(dim);

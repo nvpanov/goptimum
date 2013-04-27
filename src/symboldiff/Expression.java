@@ -1,6 +1,5 @@
 package symboldiff;
 
-import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
@@ -15,12 +14,10 @@ import core.Box;
 import symboldiff.exceptions.ExpressionException;
 import symboldiff.exceptions.IncorrectExpression;
 import symboldiff.exceptions.UnsupportedFunction;
-import symboldiff.ThreeStateLogic;
 
 public class Expression implements Cloneable {
 	private Expression left = null;
 	private Expression right = null;
-	private Method method = null;
 	private String op;
 	
 	/*
@@ -41,7 +38,7 @@ public class Expression implements Cloneable {
 	
 	private static enum ExpType {unset, constant, notAconstant, variable, binaryOperation, notAbinaryOperation, unaryOperation, notAnUnaryOperation};
 	private ExpType expType = ExpType.unset;
-	private ThreeStateLogic isConstant;
+	private Boolean isConstant = null;
 		
 	
 	// List supports random access: get(i)
@@ -124,24 +121,24 @@ public class Expression implements Cloneable {
 	 * determining type of expression
 	 */
 	public boolean isConstant() {
-		if (isConstant == ThreeStateLogic.unknown) {
+		if (isConstant == null) {
 			if (getRightExpression() != null || getLeftExpression() != null) {
-				isConstant = ThreeStateLogic.no;
+				isConstant = false;
 				return false;
 			}
 			try {
-				if (getOperation().equals("pi") ||
-						Double.valueOf(getOperation()) == 0) {
-					isConstant = ThreeStateLogic.yes;
-				}
 				// this construction means that either the value is PI or
 				// it is ANY number 
 				// all other cases will cause exception
+				if (!getOperation().equals("pi") ) {
+					Double.valueOf(getOperation());
+				}
+				isConstant = true;
 			} catch (Exception e) {
-				isConstant = ThreeStateLogic.no;
+				isConstant = false;
 			}			
 		}
-		return isConstant == ThreeStateLogic.yes;
+		return isConstant;
 	}
 	public boolean isVariable() {
 		if (left != null || right != null) // cheap check for isOperation
@@ -554,7 +551,7 @@ public class Expression implements Cloneable {
 		setLeftExpression(e.getLeftExpression());
 		setRightExpression(e.getRightExpression());
 		setOperation(e.getOperation());
-		setMethod(e.getMethod());	
+		isConstant = e.isConstant;
 	}
 	public void setTo(double d) {
 		setLeftExpression(null);
@@ -579,9 +576,7 @@ public class Expression implements Cloneable {
 			this.op = Integer.toString((int)d);
 		else
 			this.op = Double.toString(d);
-	}
-	public void setMethod(Method m) {
-		this.method = m;
+		isConstant = true;
 	}
 
 	/*
@@ -599,10 +594,6 @@ public class Expression implements Cloneable {
 		return this.op;
 	}
 
-	public Method getMethod() {
-		return this.method;
-	}
-	
 	// evaluate for points
 	public double evaluate(double... point) {
 		assert(point.length == getVariables().size());

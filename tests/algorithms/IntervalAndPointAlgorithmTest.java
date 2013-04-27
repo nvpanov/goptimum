@@ -25,7 +25,7 @@ import worklists.SortedWorkList;
 import worklists.WorkList;
 import choosers.Chooser;
 import choosers.CurrentBestChooser;
-import functions.FunctionNEW;
+import functions.Function;
 import functions.Function_DeJong_nD;
 import functions.Function_RavineSurface;
 import functions.Function_RosenbrockG_nD;
@@ -87,7 +87,7 @@ public class IntervalAndPointAlgorithmTest {
 	public final void test_RavineSurface() {
 		int dim = 2;
 		Box area = new Box(dim, new RealInterval(-10, 100));
-		FunctionNEW f = new Function_RavineSurface(dim);
+		Function f = new Function_RavineSurface(dim);
 		IntervalSolver iSolver = new Bisection_SrtL_CBtC_BigEqS();
 		PointAlgorithm pointAlg = new SteepestDescent();
 		Algorithm algo = new IntervalAndPointAlgorithm(iSolver, pointAlg);

@@ -5,7 +5,7 @@ package functions;
 // f(1) = 0
 // [-2.048, 2.048]
 
-public class Function_RosenbrockG_nD extends FunctionNEW {
+public class Function_RosenbrockG_nD extends Function {
 	public Function_RosenbrockG_nD(int dim) {
 		if (dim < 2)
 			throw new IllegalArgumentException(this.getClass().getName() + 

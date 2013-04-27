@@ -12,7 +12,7 @@ import net.sourceforge.interval.ia_math.RealInterval;
 import rejecting.Rejector;
 import choosers.Chooser;
 import core.Box;
-import functions.FunctionNEW;
+import functions.Function;
 
 
 public abstract class WorkList {
@@ -84,7 +84,7 @@ public abstract class WorkList {
 		_dbg_InitialAreaAddedCorrectly = true;
 		addAreaAndAllEges(area);
 	}
-	public void init(Box area, FunctionNEW function) {
+	public void init(Box area, Function function) {
 		this.init(area);
 		rejector.init(function);
 	}

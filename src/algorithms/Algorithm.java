@@ -3,7 +3,7 @@ package algorithms;
 
 import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
-import functions.FunctionNEW;
+import functions.Function;
 
 
 public interface Algorithm {
@@ -20,7 +20,7 @@ public interface Algorithm {
 	/*
 	 * sets the target function and search area
 	 */
-	public void setProblem(FunctionNEW f, Box area);
+	public void setProblem(Function f, Box area);
 
 	/*
 	 * sets stop criterion -- when the iteration should be stopped.

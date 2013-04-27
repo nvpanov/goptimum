@@ -2,12 +2,12 @@ package point;
 
 import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
-import functions.FunctionNEW;
+import functions.Function;
 
 public abstract class PointAlgorithm /*implements Runnable*/ {
 	protected double alpha = 0.9;
 	protected final double epsilon = 1e-6;
-	protected FunctionNEW function;
+	protected Function function;
 	protected final int maxSteps = 100;
 	protected final double stepFromSearchAreaSizeFactor = 0.25;
 	protected Box initialSearchArea; // point algorithm doesn't allowed to return extremes outside this area!
@@ -23,7 +23,7 @@ public abstract class PointAlgorithm /*implements Runnable*/ {
 	
 	public PointAlgorithm() {
 	}
-	public void setProblem(FunctionNEW f, Box initialSearchArea) {
+	public void setProblem(Function f, Box initialSearchArea) {
 		function = f;
 		this.initialSearchArea = initialSearchArea;
 	}

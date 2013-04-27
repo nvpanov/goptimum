@@ -2,13 +2,13 @@ package point;
 
 import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
-import functions.FunctionNEW;
+import functions.Function;
 
 public class SteepestDescent extends PointAlgorithm {
 
 	double[] delta;  
 
-	public SteepestDescent(FunctionNEW f, Box area) {
+	public SteepestDescent(Function f, Box area) {
 		super();
 		setProblem(f, area);
 	}
