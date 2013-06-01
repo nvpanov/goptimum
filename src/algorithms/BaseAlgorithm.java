@@ -124,16 +124,25 @@ public class BaseAlgorithm implements Algorithm {
 		assert(newBoxes.length > 1);
 		
 		calculateIntervalExtensions(newBoxes);
+		for (Box b : newBoxes) {
+			// new <= old, not care about the last digits
+			final double precision = 1e-6;
+			assert ((int)(workBox.getFunctionValue().lo()/precision) <= (int)(b.getFunctionValue().lo()/precision));
+			assert ((int)(workBox.getFunctionValue().hi()/precision) >= (int)(b.getFunctionValue().hi()/precision));
+		}
+		
 		if (logging)
 			for (Box b : newBoxes)
 				System.out.println("  => " + b);
-	
+		
 		workList.add(newBoxes);
-/*		if (last)
+		
+/*		
+		if (last)
 			if (debug_catchLastOptimaBox()) {
 				System.out.println("LAST BOX contains optima was lost!");
 			}
-*/
+//*/
 		/*
 		 * calculated function extensions can contain infinity. what to do in such case?
 		 */
