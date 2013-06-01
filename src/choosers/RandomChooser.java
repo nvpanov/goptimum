@@ -17,6 +17,11 @@ public class RandomChooser extends Chooser {
 		super(list);
 		random = new Random();
 	}
+	public RandomChooser(WorkList list, long seed) {
+		this(list);
+		random.setSeed(seed);
+		System.out.println("RandomChooser: set seed = " + seed);
+	}	
 	
 	protected int getRndIdx() {
 		int size = list.size();
