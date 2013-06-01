@@ -12,7 +12,6 @@ public class Gradient {
 
 	//private Expression gradient;
 	private Expression[] pder;
-	private static final String needCopy = "*/^";
 
 	// private Vector<String> coords;
 
@@ -195,7 +194,7 @@ public class Gradient {
 		if (exp.isBinaryOperation()) {
 			// for some kind of operations we have to copy left and right
 			// branches.
-			if (Gradient.needCopy.contains(exp.getOperation())) {
+			if (shouldThisExpressionBeCopiedBeforeDifferentiating(exp)) {
 				exp = derivativeOfOperation(exp, coord);
 			} else {
 				left = calculatePartialDerivative(left, coord);
@@ -206,28 +205,27 @@ public class Gradient {
 		} else if (exp.isUnaryOperation()) {
 			Expression arg = right.clone();
 			Expression tmpLeft = null, tmpRight = null;
-			// parent.setOperation("*");
 			try {
-				// parent.setRightExpression(functionDerivative(exp.getOperation(),
-				// arg));
 				tmpLeft = derivativeOfFunction(exp.getOperation(), arg);
 			} catch (IncorrectExpression e) {
 				// private functionDerivative marked as throwing
 				// IncorrectExpression for more compact code
 				// actually no exception should be thrown
 			}
-			// parent.setLeftExpression(calculatePartialDerivative(arg.clone(),
-			// coord));
 			tmpRight = calculatePartialDerivative(arg.clone(), coord);
 			parent = newExpression(tmpLeft, tmpRight, "*");
 			exp = parent;
 		}
 		// hit some constant or variable
 		else {
-			// exp.setOperation((exp.hasVar(coord)) ? "1" : "0");
 			exp = Expression.newConstant(1);
 		}
 		return exp;
+	}
+	
+	private boolean shouldThisExpressionBeCopiedBeforeDifferentiating(Expression exp) {
+		final String complexOperationsNeedToBeCopied = "*/^";
+		return complexOperationsNeedToBeCopied.contains(exp.getOperation());
 	}
 /*
 	public Expression getGradient() {
