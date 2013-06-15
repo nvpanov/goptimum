@@ -11,14 +11,10 @@ import functions.Function;
  * 1) this is a border point of initial search area
  * 2) the function is concave on this interval.
  */
-class RejectorBySecondDerivative extends BaseRejector {
+class RejectorBySecondDerivative implements BaseRejector {
 	
-	private boolean doNotCheckAnythingAndAlwaysReturnTrue;
-
 	@Override
 	public boolean checkPassed(Box box) {
-		if (isBorder(box)) // we can't screen out any border point of original search area
-			return true;   // because of derivatives. 
 		return check2Derivative(box);
 	}
 
@@ -27,12 +23,14 @@ class RejectorBySecondDerivative extends BaseRejector {
 	 * second derivative is non-negative there; this gives a practical test for convexity.
 	 */
 	protected boolean check2Derivative(Box box) {
-		if (doNotCheckAnythingAndAlwaysReturnTrue) {
-			return true;
-		}
 		Function function = FunctionFactory.getTargetFunction();
 		for (int i = box.getDimension()-1; i >= 0; --i) {
-			assert (box.getInterval(i).wid() != 0);
+			// A workaround for edges. Worklist adds zero-width
+			// edges for initial search area. 
+			// See Worklist.addAreaAndAllEges()
+			if (box.getInterval(i).wid() == 0) {
+				return true;
+			}
 			
 			RealInterval f2d = function.calculate2Derivative(box, i);
 			if (f2d == null)
@@ -42,9 +40,4 @@ class RejectorBySecondDerivative extends BaseRejector {
 		}
 		return true;
 	}
-
-	public void switchOff() {
-		doNotCheckAnythingAndAlwaysReturnTrue = true;		
-	}
-
 }

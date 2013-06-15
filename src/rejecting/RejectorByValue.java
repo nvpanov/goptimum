@@ -6,7 +6,7 @@ import core.Box;
  * @author nvp
  * rejects a box if its lower bound is higher than a known minimum value of the function
  */
-class RejectorByValue extends BaseRejector {
+class RejectorByValue implements BaseRejector {
 	private volatile double lowBoundMaxValue = Double.POSITIVE_INFINITY;
 	private double lowBoundMaxValueDelta;
 	private int updatesCount;
@@ -51,7 +51,7 @@ class RejectorByValue extends BaseRejector {
 	}
 
 	void setLowBoundMaxValue(double val) {
-		assert(val < lowBoundMaxValue);
+		assert(val <= lowBoundMaxValue);
 		double d = lowBoundMaxValue - val;
 		lowBoundMaxValueDelta += d;
 		lowBoundMaxValue = val;

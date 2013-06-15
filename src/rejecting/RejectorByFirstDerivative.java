@@ -16,14 +16,10 @@ import functions.Function;
  * Because of this it doesn't screen out boxes with at least one side width = 0
  */
 
-class RejectorByFirstDerivative extends BaseRejector {
-
-	private boolean doNotCheckAnythingAndAlwaysReturnTrue;
+class RejectorByFirstDerivative implements BaseRejector {
 
 	@Override
 	public boolean checkPassed(Box box) {
-		if (isBorder(box)) // we can't screen out any border point of original search area
-			return true;   // because of derivatives. 
 		return check1Derivative(box);
 	}
 
@@ -39,12 +35,14 @@ class RejectorByFirstDerivative extends BaseRejector {
 	 */
 	 
 	protected boolean check1Derivative(Box box) {
-		if (doNotCheckAnythingAndAlwaysReturnTrue) {
-			return true;
-		}
 		Function function = FunctionFactory.getTargetFunction();
 		for (int i = box.getDimension()-1; i >= 0; --i) {
-			assert (box.getInterval(i).wid() != 0);
+			// A workaround for edges. Worklist adds zero-width
+			// edges for initial search area. 
+			// See Worklist.addAreaAndAllEges()			
+			if (box.getInterval(i).wid() == 0) {
+				return true;
+			}
 			
 			RealInterval f1d = function.calculate1Derivative(box, i);
 			if (f1d == null)
@@ -53,9 +51,5 @@ class RejectorByFirstDerivative extends BaseRejector {
 				return false;
 		}
 		return true; // check passed
-	}
-
-	public void switchOff() {
-		doNotCheckAnythingAndAlwaysReturnTrue = true;		
 	}
 }

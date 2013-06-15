@@ -3,7 +3,6 @@ package rejecting;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-
 import core.Box;
 import functions.Function;
 
@@ -11,7 +10,7 @@ import functions.Function;
  * Main class in Rejecting package. Actually the only one which is public.
  * Basically just a container for simple rejectors
  */
-public class Rejector {
+public class Rejector implements BaseRejector {
 	/**
 	 * list of all actual rejectors 
 	 */
@@ -29,25 +28,27 @@ public class Rejector {
 	 * links for some rejectors 
 	 */
 	private RejectorByValue rejectorByValue;
-	private RejectorByFirstDerivative rejectorByFirstDerivative;
-	private RejectorBySecondDerivative rejectorBySecondDerivative;
-	private RejectorConstraintPropogation rejectorConstraintPropogation;
 		
 	public Rejector() {
 		rejectorByValue = new RejectorByValue();
-		rejectorByFirstDerivative = new RejectorByFirstDerivative();
-		rejectorBySecondDerivative = new RejectorBySecondDerivative();
-		rejectorConstraintPropogation = new RejectorConstraintPropogation();
+		BaseRejector rejectorByFirstDerivative = new RejectorByFirstDerivative();
+		BaseRejector rejectorBySecondDerivative = new RejectorBySecondDerivative();
 		// the order of adding is important. the rejectors will be called in this order,
 		// so more effective rejectors should go first.
 		add(rejectorByValue);
 		add(rejectorByFirstDerivative);
 		add(rejectorBySecondDerivative);
-		add(rejectorConstraintPropogation);
 	}
 	
 	public void init(Function f) {
-		rejectorConstraintPropogation.init(f);
+		RejectorConstraintPropogation constraintRejectors[] = { new RejectorConstraint1stDerivative(),
+																new RejectorConstraint2ndDerivative(),
+																new RejectorConstraintValue()
+															  };
+		for (RejectorConstraintPropogation r : constraintRejectors) {
+			r.init(f, rejectorByValue);
+			add(r);
+		}
 	}
 
 	private void add(BaseRejector nextRejector) {
@@ -71,9 +72,17 @@ public class Rejector {
 	}
 
 	public boolean checkPassed(Box box) {
-		if (profilingTimes != null)
-			return checkWithProfiling(box);
-		return checkNoProfiling(box);
+		boolean checkPassed;
+		if (profilingTimes != null) {
+			checkPassed = checkWithProfiling(box);
+		} else {
+			checkPassed = checkNoProfiling(box);
+		}
+		if (checkPassed) { // some Rejectors could shrink the area and change the function value
+							// (like Constraint Propagation or Newton)
+			rejectorByValue.probeNewLimit(box.getFunctionValue().hi());
+		}
+		return checkPassed;
 	}
 	
 	private boolean checkNoProfiling(Box box) {
@@ -167,9 +176,9 @@ public class Rejector {
 		rejectorByValue.resetStatistics();
 	}
 	// for tests
-	public void switchOffDerivativesCheck() {
-		rejectorByFirstDerivative.switchOff();
-		rejectorBySecondDerivative.switchOff();
+	public void useOnlyCheckByValue() {
+		rejectors.clear();
+		rejectors.add(this.rejectorByValue);
 	}
 }
 
