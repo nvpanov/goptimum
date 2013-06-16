@@ -43,6 +43,7 @@ class IntervalMerger {
 					boxes.add(i+1, newBox);
 					boxes.remove(i);
 					boxes.remove(i-1);
+					thisBox = newBox;
 				} else
 					i++;
 			}
@@ -59,13 +60,29 @@ class IntervalMerger {
 		}
 		return false;
 	}
+	
+	/**
+	 * Checks if all other sides (except specified int side) are equal.
+	 * @param b1 -- first box
+	 * @param b2 -- second box
+	 * @param side -- number of dimension in which they are consecutive.
+	 * @return true if all other sides except specified are the same
+	 * 
+	 *     ____    ________
+	 *  2 /___/|  /_______/| 
+	 * 0  |___|/  |_______|/  , side #0 => true, side #1 => false, side #2 => false 
+	 *     1
+	 */
 	boolean allTouchingSidesAreEqual(Box b1, Box b2, int side) {
 		final int dim = b1.getDimension();
-		for (int i = 1; i <= dim; i++) {
-			int touchingSideNum = (side+i)%dim;
-			if ( touchingSideNum != side && !b1.getInterval(touchingSideNum).equals( b2.getInterval(touchingSideNum) ) )
-				// ^^^ f.e. when dim == 1.. Other cases?
+		for (int i = 0; i < dim; i++) {
+			if (i == side) // we don't compare sides which are "not touching". i.e. sides that going to be merged in one. 
+				continue;  //   (side #1 in the picture above)
+			// all other sides:
+			// (the surface which is going to be glued. 
+			if ( !b1.getInterval(i).equals( b2.getInterval(i) ) ) {
 				return false;
+			}
 		}
 		return true;
 	}
