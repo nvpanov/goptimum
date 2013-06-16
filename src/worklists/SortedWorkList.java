@@ -2,6 +2,7 @@ package worklists;
 
 import java.util.Comparator;
 import java.util.TreeSet;
+import net.sourceforge.interval.ia_math.RMath;
 import net.sourceforge.interval.ia_math.RealInterval;
 import core.Box;
 
@@ -55,6 +56,9 @@ public class SortedWorkList extends WorkList {
 		if (size == 0)
 			return 0;
 		double threshold = rejector.getLowBoundMaxValue();
+		if ( threshold >= Double.MAX_VALUE ) {
+			return 0;
+		}
 		Box leader = getLeadingBoxInternal(); // it can't be null, we already checked the size
 		
 		// 'remove all' case
@@ -63,9 +67,12 @@ public class SortedWorkList extends WorkList {
 			return size;
 		}
 		// otherwise...
-		// find where to cut
-		Box mark = new Box(leader.getDimension(), new RealInterval(0)); // boxes with wider sides goes first in the order. this box sizes are 0
-		mark.setFunctionValue(new RealInterval(threshold)); // width = 0;
+		// find where to cut: will remove all boxes witch FunctionValue.lo > threshold.
+		Box mark = new Box(leader.getDimension(), new RealInterval());
+		double aLittleBitMoreThanThreshold = RMath.add_hi(threshold, 0);
+		mark.setFunctionValue(new RealInterval(aLittleBitMoreThanThreshold));
+		assert (mark.getFunctionValue().wid() == 0); // just checking that Interval is not making an interval from a number. 
+														//	otherwise the lower bound could become lower than needed.
 		
 		assert (collection instanceof TreeSet<?>);
 		((TreeSet<Box>)collection).tailSet(mark).clear();

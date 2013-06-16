@@ -36,8 +36,6 @@ public class Expression implements Cloneable {
 
 	private ArrayList<String> coords;
 	
-	private static enum ExpType {unset, constant, notAconstant, variable, binaryOperation, notAbinaryOperation, unaryOperation, notAnUnaryOperation};
-	private ExpType expType = ExpType.unset;
 	private Boolean isConstant = null;
 		
 	
@@ -527,7 +525,7 @@ public class Expression implements Cloneable {
 		else
 			clone.right = null;
 		clone.setVariablesList(this.getVariables());
-		clone.expType = this.expType;
+		clone.isConstant = this.isConstant;
 		assert(this.equals(clone));
 		return clone;
 		
@@ -561,12 +559,15 @@ public class Expression implements Cloneable {
 	
 	public void setLeftExpression(Expression e) {
 		this.left = e;
+		isConstant = (e == null) ? null : false;
 	}
 	public void setRightExpression(Expression e) {
 		this.right = e;
+		isConstant = (e == null) ? null : false;
 	}
 	public void setOperation(String op) {
 		this.op = op;
+		isConstant = null;
 	}
 	public void setConstantValue(double d) {
 		if (left != null || right != null)
@@ -596,7 +597,6 @@ public class Expression implements Cloneable {
 
 	// evaluate for points
 	public double evaluate(double... point) {
-		assert(point.length == getVariables().size());
 		if (isConstant())
 			return getConstantValue();
 		if (isVariable())
@@ -816,8 +816,6 @@ public class Expression implements Cloneable {
 	}
 	public boolean equals(Expression that) {
 	    //now a proper field-by-field evaluation can be made
-		if (this.expType != that.expType)
-			return false;
 	    if (!this.op.equals(that.op))
 	    	return false;
 	    if (this.left == null && that.left != null ||
