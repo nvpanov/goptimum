@@ -135,7 +135,7 @@ public class BoxTest {
 		}
 		///////////////////////////////
 		for (int i = 0; i < dim; i++)
-			point[i] = 0.01;
+			point[i] = 0.0001;
 		Box[] boxes = b.cutOutBoxAroundThisPoint(point);
 		assertEquals(1, boxes.length);
 		assertEquals(b, boxes[0]);

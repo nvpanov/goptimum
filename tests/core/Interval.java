@@ -193,4 +193,62 @@ public class Interval {
 		}
 	}
 	
+	@Test
+	public void testBoundaryPointsForPowerAndRoot() {
+		// contains 0
+		RealInterval x = new RealInterval(-10, 10);
+		RealInterval r = IAMath.pow(x, 2);
+		assertTrue(r.contains(0));
+		assertTrue(r.contains(100));
+		
+		x = new RealInterval(-10, 10);
+		r = IAMath.pow(x, 3);
+		assertTrue(r.contains(-1000));
+		assertTrue(r.contains(1000));
+		
+		// non-negative
+		x = new RealInterval(0, 10);
+		r = IAMath.pow(x, 2);
+		assertTrue(r.contains(0));
+		assertTrue(r.contains(100));
+		
+		x = new RealInterval(0, 10);
+		r = IAMath.pow(x, 3);
+		assertTrue(r.contains(0));
+		assertTrue(r.contains(1000));		
+
+		// positive
+		x = new RealInterval(5, 10);
+		r = IAMath.pow(x, 2);
+		assertTrue(r.contains(25));
+		assertTrue(r.contains(100));
+		
+		x = new RealInterval(5, 10);
+		r = IAMath.pow(x, 3);
+		assertTrue(r.contains(125));
+		assertTrue(r.contains(1000));		
+		
+		// non-positive
+		x = new RealInterval(-10, 0);
+		r = IAMath.pow(x, 2);
+		assertTrue(r.contains(0));
+		assertTrue(r.contains(100));
+		
+		x = new RealInterval(-10, 0);
+		r = IAMath.pow(x, 3);
+		assertTrue(r.contains(0));
+		assertTrue(r.contains(-1000));		
+
+		// negative
+		x = new RealInterval(-10, -5);
+		r = IAMath.pow(x, 2);
+		assertTrue(r.contains(25));
+		assertTrue(r.contains(100));
+		
+		x = new RealInterval(-10, -5);
+		r = IAMath.pow(x, 3);
+		assertTrue(r.contains(-125));
+		assertTrue(r.contains(-1000));		
+	}
+	
 }

@@ -8,6 +8,7 @@ import net.sourceforge.interval.ia_math.IAMath;
 import net.sourceforge.interval.ia_math.RealInterval;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import core.Box;
@@ -120,4 +121,44 @@ public class ExpressionTest {
 		exp = new Expression("(a+b)/(c+d)");
 		assertEquals("(a+b)/(c+d)", exp.toString());		
 	}
+
+    @Test
+    public void testEvaluate1_1() throws ExpressionException {
+    	Expression exp = new Expression("(2*x^3*y-y^3)^2");
+    	Box bigBox = new Box(2, new RealInterval(-1.05, 0.28));
+    	bigBox.setInterval(1, new RealInterval(-3.70, 1.60));
+    	Box smallBox = bigBox.splitSide(0, 0.5)[0];
+    	RealInterval bigVal = exp.evaluate(bigBox);
+    	RealInterval smallVal = exp.evaluate(smallBox);
+    	assertTrue (bigVal.contains(smallVal) );
+    }
+    @Test
+    public void testEvaluate1_2() throws ExpressionException {
+    	Expression exp = new Expression("(6*x+y-y^2)^2");
+    	Box bigBox = new Box(2, new RealInterval(-1.05, 0.28));
+    	bigBox.setInterval(1, new RealInterval(-3.70, 1.60));
+    	Box smallBox = bigBox.splitSide(0, 0.5)[0];
+    	RealInterval bigVal = exp.evaluate(bigBox);
+    	RealInterval smallVal = exp.evaluate(smallBox);
+    	assertTrue (bigVal.contains(smallVal) );
+    }
+    @Ignore
+    @Test
+    public void testEvaluate1_2_1() throws ExpressionException {
+    	Expression exp = new Expression("(x-y^2)^2");
+    	Box bigBox = new Box(2, new RealInterval(-1, 0.2));
+    	bigBox.setInterval(1, new RealInterval(-2, 1));
+    	Box smallBox = bigBox.splitSide(0, 0.5)[0];
+    	RealInterval bigVal = exp.evaluate(bigBox);
+    	RealInterval smallVal = exp.evaluate(smallBox);
+    	assertTrue (bigVal.contains(smallVal) );
+    }
+    @Test
+    public void testEvaluate1_2_2() throws ExpressionException {
+    	Expression exp = new Expression("(a)^2");
+    	Box b = new Box(1, new RealInterval(-5, 0.1));
+    	RealInterval val = exp.evaluate(b);
+    	assertTrue (val.contains(25) );
+    }
+	
 }

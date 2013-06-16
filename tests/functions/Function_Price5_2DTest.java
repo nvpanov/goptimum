@@ -4,6 +4,9 @@ import java.util.Random;
 import junit.framework.TestCase;
 import net.sourceforge.interval.ia_math.RealInterval;
 import org.junit.Test;
+
+import symboldiff.Expression;
+import symboldiff.exceptions.ExpressionException;
 import core.Box;
 
 public class Function_Price5_2DTest extends TestCase {
@@ -60,5 +63,18 @@ public class Function_Price5_2DTest extends TestCase {
         } catch (AssertionError e) {
         	// OK
         }
+    }
+    
+    @Test
+    public void test1() {
+    	// [-0.00, 781.08] ([-1.05, 0.28] x [-3.70, 1.60])
+    	// [0.53, 4,068.16] ([-1.05, -0.39] x [-3.70, 1.60])
+    	Function f = new Function_Price5_2D();
+    	Box bigBox = new Box(2, new RealInterval(-1.05, 0.28));
+    	bigBox.setInterval(1, new RealInterval(-3.70, 1.60));
+    	Box smallBox = bigBox.splitSide(0, 0.5)[0];
+    	f.calculate(bigBox);
+    	f.calculate(smallBox);
+    	assertTrue (bigBox.getFunctionValue().contains(smallBox.getFunctionValue()) );
     }
 }
