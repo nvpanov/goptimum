@@ -31,14 +31,14 @@ public class UnSortedWorkListTest extends TestCase {
 			b2.setInterval(i, new RealInterval(-200 * rnd.nextDouble(), 1000 * rnd.nextDouble()));
 		}
 		WorkList wl = new UnSortedWorkList(b2);
-		wl.switchOffDerivativesCheck(); // 12/23/11
+		wl.useOnlyCheckByValue(); // 12/23/11
 		int size = wl.size();
 		assertTrue(size == 1 + 2*dim); // because we add all ages of search area as well. 12/23/11
 		wl.add(b1);
 		assertTrue(wl.size() == size + 1);
 		
 		WorkList wl1 = new UnSortedWorkList(b1);
-		wl1.switchOffDerivativesCheck(); //12/23/11
+		wl1.useOnlyCheckByValue(); //12/23/11
 		int s = wl1.size(); // 12/23/11: it doesn't equal to 1. 
 		wl1.add(b2); // Shouldn't be added because b2's function value is higher
 		assertTrue(wl1.size() == 1 + s);
@@ -98,7 +98,7 @@ public class UnSortedWorkListTest extends TestCase {
 			}
 			if (wl == null) {
 				 wl = new UnSortedWorkList(b);
-				 wl.switchOffDerivativesCheck();
+				 wl.useOnlyCheckByValue();
 			}
 			wl.add(b);
 		}

@@ -77,12 +77,6 @@ public class WorkListTest {
 		assertTrue(wl.size() == 1 + dim*2);
 		
 		//4
-		wl.clearAll();
-		assertTrue(wl.size() == 0);
-		wl.add(area);
-		assertTrue(wl.size() == 1 + dim*2);
-				
-		//5
 		WorkList wl = new WorkList(new ArrayList<Box>(), null) {
 			@Override
 			protected void addChecked(Box box) {

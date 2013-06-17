@@ -10,8 +10,10 @@ public class ListCleaner {
 	
 	@Override
 	public void finalize() {
-		workListToClean.removeRejectedBoxes();
+		workListToClean.requestCleaning(); // we can't clean it from here -- if other thread is working with the list right now 
+											// we will receive concurrent modification exception
 		new ListCleaner(workListToClean);
+		System.out.println("ListCleaner: cleaning requested.");
 	}
 
 }

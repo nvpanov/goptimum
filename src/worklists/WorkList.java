@@ -14,7 +14,7 @@ import choosers.Chooser;
 import core.Box;
 import functions.Function;
 
-
+@SuppressWarnings("unused")
 public abstract class WorkList {
 	protected Collection<Box> collection;
 	protected Rejector rejector;
@@ -28,6 +28,7 @@ public abstract class WorkList {
 	private static final long memoryThreshold = 1 * 1024*1024; // 1 Mb;
 
 	boolean _dbg_InitialAreaAddedCorrectly = false;
+	private boolean listCleaningWasRequested;
 	
 	private static final boolean logging = false;
 
@@ -172,10 +173,13 @@ public abstract class WorkList {
 	 * and calls add_checked()
 	 */
 	public final void add(Box box) {
-		// do not use here something like "if(collection.size() == 0)" 
-		// because @addAllEges@ calls @add@ and the size is still equal to zero.
+		if (listCleaningWasRequested) {
+			removeRejectedBoxes();
+			listCleaningWasRequested = false;
+		}
 		if (rejector.checkPassed(box)) {
 			if (logging) System.out.println("     -> Box " + box.getFunctionValue() + " PASSED the screening.");
+
 			if(collection.size() == 0) { // this is the first box -- 
 				addAreaAndAllEges(box); 		// -- has to take care about border points
 										// ...
@@ -188,6 +192,10 @@ public abstract class WorkList {
 		} else {
 			if (logging) System.out.println("     -> Box " + box.getFunctionValue() + " FAILD the screening.");
 		}
+	}
+	
+	public void requestCleaning() {
+		listCleaningWasRequested = true;
 	}
 	/*
 	 * receives a new set of boxes and their estimation of the optimum
@@ -290,7 +298,6 @@ public abstract class WorkList {
 	}
 	// first variant of list cleaning.
 	// Do not call this function manually! Use @removeRejectedBoxes()@ instead
-	@SuppressWarnings("unused")
 	private int removeRejected1() {	
 		int removedCount = 0;
 
@@ -306,7 +313,6 @@ public abstract class WorkList {
 	}
 	// second variant of list cleaning implementation
 	// Do not call this function manually! Use @removeRejectedBoxes()@ instead
-	@SuppressWarnings("unused")
 	private int removeRejected2() {	
 		int removedCount = 0;
 
@@ -322,7 +328,6 @@ public abstract class WorkList {
 	}
 	// third variant of list cleaning
 	// Do not call this function manually! Use @removeRejectedBoxes()@ instead
-	@SuppressWarnings("unused")
 	private int removeRejected3() {
 		int removedCount = 0;
 		// WorkList will use the old collection!
@@ -392,7 +397,7 @@ System.out.println(" => " + otherWL.size());
 		return null;
 	}
 	//for tests
-	public void switchOffDerivativesCheck() {
-		rejector.switchOffDerivativesCheck();
+	public void useOnlyCheckByValue() {
+		rejector.useOnlyCheckByValue();
 	}
 }
