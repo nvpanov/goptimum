@@ -86,7 +86,7 @@ public class IntervalAndPointAlgorithmTest {
 	@Test
 	public final void test_RavineSurface() {
 		int dim = 2;
-		Box area = new Box(dim, new RealInterval(-10, 100));
+		Box area = new Box(dim, new RealInterval(0, 100)); // x^0.1. Math.pow(x, y) with non-integer y is defined only for positive x.
 		Function f = new Function_RavineSurface(dim);
 		IntervalSolver iSolver = new Bisection_SrtL_CBtC_BigEqS();
 		PointAlgorithm pointAlg = new SteepestDescent();

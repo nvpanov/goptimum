@@ -29,7 +29,7 @@ public class Bisection_SrtL_CBtC_AllEqSTest {
 	@Test(timeout=12*1000) //12 sec
 	public final void test1() {
 		Algorithm a = new Bisection_SrtL_CBtC_AllEqS();
-		final int dim = rnd.nextInt(5)+1;
+		final int dim = rnd.nextInt(5)+5;
 		RealInterval area = new RealInterval(-700, 200);
 		result = test.f_DeJong_Zero(a, dim, area);
 	}
@@ -46,7 +46,7 @@ public class Bisection_SrtL_CBtC_AllEqSTest {
 		RealInterval area = new RealInterval(-900, 999);
 		result = test.f_Price5_Zero(a, area);
 	}
-	@Test(timeout=12*1000) //12 sec
+	@Test//(timeout=12*1000) //12 sec
 	public final void test3() {
 		Algorithm a = new Bisection_SrtL_CBtC_AllEqS();
 		RealInterval area = new RealInterval(-1000, 1000);

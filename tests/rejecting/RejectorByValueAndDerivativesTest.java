@@ -63,23 +63,23 @@ public class RejectorByValueAndDerivativesTest {
 	public final void check1Derivative() throws Exception {
 		Box b;
 		RejectorByFirstDerivative s = new RejectorByFirstDerivative();
-		String functions[] = {"x^2+y^2+z^3", "x^2", "-x^20", "x^9"};
+		String functions[] = {"x^2", "-x^20", "x^9"};
 		for (String f : functions) {
 			FunctionFactory.newFunction(f);
-			b = new Box(2, new RealInterval(-5, 5));
+			b = new Box(1, new RealInterval(-5, 5));
 			assertTrue( s.check1Derivative(b) );
-			b = new Box(2, new RealInterval(0));
+			b = new Box(1, new RealInterval(0));
 			assertTrue( s.check1Derivative(b) );
-			b = new Box(2, new RealInterval(-101, -100));
+			b = new Box(1, new RealInterval(-101, -100));
 			assertFalse( s.check1Derivative(b) );
-			b = new Box(2, new RealInterval(100, 101));
+			b = new Box(1, new RealInterval(100, 101));
 			assertFalse( s.check1Derivative(b) );
 		}
-		String functions1[] = {"-0.001", "0", "-x^20"};
+		String functions1[] = {"-0.001", "0"};
 		for (String f : functions1) {
 			FunctionFactory.newFunction(f);
-			b = new Box(2, new RealInterval(-50000, 50000));
-			assertFalse( s.check1Derivative(b) );
+			b = new Box(1, new RealInterval(-50000, 50000));
+			assertTrue( s.check1Derivative(b) );
 		}
 		
 	}

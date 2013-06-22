@@ -26,6 +26,7 @@ public class ExpressionPropagatableTest {
 		Box check = new Box(1, constrainingValue);
 		check.setFunctionValue(constrainingValue);
 		propagated = exp.propagate(area, constrainingValue);
+		area.setFunctionValue( exp.evaluate(area) );
 		assertTrue(propagated);
 		assertEquals(check, area);
 	}
@@ -39,6 +40,7 @@ public class ExpressionPropagatableTest {
 		check.setFunctionValue(constrainingValue);
 		propagated = exp.propagate(area, constrainingValue);
 		assertTrue(propagated);
+		area.setFunctionValue( exp.evaluate(area) );
 		assertTrue( check.almostEquals(area) );
 	}
 	@Test
@@ -50,6 +52,7 @@ public class ExpressionPropagatableTest {
 		check.setFunctionValue(constrainingValue);
 		propagated = exp.propagate(area, constrainingValue);
 		assertTrue(propagated);
+		area.setFunctionValue( exp.evaluate(area) );
 		assertTrue( check.almostEquals(area) );
 	}
 	@Test
@@ -72,6 +75,7 @@ public class ExpressionPropagatableTest {
 		constrainingValue = new RealInterval(0,15);
 		propagated = exp.propagate(area, constrainingValue);
 		assertTrue(propagated);
+		area.setFunctionValue( exp.evaluate(area) );
 		assertTrue(new RealInterval(10, 15).almostEquals(area.getFunctionValue()) );
 		assertTrue(new RealInterval(10, 15).almostEquals(area.getInterval(0)) );
 		assertTrue(new RealInterval( 5, 10).almostEquals(area.getInterval(1)) );
@@ -86,6 +90,7 @@ public class ExpressionPropagatableTest {
 		constrainingValue = new RealInterval(0,0);
 		propagated = exp.propagate(area, constrainingValue);
 		assertTrue(propagated);
+		area.setFunctionValue( exp.evaluate(area) );
 		assertTrue(new RealInterval(0, 0).almostEquals(area.getFunctionValue()) );
 		assertTrue(new RealInterval(0, 0).almostEquals(area.getInterval(0)) );
 		assertTrue(new RealInterval(5, 100).almostEquals(area.getInterval(1)) );
@@ -102,7 +107,7 @@ public class ExpressionPropagatableTest {
 		area.setInterval(2, new RealInterval(0.1,100));
 		propagated = exp.propagate(area, constrainingValue);
 		assertTrue(propagated);
-		
+		area.setFunctionValue( exp.evaluate(area) );
 		assertTrue(new RealInterval(0).almostEquals(area.getFunctionValue()) );
 		assertTrue(new RealInterval(0).almostEquals(area.getInterval(0)) );
 		assertTrue(new RealInterval(5, 100).almostEquals(area.getInterval(1)) );
@@ -117,7 +122,10 @@ public class ExpressionPropagatableTest {
 		constrainingValue = new RealInterval(-10,10);
 		propagated = exp.propagate(area, constrainingValue);
 		assertTrue(propagated);
+		area.setFunctionValue( exp.evaluate(area) );
 		assertTrue(new RealInterval(0, 10).almostEquals(area.getFunctionValue() ));
-
+		for (int i = 0; i < dim; i++) {
+			assertTrue(new RealInterval(0, Math.sqrt(10)).almostEquals(area.getInterval(i) ));
+		}
 	}
 }

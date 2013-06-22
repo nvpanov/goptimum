@@ -107,7 +107,7 @@ public class FunctionFactoryTest {
 	public void t1() throws ExpressionException {
 		String equation = "1e-8 + 2+ee-2 - 3.14e+9 - 2.1e2";//*x^(1/10)";
 		f = FunctionFactory.newFunction(equation);
-		System.out.println(f);
+//		System.out.println(f);
 		assertEquals(1, f.getDimension());
 		
 		equation = "1e-8*x^(1/10)";
@@ -115,11 +115,6 @@ public class FunctionFactoryTest {
 		double rd;
 		Box b = new Box(1, ZERO);
 		rd = f.calculatePoint(0);
-		f.calculate(b);
-		assertTrue(Math.abs(rd-0) < 1e-6);
-		assertTrue(b.getFunctionValue().almostEquals(ZERO));
-		rd = f.calculatePoint(1e100);
-		b.setInterval(0, 1e100);
 		f.calculate(b);
 		assertTrue(Math.abs(rd-0) < 1e-6);
 		assertTrue(b.getFunctionValue().almostEquals(ZERO));

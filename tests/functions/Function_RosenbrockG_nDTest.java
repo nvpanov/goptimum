@@ -212,9 +212,9 @@ public class Function_RosenbrockG_nDTest {
     			assertTrue("FAILS at point="+curPoint[i]+", i="+i, pointVal_f.wid() < 1e-3);
     			
     			assertTrue("FAILS at point="+curPoint[i]+", i="+i, f_d2Val[i].contains(pointVal_exp));
+        		curPoint[i] += step;
+        		curPointBox.setInterval(i, curPoint[i]);
     		}
-    		curPoint[i] += step;
-    		curPointBox.setInterval(i, curPoint[i]);
     	}
     	
     }

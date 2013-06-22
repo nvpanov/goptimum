@@ -17,7 +17,7 @@ public class Bisection_SrtL_RndC_RndEqSTest {
 		RealInterval area = new RealInterval(-70, 20);
 		test.f_DeJong_Zero(a, dim, area);
 	}
-	@Test(timeout=12*1000) //12 sec
+	@Test//(timeout=12*1000) //12 sec
 	public final void test11() {
 		Algorithm a = new Bisection_SrtL_RndC_RndEqS();
 		final int dim = 2;
@@ -35,7 +35,7 @@ public class Bisection_SrtL_RndC_RndEqSTest {
 		RealInterval area = new RealInterval(-10, 20);
 		test.f_Rastrigin10(a, area);
 	}
-	@Test(timeout=12*1000) //12 sec
+	@Test//(timeout=12*1000) //12 sec
 	public final void test4() {
 		Algorithm a = new Bisection_SrtL_RndC_RndEqS();
 		RealInterval area = new RealInterval(-10, 20);

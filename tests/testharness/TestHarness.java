@@ -128,7 +128,7 @@ public class TestHarness {
     	for (int i = 0; i < dim; i++) {
     		if(argOK[i] < 1) { // this dimension doesn't contain right result
         		System.out.println(" > Wrong area for optimum was found!");
-        		System.out.println(" > On dimension #" + i + ". The known value for area is + " + checkArg);
+        		System.out.println(" > On dimension #" + i + ". The known value for area is " + checkArg);
         		fail("Wrong AREA for optimum was found by " + algorithm.toString() + " for " + f.toString() + " function!");
     			
     		}
