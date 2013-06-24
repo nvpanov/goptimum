@@ -1,7 +1,6 @@
 package core;
 
 import static org.junit.Assert.*;
-
 import java.util.Random;
 import org.junit.Test;
 import core.Box;
@@ -9,6 +8,7 @@ import net.sourceforge.interval.ia_math.RealInterval;
 
 
 public class BoxTest {
+	protected final double epsilon = 5e-4;
 	protected Random rnd = new Random();
 	protected Box setupBox() {
 		   int dim = rnd.nextInt(6) + 1;
@@ -117,8 +117,135 @@ public class BoxTest {
 		assertTrue(a.hasAtLeastOneCommonSide(b));		
 	}
 
+	
 	@Test
-	public void testCutOutBoxAroundThisPoint() {
+	public void testCutOutBoxAroundThisPoint_FunctionValue() {
+		Box b = new Box(1);
+		b.setInterval(0, new RealInterval(-10, 10));
+		b.setFunctionValue(new RealInterval(111));
+		Box boxes[] = b.cutOutBoxAroundThisPoint(new double[] {0});
+		for (Box bb: boxes) {
+			assertEquals(bb.getFunctionValue(), new RealInterval());
+		}
+	}	
+
+	@Test
+	public void testCutOutBoxAroundThisPoint_Bound() {
+		Box b = new Box(1);
+		b.setInterval(0, new RealInterval(-10, 10));
+		Box boxes[] = b.cutOutBoxAroundThisPoint(new double[] {10});
+		assertEquals(2, boxes.length);
+		assertEquals(boxes[0].getInterval(0), new RealInterval(-10, 10-epsilon));
+	}	
+
+	@Test
+	public void testCutOutBoxAroundThisPoint_OutOfBound() {
+		Box b = new Box(1);
+		b.setInterval(0, new RealInterval(-10, 10));
+		b.setFunctionValue(new RealInterval(111));
+		try {
+			b.cutOutBoxAroundThisPoint(new double[] {11});
+			fail("assert expected");
+		} catch (AssertionError e) {
+			// OK
+		}
+	}	
+	
+	@Test
+	public void testCutOutBoxAroundThisPoint_SmallBox() {
+		Box b = new Box(1);
+		b.setInterval(0, new RealInterval(-epsilon/2, epsilon/2));
+		Box[] bb = b.cutOutBoxAroundThisPoint(new double[] {0});
+		assertEquals(1, bb.length);
+		assertEquals(bb[0], b);
+	}
+	
+	@Test
+	public void testCutOutBoxAroundThisPoint1d() {
+		Box b = new Box(1);
+		b.setInterval(0, new RealInterval(-10, 10));
+		Box boxes[] = b.cutOutBoxAroundThisPoint(new double[] {0});
+		assertEquals(3, boxes.length);
+		assertEquals(new RealInterval(-10, -epsilon), 		boxes[0].getInterval(0));
+		assertEquals(new RealInterval(epsilon, 10),			boxes[1].getInterval(0));
+		assertEquals(new RealInterval(-epsilon, +epsilon),	boxes[2].getInterval(0));
+	}	
+	
+	/*                                3
+	 *  _____________          _______________
+	 * |             |        |      | |      |
+	 * |             |        |      |_|      |
+	 * |      .      |  ===>  |  0   |_|  1   |
+	 * |             |        |      | |      |
+	 * |_____________|        |______|_|______|
+	 *                                2 
+	 */
+	@Test
+	public void testCutOutBoxAroundThisPoint2d() {
+		Box b = new Box(2);
+		b.setInterval(0, new RealInterval(-10, 10));
+		b.setInterval(1, new RealInterval(-2, 2));
+		Box boxes[] = b.cutOutBoxAroundThisPoint(new double[] {0, 0});
+		assertEquals(5, boxes.length);
+		assertEquals(new RealInterval(-10, -epsilon), 		boxes[0].getInterval(0));
+		assertEquals(new RealInterval(epsilon, 10),			boxes[1].getInterval(0));
+		assertEquals(new RealInterval(-epsilon, +epsilon),	boxes[2].getInterval(0));
+		assertEquals(new RealInterval(-epsilon, +epsilon),	boxes[3].getInterval(0));
+		assertEquals(new RealInterval(-epsilon, +epsilon),	boxes[4].getInterval(0));
+
+		assertEquals(new RealInterval(-2, 2), 				boxes[0].getInterval(1));
+		assertEquals(new RealInterval(-2, 2),				boxes[1].getInterval(1));
+		assertEquals(new RealInterval(-2, -epsilon),		boxes[2].getInterval(1));
+		assertEquals(new RealInterval(epsilon, 2),			boxes[3].getInterval(1));
+		assertEquals(new RealInterval(-epsilon, +epsilon),	boxes[4].getInterval(1));
+	}	
+
+	@Test
+	public void testCutOutBoxAroundThisPoint3dNearOneBorder() {
+		Box b = new Box(3);
+		b.setInterval(0, new RealInterval(-6, 6));
+		b.setInterval(1, new RealInterval(-4, 4));
+		b.setInterval(2, new RealInterval(-2, 2));
+		
+		Box[] checkResults = new Box[9-3];
+		for (int i = 0; i < checkResults.length; i++) {
+			checkResults[i] = new Box(3);
+		}
+		Box tmp[] = b.splitSide(0, 0.5);
+		tmp[0].setInterval(0, new RealInterval(-6, -epsilon));
+		tmp[1].setInterval(0, new RealInterval(epsilon, 6));
+		checkResults[0] = tmp[0];
+		checkResults[1] = tmp[1];
+		
+		RealInterval ee = new RealInterval(-epsilon, epsilon);
+		Box t = new Box(3);
+		t.setInterval(0, ee);
+		t.setInterval(1, new RealInterval(-4, -epsilon));
+		t.setInterval(2, new RealInterval(-2, 2));
+		checkResults[2] = t;
+		
+		t = t.clone();
+		t.setInterval(1, new RealInterval(epsilon, 4));
+		checkResults[3] = t;
+		
+		t = t.clone();
+		t.setInterval(1, ee);
+		t.setInterval(2, new RealInterval(-2, 2-epsilon));
+		checkResults[4] = t;
+
+		t = t.clone();
+		t.setInterval(2, new RealInterval(2-epsilon, 2));
+		checkResults[5] = t;
+
+		Box boxes[] = b.cutOutBoxAroundThisPoint(new double[] {0, 0, 2});
+
+		assertEquals(checkResults.length, boxes.length);
+		for(int i = 0; i < checkResults.length; i++) {
+			assertEquals("i = " + i, checkResults[i], boxes[i]);
+		}
+	}	
+	@Test
+	public void testCutOutBoxAroundThisPointRnd() {
 		int dim = 6;
 		dim = rnd.nextInt(10);
 		if (dim == 0) 
@@ -173,5 +300,5 @@ public class BoxTest {
 				contains++;
 		assertEquals(1, contains);
 		///////////////////////////////
-	}	
+	}
 }

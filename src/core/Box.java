@@ -216,6 +216,15 @@ public class Box implements Cloneable {
 	 * that we are looking for. (For example when a point algorithm found it).
 	 * Than we want to check this. To do this we cut the box on a small box
 	 * around this point and everything else
+	 * 
+	 * For 2d:
+	 *  _____________          _______________
+	 * |             |        |      | |      |
+	 * |             |        |      |_|      |
+	 * |      .      |  ===>  |      |_|      |
+	 * |             |        |      | |      |
+	 * |_____________|        |______|_|______|
+	 * 
 	 */
 	public Box[] cutOutBoxAroundThisPoint(double[] potentialOptPoint) {
 		final double epsilon = 5e-4;
