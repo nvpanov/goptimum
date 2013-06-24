@@ -31,7 +31,7 @@ public class Expression implements Cloneable {
 	protected static final String binary_operations[] = { "+", "-", "/", "*", "^" };
 
 	protected static final String unary_operations[] = { "arccos", "arcsin", "arctg",
-			"arcctg", "sin", "cos", "tg", "ctg", "ln", "exp", "sqrt", "negate" };
+			"arcctg", "sin", "cos", "tg", "ctg", "ln", "exp", "sqrt", "negate", "abs" };
 	protected static final String ambiguous[] = {"%", "&", "~", "|", "`", "\"", "\\", "<", ">", "=", ",", ".", "?", "!"};
 
 	private ArrayList<String> coords;
@@ -206,6 +206,9 @@ public class Expression implements Cloneable {
 	}
 	public boolean isNegate() {
 		return op.equals("negate");
+	}
+	public boolean isAbs() {
+		return op.equals("abs");
 	}
 	
 	// also used by StringParser. Thats why it receives operation as string	
@@ -483,10 +486,17 @@ public class Expression implements Cloneable {
 		for (String v : vars) {
 			if ( v.contains("(") ) // user entered some function that we don't know. So we decided that this is a variable.
 				throw new UnsupportedFunction("Unsupported function " + op); // But variables can't contain brackets
-			for (String amb : ambiguous)
-				if ( v.contains(amb) )
-					throw new IncorrectExpression("Ambiguous name of following variable: '" + v + 
-							"'. Actually nothing is really wrong, but just to avoid any confusion...");
+			for (String amb : ambiguous) {
+				if ( v.contains(amb) ) {
+					String msg = "Ambiguous name of following variable: '" + v + "'. ";
+					if ( "|".equals(amb) ) {
+						msg += "Please use abs() for absolute value.";
+					} else {
+						msg += "Actually nothing is really wrong, but just to avoid any confusion...";
+					}
+					throw new IncorrectExpression(msg);
+				}
+			}
 			for (int i = 0; i < v.length(); i++)
 				if (v.charAt(i) > 127) // Simplifyer.isEqualsAccurateWithinConstants() depends on it!
 					throw new IncorrectExpression("Please use only ASCII (non-unicode) characters for variable names. " +
@@ -694,6 +704,8 @@ public class Expression implements Cloneable {
 				return exp(r);
 			case "sqrt":
 				return sqrt(r);
+			case "abs":
+				return abs(r);
 	
 			default:
 				throw new UnsupportedOperationException("Unsupported operation for intervals: " + op);
@@ -746,6 +758,8 @@ public class Expression implements Cloneable {
 				return Math.exp(r);
 			case "sqrt":
 				return Math.sqrt(r);
+			case "abs":
+				return Math.abs(r);
 	
 			default:
 				throw new UnsupportedOperationException("Unsupported operation for doubles: " + op);
