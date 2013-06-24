@@ -86,7 +86,8 @@ public abstract class WorkList {
 		addAreaAndAllEges(area);
 	}
 	public void init(Box area, Function function) {
-		this.init(area);
+		clearAll();
+		init(area);
 		rejector.init(function);
 	}
 

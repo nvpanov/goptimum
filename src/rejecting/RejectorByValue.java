@@ -16,8 +16,7 @@ class RejectorByValue implements BaseRejector {
 	}
 	
 	public RejectorByValue(double startLimit) {
-		resetStatistics();
-		lowBoundMaxValue = startLimit;		
+		reset(startLimit);
 	}
 
 	/**
@@ -68,8 +67,9 @@ class RejectorByValue implements BaseRejector {
 		return updatesCount;
 	}
 
-	public void resetStatistics() {
+	public void reset(double newThreshold) { 
 		lowBoundMaxValueDelta = 0;
 		updatesCount = 0;
+		lowBoundMaxValue = newThreshold;
 	}
 }
