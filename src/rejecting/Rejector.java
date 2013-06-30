@@ -31,16 +31,20 @@ public class Rejector implements BaseRejector {
 		
 	public Rejector() {
 		rejectorByValue = new RejectorByValue();
+	}
+	
+	public void init(Function f) {
+		rejectors.clear();
+		
+		rejectorByValue.reset(Double.MAX_VALUE);
 		BaseRejector rejectorByFirstDerivative = new RejectorByFirstDerivative();
 		BaseRejector rejectorBySecondDerivative = new RejectorBySecondDerivative();
 		// the order of adding is important. the rejectors will be called in this order,
 		// so more effective rejectors should go first.
 		add(rejectorByValue);
-		add(rejectorByFirstDerivative);
-		add(rejectorBySecondDerivative);
-	}
-	
-	public void init(Function f) {
+//		add(rejectorByFirstDerivative);
+//		add(rejectorBySecondDerivative);
+		
 		RejectorConstraintPropogation constraintRejectors[] = { new RejectorConstraint1stDerivative(),
 																new RejectorConstraint2ndDerivative(),
 																new RejectorConstraintValue()
@@ -169,11 +173,10 @@ public class Rejector implements BaseRejector {
 	}
 
 	public void reset(double threshold) {
-		rejectorByValue.setLowBoundMaxValue(threshold);
-		this.reset();
+		rejectorByValue.reset(threshold);
 	}
 	public void reset() {
-		rejectorByValue.resetStatistics();
+		reset(Double.MAX_VALUE);
 	}
 	// for tests
 	public void useOnlyCheckByValue() {
