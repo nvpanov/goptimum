@@ -66,10 +66,8 @@ public class BaseAlgorithm implements Algorithm {
 */	
 	@Override
 	public void setProblem(Function f, Box area) {
-		if (workList.size() != 0) { // we were solving other problem and got this one.
-			workList.clearAll(); 
-			stopCriterion.reset();
-		}
+		_dbg_iterationNum = 0;
+		stopCriterion.reset();
 		workList.init(area, f);
 		targetFunction = f;
 	}
@@ -111,8 +109,6 @@ public class BaseAlgorithm implements Algorithm {
 			System.out.println("WorkList size = " + workList.size());
 		workBox = workList.extractNext();
 
-//		boolean last = debug_catchLastOptimaBox();
-		
 		if (logging)
 			System.out.println(workBox + " => ");
 		if (workBox == null) {
@@ -137,11 +133,17 @@ public class BaseAlgorithm implements Algorithm {
 		
 		workList.add(newBoxes);
 		
-/*		
-		if (last)
-			if (debug_catchLastOptimaBox()) {
-				System.out.println("LAST BOX contains optima was lost!");
-			}
+		/*
+		 * uncomment for debug. Will allow to catch when the last box containing optimum was removed from the list.
+		 * Also set actual optimum value and optimum area 		
+		 */
+//*		
+		Double checkValue = null;//-1.03163;
+		double checkArg[] = new double[] {+0.08984, -0.71266};
+		boolean wasLastBox = debug_catchLastOptimaBox(checkValue, checkArg);
+		if (wasLastBox) {
+			System.out.println("LAST BOX contains optima has been just LOST! (iteration #" + (_dbg_iterationNum-1) + ")");
+		}
 //*/
 		/*
 		 * calculated function extensions can contain infinity. what to do in such case?
@@ -258,14 +260,11 @@ public class BaseAlgorithm implements Algorithm {
 			if (anotherBoxFromTheList == null) {
 				// probably it is due to rounding error and it is close
 				// save original point for diagnostic
-				// double[] _debug_origPoint = potentialOptPoint.clone();
-				
-				if (boxFromTheList.setToClosestAreaPoint(potentialOptPoint) < epsilon * dim) {
-					// let it be "close enough"
-					// continue
-				} else {
-					// possible bug. Lets fail in debug. See origPoint[].
-					assert (false); 
+//				double[] _debug_origPoint = potentialOptPoint.clone();
+				double distance = boxFromTheList.setToClosestAreaPoint(potentialOptPoint);
+				if (distance > epsilon * dim) {
+					// possible bug. Lets fail in debug. See _debug_origPoint[].
+//					assert false : "distance = " + distance + ", threshold = " + epsilon * dim; 
 					return;
 				}
 			} else 
@@ -291,31 +290,22 @@ public class BaseAlgorithm implements Algorithm {
 	@SuppressWarnings("unused")
 	private int _dbg_iterationNum = 0;	
 	@SuppressWarnings("unused")
-	private boolean debug_catchLastOptimaBox() {
-	// the following block is for debugging.
-	// it allows to catch why last containing optimum box
-	// was rejected.
-	// checkVal -- optimum value, checkArg - optimum arguments		
+	/**
+	 * the following block is for debugging.
+	 * it allows to catch why last containing optimum box was rejected
+	 * @param checkVal -- known optimum value, can be null if unknown
+	 * @param checkArg -- known optimum arguments, can be null if unknown
+	 * @return true if the work list doesn't contain boxes carry the known optimum
+	 */
+	private boolean debug_catchLastOptimaBox(Double checkVal, double[] checkArg) {
 		_dbg_iterationNum++;
-		boolean last = false;
-		double checkVal = 0;
-		if (workBox == null)
-			return false;
-		double[] checkArg = new double[workBox.getDimension()]; // {0, ..., 0}
-		if( (workBox.getFunctionValue().contains(checkVal) && 
-			 !workList.getOptimumValue().contains(checkVal) ) ) {
-			if (workBox.contains(checkArg)) {
-//				System.out.println(">>>> Last box that contains optimum Val. " + _delme_dbg_iterationNum);
-				last = true;
-			}
-		} 
-		if (workBox.contains(checkArg)) {
-			if (workList.getBoxContainsThisPoint(checkArg) == null) {
-//				System.out.println(">>>> Last box that contains optimum Arg. " + _delme_dbg_iterationNum);
-				last = true;
-			}		
+		boolean noMoreOptimumInTheList = false;
+		if(checkVal != null && !workList.getOptimumValue().contains(checkVal) ) {
+			noMoreOptimumInTheList = true;
 		}
-		return last;
+		if (checkArg != null && workList.getBoxContainsThisPoint(checkArg) == null) {
+			noMoreOptimumInTheList = true;
+		}
+		return noMoreOptimumInTheList;
 	}
-
 }
