@@ -163,11 +163,12 @@ public class RejectorByValueAndDerivativesTest {
 		fail("Not implemented");
 	}
 	
+	
 	@Test
 	public void checkPropagation2ndDerivative() {
 		RejectorConstraint2ndDerivative r = new RejectorConstraint2ndDerivative();
-		Function f = new Function_SixHumpCamelBack_2D();
-		r.init(f, null);
+		@SuppressWarnings("unused")
+		Function f = new Function_SixHumpCamelBack_2D(); // rejector uses it
 
 		Box b = new Box(2);
 		b.setInterval(0, new RealInterval(0.089, 0.0899));

@@ -33,7 +33,7 @@ public class Rejector implements BaseRejector {
 		rejectorByValue = new RejectorByValue();
 	}
 	
-	public void init(Function f) {
+	public void init() {
 		rejectors.clear();
 		
 		rejectorByValue.reset(Double.MAX_VALUE);
@@ -50,7 +50,7 @@ public class Rejector implements BaseRejector {
 																new RejectorConstraintValue()
 															  };
 		for (RejectorConstraintPropogation r : constraintRejectors) {
-			r.init(f, rejectorByValue);
+			r.init(rejectorByValue);
 			add(r);
 		}
 	}

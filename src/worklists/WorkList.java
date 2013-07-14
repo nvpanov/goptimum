@@ -88,7 +88,6 @@ public abstract class WorkList {
 	public void init(Box area, Function function) {
 		clearAll();
 		init(area);
-		rejector.init(function);
 	}
 
 /*

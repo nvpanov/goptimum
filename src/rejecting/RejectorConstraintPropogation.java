@@ -10,6 +10,7 @@ import constraint.ExpressionPropagatable;
 import constraint.RepugnantConditionException;
 import core.Box;
 import functions.Function;
+import functions.FunctionFactory;
 
 // one class -- one rejecting criterion
 class RejectorConstraintValue extends RejectorConstraintPropogation {
@@ -50,13 +51,11 @@ abstract class RejectorConstraintPropogation implements BaseRejector {
 
 	public RejectorConstraintPropogation() {
 	}
-	public RejectorConstraintPropogation(Function f) {
-		init(f, null);
-	}
 	
-	public void init(Function f, RejectorByValue rejectorByValue) {
+	public void init(RejectorByValue rejectorByValue) {
 		this.rejectorByValue = rejectorByValue;
 		
+		Function f = FunctionFactory.getTargetFunction();
 		final int dim = f.getDimension();
 		derivatives1 = new ExpressionPropagatable[dim];
 		derivatives2 = new ExpressionPropagatable[dim];
