@@ -10,7 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import core.Box;
+import functions.Function;
 import functions.FunctionFactory;
+import functions.Function_SixHumpCamelBack_2D;
 
 public class RejectorByValueAndDerivativesTest {
 	RejectorByValue s;
@@ -159,5 +161,23 @@ public class RejectorByValueAndDerivativesTest {
 	@Test
 	public final void check2Derivative() {
 		fail("Not implemented");
+	}
+	
+	@Test
+	public void checkPropagation2ndDerivative() {
+		RejectorConstraint2ndDerivative r = new RejectorConstraint2ndDerivative();
+		Function f = new Function_SixHumpCamelBack_2D();
+		r.init(f, null);
+
+		Box b = new Box(2);
+		b.setInterval(0, new RealInterval(0.089, 0.0899));
+		b.setInterval(1, new RealInterval(-0.7127, -0.71));
+		boolean passed = r.checkPassed(b);
+		assertTrue(passed);
+
+		b.setInterval(0, new RealInterval(-0.0899, -0.089));
+		b.setInterval(1, new RealInterval(0.71, 0.7127));
+		passed = r.checkPassed(b);
+		assertTrue(passed);		
 	}
 }
