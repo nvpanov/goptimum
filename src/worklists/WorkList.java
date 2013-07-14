@@ -181,15 +181,8 @@ public abstract class WorkList {
 		if (rejector.checkPassed(box)) {
 			if (logging) System.out.println("     -> Box " + box.getFunctionValue() + " PASSED the screening.");
 
-			if(collection.size() == 0) { // this is the first box -- 
-				addAreaAndAllEges(box); 		// -- has to take care about border points
-										// ...
-										// actually it could be not the very first box
-										// but the list could be cleaned out.
-										// anyway lets play safe and do not add one more flag
-										// for this and trigger it in @clearAll@ and so on..
-			} else
-				addChecked(box);
+			addChecked(box);
+			
 		} else {
 			if (logging) System.out.println("     -> Box " + box.getFunctionValue() + " FAILD the screening.");
 		}
